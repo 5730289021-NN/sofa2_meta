@@ -132,22 +132,17 @@ class StateManagerImplementation(object):
 
         if data.in_move_base_status_updated and data.in_move_base_status.status_list:
             move_base_status_id = data.in_move_base_status.status_list[-1].status
-            #print("move_base_status_id", move_base_status_id)
+            rospy.loginfo("move_base_status_id %d", move_base_status_id)
             if move_base_status_id == 1:
-                rospy.loginfo('status_command: GOING TO POSITION')
-                rospy.set_param('status_command', "GOING TO POSITION")
+                self.set_rosparam('/system/response', 'GOING TO POSITION')
             elif move_base_status_id == 4 or move_base_status_id == 5:
-                rospy.loginfo('status_command: ALARM')
-                rospy.set_param('status_command', "ALARM")
+                self.set_rosparam('/system/response', 'ALARM')
             elif move_base_status_id == 3:
-                rospy.loginfo('status_command: COMPLETE')
-                rospy.set_param('status_command', "COMPLETE")
+                self.set_rosparam('/system/response', 'COMPLETE')
             elif move_base_status_id == 6 or move_base_status_id == 7:
-                rospy.loginfo('status_command: STOPPING')
-                rospy.set_param('status_command', "STOPPING")
+                self.set_rosparam('/system/response', 'STOPPING')
             elif move_base_status_id == 2 or move_base_status_id == 8:
-                rospy.loginfo('status_command: STOPPED')
-                rospy.set_param('status_command', "STOPPED")
+                self.set_rosparam('/system/response', 'STOPPED')
 
         # protected region user update end #
 
