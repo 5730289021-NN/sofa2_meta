@@ -85,25 +85,29 @@ class StateManagerImplementation(object):
         """
         # protected region user configure begin #
         rospy.loginfo('State Manager Started')
-        rospy.loginfo('Setting status: HEALTHY')
-        rospy.set_param('/status', 'HEALTHY')
-        rospy.loginfo('Setting status_command: STAND BY')
-        rospy.set_param('/status_command', 'STAND BY')
-        rospy.loginfo('Setting battery_level: 75')
-        rospy.set_param('/battery_level', 75)
-        rospy.loginfo('Setting fault_list: []')
-        rospy.set_param('/fault_list', [])
-        rospy.loginfo('Setting camera_codex: OFF')
-        rospy.set_param('/camera_codex', 'OFF')
-        rospy.loginfo('Setting camera_realsense: OFF')
-        rospy.set_param('/camera_realsense', 'OFF')
-        rospy.loginfo('Setting camera_thermal: OFF')
-        rospy.set_param('/camera_thermal', 'OFF')
-        rospy.loginfo('Setting map_scale: 0.03')
-        rospy.set_param('/map_scale', 0.03)
-        rospy.loginfo('Setting follow_status: UNFOLLOWED')
-        rospy.set_param('/follow_status', 'UNFOLLOWED')
 
+        self.set_rosparam('/system/status', 'HEALTHY')
+        self.set_rosparam('/system/response', 'STANDBY')
+        self.set_rosparam('/system/fault_list', [])
+        
+        self.set_rosparam('/battery/level', 75)
+        
+        self.set_rosparam('/map_1/scale', 0.03)
+        
+        self.set_rosparam('/follow_me/status', 'UNFOLLOWED')
+
+        self.set_rosparam('/camera/zoom_status', 'OFF')
+        self.set_rosparam('/camera/depth_status', 'OFF')
+        self.set_rosparam('/camera/thermal_status', 'OFF')
+
+        self.set_rosparam('/android/sing', 'DISABLED')
+        self.set_rosparam('/android/stt', '')
+        self.set_rosparam('/android/sound', 'UNMUTED')
+        self.set_rosparam('/android/destination', '')
+        self.set_rosparam('/android/patient/birth_date', '')
+        self.set_rosparam('/android/patient/name', '')
+        self.set_rosparam('/android/patient/confirm', '')
+        
         return True
         # protected region user configure end #
 
@@ -159,4 +163,7 @@ class StateManagerImplementation(object):
 
 
     # protected region user additional functions begin #
+    def set_rosparam(self, param, value):
+        rospy.loginfo('Setting %s: %s', param, value)
+        rospy.set_param(param, value)
     # protected region user additional functions end #
