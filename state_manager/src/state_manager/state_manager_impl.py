@@ -87,10 +87,10 @@ class StateManagerImplementation(object):
         rospy.loginfo('State Manager Started')
 
         self.set_rosparam('/system/status', 'NORMAL')
-        self.set_rosparam('/system/response', 'STANDBY')
+        self.set_rosparam('/system/response', 'STAND BY')
         self.set_rosparam('/system/fault_list', [])
         
-        self.set_rosparam('/battery/level', 75)
+        self.set_rosparam('/battery/level', 55)
         
         self.set_rosparam('/map_1/scale', 0.03)
         
