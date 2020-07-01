@@ -1,0 +1,19 @@
+<launch>
+    <node name="driver" pkg="roboteq_tcp_driver" type="driver" />
+    <!-- protected region driver odom additional configuration begin -->
+    <!-- protected region driver odom additional configuration end -->
+    <test test-name="hz_loop_test_driver_odom" pkg="rostest" type="hztest" name="hz_test_driver_odom">
+        <param name="topic" value="odom" />
+        <param name="hz" value="20" />
+        <param name="hzerror" value="1" />
+        <param name="test_duration" value="5.0" />
+    </test>
+    <!-- protected region driver queryResult additional configuration begin -->
+    <!-- protected region driver queryResult additional configuration end -->
+    <test test-name="hz_loop_test_driver_queryResult" pkg="rostest" type="hztest" name="hz_test_driver_queryResult">
+        <param name="topic" value="queryResult" />
+        <param name="hz" value="20" />
+        <param name="hzerror" value="1" />
+        <param name="test_duration" value="5.0" />
+    </test>
+</launch>

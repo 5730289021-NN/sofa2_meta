@@ -1,0 +1,31 @@
+EBandPlannerROS:
+  
+  yaw_goal_tolerance: 0.2
+  xy_goal_tolerance: 0.3
+  rot_stopped_vel: 0.05
+  trans_stopped_vel: 0.025
+
+  costmap_weight: 1.9 #7
+
+  max_vel_lin: 0.35
+  min_vel_lin: 0.05
+  max_vel_th: 0.6
+  min_vel_th: 0.02
+
+  max_translational_acceleration: 0.5
+  max_rotational_acceleration: 1.0
+  eband_external_force_gain: 1.5
+
+  eband_significant_force_lower_bound: 0.15 #0.15
+
+  num_iterations_eband_optimization: 6
+
+  bubble_velocity_multiplier: 2.0 #3
+  eband_min_relative_overlap: 0.5
+
+  k_prop: 2.0
+  k_damp: 5.0
+
+  rotation_threshold_multiplier: 0.6
+  Ctrl_Rate: 10
+

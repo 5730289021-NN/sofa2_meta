@@ -1,0 +1,10 @@
+obstacle_range: 6.0
+raytrace_range: 8.0
+#footprint: [[x0, y0], [x1, y1], ... [xn, yn]]
+robot_radius: 0.28
+
+inflation_layer:
+  inflation_radius: 1.2
+  cost_scaling_factor: 3
+
+publish_voxel_map: true

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package author="Norawit Nangsue" author_email="norawitn@hotmail.com" copyright="FIBO" description="State Manager" license="FIBO" name="state_manager" template="python_node_update">
+  <component frequency="10" name="state_manager">
+    <subscriber description="move base status" name="move_base_status" type="actionlib_msgs::GoalStatusArray" />
+  </component>
+
+  <!--<component frequency="10" name="state_manager2">
+    <actionClient description="move base action client" name="move_base" type="move_base_msgs::MoveBase"/>
+  </component>-->
+
+  <depend>rospy</depend>
+  <depend>std_msgs</depend>
+  <depend>actionlib</depend>
+  <depend>actionlib_msgs</depend>
+
+</package>

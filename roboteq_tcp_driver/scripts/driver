@@ -1,0 +1,14 @@
+#!/usr/bin/env python
+"""
+@package roboteq_tcp_driver
+@file driver
+@author Norawit Nangsue
+@brief ROS Roboteq Driver
+        Entry point to the node.
+Copyright (C) FIBO
+FIBO
+"""
+from roboteq_tcp_driver.driver_ros import main
+
+if __name__ == '__main__':
+    main()

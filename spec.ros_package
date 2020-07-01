@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package author="" author_email="" copyright="" description="" license="" name="" template="python_node_update">
+  <component frequency="" name="">
+    <publisher description="" name="" type=""/>
+    <subscriber description="" name="" type=""/>
+    <directPublisher description="" name="" type=""/>
+    <serviceClient description="" name="" type=""/>
+    <actionClient description="" name="" type=""/>
+    <listener description="" name=""/>
+    <dynParameter description="" name="" type="" value=""/>
+    <actionServer description="" name="" type=""/>
+    <directSubscriber description="" name="" type=""/>
+    <broadcaster description="" name=""/>
+    <parameter description="" name="" type="" value=""/>
+    <serviceServer description="" name="" type=""/>
+  </component>
+  <depend>rospy</depend>
+</package>
