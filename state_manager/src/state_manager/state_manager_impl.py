@@ -84,14 +84,24 @@ class StateManagerImplementation(object):
         @return True on success
         """
         # protected region user configure begin #
+        rospy.loginfo('State Manager Started')
+        rospy.loginfo('Setting status: HEALTHY')
         rospy.set_param('/status', 'HEALTHY')
+        rospy.loginfo('Setting status_command: STAND BY')
         rospy.set_param('/status_command', 'STAND BY')
+        rospy.loginfo('Setting battery_level: 75')
         rospy.set_param('/battery_level', 75)
+        rospy.loginfo('Setting fault_list: []')
         rospy.set_param('/fault_list', [])
+        rospy.loginfo('Setting camera_codex: OFF')
         rospy.set_param('/camera_codex', 'OFF')
+        rospy.loginfo('Setting camera_realsense: OFF')
         rospy.set_param('/camera_realsense', 'OFF')
+        rospy.loginfo('Setting camera_thermal: OFF')
         rospy.set_param('/camera_thermal', 'OFF')
+        rospy.loginfo('Setting map_scale: 0.03')
         rospy.set_param('/map_scale', 0.03)
+        rospy.loginfo('Setting follow_status: UNFOLLOWED')
         rospy.set_param('/follow_status', 'UNFOLLOWED')
 
         return True
@@ -120,14 +130,19 @@ class StateManagerImplementation(object):
             move_base_status_id = data.in_move_base_status.status_list[-1].status
             #print("move_base_status_id", move_base_status_id)
             if move_base_status_id == 1:
+                rospy.loginfo('status_command: GOING TO POSITION')
                 rospy.set_param('status_command', "GOING TO POSITION")
             elif move_base_status_id == 4 or move_base_status_id == 5:
+                rospy.loginfo('status_command: ALARM')
                 rospy.set_param('status_command', "ALARM")
             elif move_base_status_id == 3:
+                rospy.loginfo('status_command: COMPLETE')
                 rospy.set_param('status_command', "COMPLETE")
             elif move_base_status_id == 6 or move_base_status_id == 7:
+                rospy.loginfo('status_command: STOPPING')
                 rospy.set_param('status_command', "STOPPING")
             elif move_base_status_id == 2 or move_base_status_id == 8:
+                rospy.loginfo('status_command: STOPPED')
                 rospy.set_param('status_command', "STOPPED")
 
         # protected region user update end #
