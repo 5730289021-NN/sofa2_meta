@@ -221,6 +221,7 @@ class DriverImplementation(object):
         self.sock.close()
         rospy.loginfo('Reconnect Socket')
         self.sock.connect((config.ip_addr, config.port_num))
+        rospy.loginfo('Reconnected')
 
     def socket_transceive(self, command, config, buff_size=64, description="Query"):
         """
