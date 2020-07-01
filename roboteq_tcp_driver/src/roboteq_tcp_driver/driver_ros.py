@@ -119,7 +119,7 @@ def main():
     Instanciate the node interface containing the Developer implementation
     @return nothing
     """
-    rospy.init_node("driver", anonymous=False, log_level=rospy.DEBUG)
+    rospy.init_node("driver", anonymous=False)
 
     node = DriverROS()
     if not node.configure():
