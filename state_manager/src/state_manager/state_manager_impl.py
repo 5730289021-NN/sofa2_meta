@@ -86,7 +86,7 @@ class StateManagerImplementation(object):
         # protected region user configure begin #
         rospy.loginfo('State Manager Started')
 
-        self.set_rosparam('/system/status', 'HEALTHY')
+        self.set_rosparam('/system/status', 'NORMAL')
         self.set_rosparam('/system/response', 'STANDBY')
         self.set_rosparam('/system/fault_list', [])
         
