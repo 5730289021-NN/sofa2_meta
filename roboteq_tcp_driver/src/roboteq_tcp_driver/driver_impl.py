@@ -144,11 +144,13 @@ class DriverImplementation(object):
 
         # Retrieve Encoder Data
         self.socket_transceive('?CR', config, description="Encoder Query")
-        if self.data_sock == '-\r':
-            return
         # Wheel Odometry(http://docs.ros.org/melodic/api/nav_msgs/html/msg/Odometry.html)
         # Extract Data
-        encin = (float(self.data_sock.split(':')[0].replace('CR=', '')), float(self.data_sock.split(':')[1]))
+        try:
+            encin = (float(self.data_sock.split(':')[0].replace('CR=', '')), float(self.data_sock.split(':')[1]))
+        except ValueError as msg:
+            rospy.logerr('ValueError: %s', msg)
+            return
         # Calculate Forward Kinematic
         dx_robot = config.invert_mul * (encin[0] + encin[1]) * config.wheel_circ / (2 * config.cpr)
         da = config.invert_mul * (encin[1] - encin[0]) * config.wheel_circ / (config.track_width * config.cpr)
