@@ -229,7 +229,7 @@ class DriverImplementation(object):
         This modifies self.data_sock
         """
         try:
-            rospy.logdebug_throttle_identical(1, '%s: %s', description, command)
+            rospy.logdebug_throttle_identical(1, '%s: %s' % (description, command))
             self.sock.sendall(command + '\r')
             self.data_sock = ''
             while self.data_sock == '' or self.data_sock[-1] != '\r': # Loop until receiving '\r'
