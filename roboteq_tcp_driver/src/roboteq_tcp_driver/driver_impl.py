@@ -144,7 +144,8 @@ class DriverImplementation(object):
 
         # Retrieve Encoder Data
         self.socket_transceive('?CR', config, description="Encoder Query")
-        
+        if self.data_sock == '-\r':
+            return
         # Wheel Odometry(http://docs.ros.org/melodic/api/nav_msgs/html/msg/Odometry.html)
         # Extract Data
         encin = (float(self.data_sock.split(':')[0].replace('CR=', '')), float(self.data_sock.split(':')[1]))
