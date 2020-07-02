@@ -240,7 +240,8 @@ class DriverImplementation(object):
         except socket.error as msg:
             #It's often timeout when network problem occured
             rospy.logerr('Socket Error(%s): %s', description, msg)
-            self.socket_reconnect(config) #Reconnect
+            #No Reconnect
+            #self.socket_reconnect(config) #Reconnect
             return
         except Exception as msg:
             #Unknown Error Exception...
