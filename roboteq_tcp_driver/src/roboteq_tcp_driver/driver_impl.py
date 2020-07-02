@@ -194,7 +194,7 @@ class DriverImplementation(object):
             data.out_queryResult_active = True
         else:
             data.out_queryResult_active = False
-        rospy.logdebug('################################################')
+        rospy.logdebug_throttle_identical(0.2, '################################################')
         # protected region user update end #
 
     def terminate(self):
@@ -229,13 +229,13 @@ class DriverImplementation(object):
         This modifies self.data_sock
         """
         try:
-            rospy.logdebug('%s: %s', description, command)
+            rospy.logdebug_throttle_identical(1, '%s: %s', description, command)
             self.sock.sendall(command + '\r')
             self.data_sock = ''
             while self.data_sock == '' or self.data_sock[-1] != '\r': # Loop until receiving '\r'
                 self.data_sock += self.sock.recv(64)
-                rospy.logdebug('Received: %s', self.data_sock)
-            rospy.logdebug('%s Response: %s', description, self.data_sock)
+                rospy.logdebug_throttle_identical('Received: %s', self.data_sock)
+            rospy.logdebug_throttle_identical('%s Response: %s', description, self.data_sock)
             return self.data_sock
         except socket.error as msg:
             #It's often timeout when network problem occured
