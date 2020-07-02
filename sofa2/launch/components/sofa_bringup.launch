@@ -1,24 +1,5 @@
 <launch>
 
-    <!--LIDAR Merger-->
-    <node pkg="ira_laser_tools" name="laserscan_multi_merger" type="laserscan_multi_merger" output="screen">
-        <!-- <remap from="/front_lidar/scan" to="scan_f"/>
-        <remap from="/rear_lidar/scan" to="scan_r"/> -->
-
-        <param name="destination_frame" value="lidar_fusion"/>
-        <param name="cloud_destination_topic" value="/cloud_fusion"/>
-        <param name="scan_destination_topic" value="/scan_fusion"/>
-         <!-- LIST OF THE LASER SCAN TOPICS TO SUBSCRIBE -->
-        <param name="laserscan_topics" value ="/front_lidar/scan /rear_lidar/scan" />
-
-        <param name="angle_min" value="-3.14159"/>
-        <param name="angle_max" value="3.14159"/>
-        <param name="angle_increment" value="0.0058"/>
-        <param name="scan_time" value="0.0333333"/>
-        <param name="range_min" value="0.05"/>
-        <param name="range_max" value="25.0"/>
-    </node>
-
     <node name="driver" pkg="roboteq_tcp_driver" type="driver" respawn="true" output="screen"/>
 
     <!--Front LIDAR-->
@@ -57,12 +38,31 @@
         <param name="timelimit" type="int" value="5"/>
     </node>
 
-
-
     <!--odom -> base_footprint -> base_link-->
     <node pkg="tf" type="static_transform_publisher" name="base_footprint_to_base_link" args="0.0 0.0 0.0 0.0 0.0 0.0 /base_footprint /base_link 20" />
     <!--base_link -> lidar_f, lidar_r, lidar_fusion-->
     <node pkg="tf" type="static_transform_publisher" name="base_link_to_cloud_f" args="0.4046 -0.2314 0.0833 -0.78540 0.0 3.14159 /base_link /cloud_f 20" />
     <node pkg="tf" type="static_transform_publisher" name="base_link_to_cloud_r" args="-0.4046 0.2314 0.0833 2.35619 0.0 3.14159 /base_link /cloud_r 20" />
     <node pkg="tf" type="static_transform_publisher" name="base_link_to_lidar_fusion" args="0.0 0.0 0.0833 0.0 0.0 0.0 /base_link /lidar_fusion 20" />
+
+    <!--LIDAR Merger-->
+    <arg name="node_start_delay" default="1.0" /> 
+    <node pkg="ira_laser_tools" name="laserscan_multi_merger" type="laserscan_multi_merger" output="screen" launch-prefix="bash -c 'sleep $(arg node_start_delay); $0 $@' ">
+        <!-- <remap from="/front_lidar/scan" to="scan_f"/>
+        <remap from="/rear_lidar/scan" to="scan_r"/> -->
+
+        <param name="destination_frame" value="lidar_fusion"/>
+        <param name="cloud_destination_topic" value="/cloud_fusion"/>
+        <param name="scan_destination_topic" value="/scan_fusion"/>
+         <!-- LIST OF THE LASER SCAN TOPICS TO SUBSCRIBE -->
+        <param name="laserscan_topics" value ="/front_lidar/scan /rear_lidar/scan" />
+
+        <param name="angle_min" value="-3.14159"/>
+        <param name="angle_max" value="3.14159"/>
+        <param name="angle_increment" value="0.0058"/>
+        <param name="scan_time" value="0.0333333"/>
+        <param name="range_min" value="0.05"/>
+        <param name="range_max" value="25.0"/>
+    </node>
+
 </launch>
