@@ -234,8 +234,8 @@ class DriverImplementation(object):
             self.data_sock = ''
             while self.data_sock == '' or self.data_sock[-1] != '\r': # Loop until receiving '\r'
                 self.data_sock += self.sock.recv(64)
-                rospy.logdebug_throttle_identical('Received: %s', self.data_sock)
-            rospy.logdebug_throttle_identical('%s Response: %s', description, self.data_sock)
+                rospy.logdebug_throttle_identical(1, 'Received: %s', self.data_sock)
+            rospy.logdebug_throttle_identical(1, '%s Response: %s' % (description, self.data_sock))
             return self.data_sock
         except socket.error as msg:
             #It's often timeout when network problem occured
