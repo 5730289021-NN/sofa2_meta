@@ -41,7 +41,7 @@ class DriverROS(object):
         self.component_config_.track_width = rospy.get_param("~track_width", 0.34)
         self.component_config_.cpr = rospy.get_param("~cpr", 200000)
         self.component_config_.gear_ratio = rospy.get_param("~gear_ratio", 20)
-        self.component_config_.invert_mul = rospy.get_param("~invert_mul", -1)
+        self.component_config_.invert_mul = rospy.get_param("~invert_mul", 1)
         # handling publishers
         self.odom_ = rospy.Publisher('odom', Odometry, queue_size=1)
         self.queryResult_ = rospy.Publisher('queryResult', String, queue_size=1)

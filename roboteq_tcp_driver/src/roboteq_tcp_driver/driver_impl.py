@@ -36,7 +36,7 @@ class DriverConfig(object):
         self.track_width = 0.34
         self.cpr = 200000
         self.gear_ratio = 20
-        self.invert_mul = -1
+        self.invert_mul = 1
         pass
 
     def __str__(self):
