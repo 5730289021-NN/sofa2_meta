@@ -12,7 +12,7 @@
     <parameter description="Distance between center of two wheel" name="track_width" type="double" value="0.34"/>
     <parameter description="Number of counts per wheel revolution (4*ppr*gear_ratio)" name="cpr" type="double" value="200000"/>
     <parameter description="Gear Ratio" name="gear_ratio" type="double" value="20"/>
-    <parameter description="Multiplier for robot that need invert driving" name="invert_mul" type="int" value="-1"/>
+    <parameter description="Multiplier for robot that need invert driving" name="invert_mul" type="int" value="1"/>
   </component>
 
   <depend>rospy</depend>
