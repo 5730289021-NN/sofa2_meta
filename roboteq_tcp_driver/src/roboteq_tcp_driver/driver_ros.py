@@ -128,6 +128,6 @@ def main():
         rospy.logfatal("{}".format(node.component_config_))
         return
 
-    rospy.Timer(rospy.Duration(1.0 / 20), node.update)
+    rospy.Timer(rospy.Duration(1.0 / 5), node.update)
     rospy.spin()
     node.component_implementation_.terminate()
