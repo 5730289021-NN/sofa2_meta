@@ -112,7 +112,8 @@ class DriverImplementation(object):
         # protected region user member variables begin #
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.data_sock = ''
-        self.mutex = False
+        self.socket_mutex = False
+        self.error = ''
         # protected region user member variables end #
 
     def configure(self, config):
@@ -219,14 +220,18 @@ class DriverImplementation(object):
         """
         Reconnect socket when SocketError arise
         """
-        rospy.loginfo('Performing Reconnecting Procedure')
-        rospy.loginfo('Shut down Socket')
-        self.sock.shutdown(socket.SHUT_RDWR)
-        rospy.loginfo('Close Socket')
-        self.sock.close()
-        rospy.loginfo('Reconnect Socket')
-        self.sock.connect((config.ip_addr, config.port_num))
-        rospy.loginfo('Reconnected')
+        try:
+            rospy.loginfo('Performing Reconnecting Procedure')
+            rospy.loginfo('Shut down Socket')
+            self.sock.shutdown(socket.SHUT_RDWR)
+            rospy.loginfo('Close Socket')
+            self.sock.close()
+            rospy.loginfo('Reconnecting Socket')
+            self.sock.connect((config.ip_addr, config.port_num))
+            rospy.loginfo('Socket is able to get reconnected')
+            self.set_error('')
+        except Exception as msg:
+            rospy.logerr('Driver is completely gone: %s', msg)
 
     def socket_transceive(self, command, config, buff_size=64, description="Query"):
         """
@@ -235,26 +240,34 @@ class DriverImplementation(object):
         """
         self.data_sock = ''
         try:
-            if not self.mutex:
-                self.mutex = True
+            if not self.socket_mutex and self.error == '':
+                self.socket_mutex = True
                 rospy.logdebug_throttle_identical(1, '%s: %s' % (description, command))
                 self.sock.sendall(command + '\r')
                 while self.data_sock == '' or self.data_sock[-1] != '\r': # Loop until receiving '\r'
                     self.data_sock += self.sock.recv(64)
                     rospy.logdebug_throttle_identical(1, 'Received: %s', self.data_sock)
                 rospy.logdebug_throttle_identical(1, '%s Response: %s' % (description, self.data_sock))
-                self.mutex = False
+                self.socket_mutex = False
                 return self.data_sock
             else:
                 raise Exception('Client tried to tranceive message when last transaction is not finished')
         except socket.error as msg:
-            #It's often timeout when network problem occured
             rospy.logerr('Socket Error(%s): %s', description, msg)
-            #No Reconnect
-            #self.socket_reconnect(config) #Reconnect
+            if 'Errno 104' in str(msg):
+                self.set_error('DRIVER_SOCKET_GONE')
+                #Handling Socket Close by Reconnect
+                self.socket_reconnect(config)
             return
         except Exception as msg:
             #Unknown Error Exception...
             rospy.logerr('Trasceiving Error: %s: %s', msg, self.data_sock)
             return
+    
+    def set_error(self, description):
+        """
+        Update Error Status
+        """
+        rospy.set_param('/fault/driver', description)
+        self.error = description
     # protected region user additional functions end #
