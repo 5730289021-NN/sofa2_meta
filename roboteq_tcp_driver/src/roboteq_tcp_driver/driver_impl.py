@@ -252,7 +252,7 @@ class DriverImplementation(object):
                 self.socket_mutex = False
                 return self.data_sock
             else:
-                raise Exception('Client tried to tranceive message when last transaction is not finished')
+                raise Exception('TRANSACTION_STACKED')
         except socket.error as msg:
             rospy.logerr('Socket Error(%s): %s', description, msg)
             if 'Errno 104' in str(msg) or 'Errno 9' in str(msg):
@@ -264,6 +264,7 @@ class DriverImplementation(object):
             return
         except Exception as msg:
             #Unknown Error Exception...
+            self.set_error(str(msg))
             rospy.logerr('Trasceiving Error: %s: %s', msg, self.data_sock)
             return
     
