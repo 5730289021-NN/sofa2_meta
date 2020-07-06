@@ -15,10 +15,10 @@
             <param name="initial_pose_y" type="double" value="12.4" />
             <param name="initial_pose_a" type="double" value="1.57" />
             <param name="odom_model_type" type="string" value="diff-corrected"/>
-            <param name="odom_alpha1" type="double" value="0.01"/>
-            <param name="odom_alpha2" type="double" value="0.01"/>
-            <param name="odom_alpha3" type="double" value="0.01"/>
-            <param name="odom_alpha4" type="double" value="0.01"/>
+            <param name="odom_alpha1" type="double" value="0.1"/>
+            <param name="odom_alpha2" type="double" value="0.1"/>
+            <param name="odom_alpha3" type="double" value="0.1"/>
+            <param name="odom_alpha4" type="double" value="0.1"/>
         </node>
     </group>
 
