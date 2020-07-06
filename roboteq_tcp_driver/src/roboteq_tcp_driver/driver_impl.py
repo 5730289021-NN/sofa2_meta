@@ -126,7 +126,7 @@ class DriverImplementation(object):
         # protected region user configure begin #
         rospy.loginfo('Connecting to Roboteq via TCP Socket....')
         self.sock.connect((config.ip_addr, config.port_num))
-        #self.sock.settimeout(0.1)
+        self.sock.settimeout(0.5)
         # self.sock.setblocking(0)
         rospy.loginfo('Roboteq Driver successfully connected using blocking mode')
         return True
