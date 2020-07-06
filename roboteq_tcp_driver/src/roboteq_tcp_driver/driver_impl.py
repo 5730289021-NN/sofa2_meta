@@ -112,6 +112,7 @@ class DriverImplementation(object):
         # protected region user member variables begin #
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.data_sock = ''
+        self.mutex = False
         # protected region user member variables end #
 
     def configure(self, config):
@@ -187,7 +188,8 @@ class DriverImplementation(object):
         if data.in_cmd_vel_updated:
             for i in (1,2):
                 self.socket_transceive('!S %d %d\r' % (i, config.invert_mul * rpmout[i-1]), config, 8, 'Motor %s' % i)
-
+                if self.data_sock != '+\r':
+                    rospy.logerr('Unexpected Device Response when Driving Command')
         ### Direct Query
 
         # Handle Direct Query Command
@@ -231,15 +233,20 @@ class DriverImplementation(object):
         Wrapper for Transmit and Receive Response from Driver Server
         This modifies self.data_sock
         """
+        self.data_sock = ''
         try:
-            rospy.logdebug_throttle_identical(1, '%s: %s' % (description, command))
-            self.sock.sendall(command + '\r')
-            self.data_sock = ''
-            while self.data_sock == '' or self.data_sock[-1] != '\r': # Loop until receiving '\r'
-                self.data_sock += self.sock.recv(64)
-                rospy.logdebug_throttle_identical(1, 'Received: %s', self.data_sock)
-            rospy.logdebug_throttle_identical(1, '%s Response: %s' % (description, self.data_sock))
-            return self.data_sock
+            if not self.mutex:
+                self.mutex = True
+                rospy.logdebug_throttle_identical(1, '%s: %s' % (description, command))
+                self.sock.sendall(command + '\r')
+                while self.data_sock == '' or self.data_sock[-1] != '\r': # Loop until receiving '\r'
+                    self.data_sock += self.sock.recv(64)
+                    rospy.logdebug_throttle_identical(1, 'Received: %s', self.data_sock)
+                rospy.logdebug_throttle_identical(1, '%s Response: %s' % (description, self.data_sock))
+                self.mutex = False
+                return self.data_sock
+            else:
+                raise Exception('Client tried to tranceive message when last transaction is not finished')
         except socket.error as msg:
             #It's often timeout when network problem occured
             rospy.logerr('Socket Error(%s): %s', description, msg)
