@@ -230,6 +230,7 @@ class DriverImplementation(object):
             self.sock.connect((config.ip_addr, config.port_num))
             rospy.loginfo('Socket is able to get reconnected')
             self.set_error('')
+            self.socket_mutex = False
         except Exception as msg:
             rospy.logerr('Driver is completely gone: %s', msg)
 
@@ -254,7 +255,9 @@ class DriverImplementation(object):
                 raise Exception('Client tried to tranceive message when last transaction is not finished')
         except socket.error as msg:
             rospy.logerr('Socket Error(%s): %s', description, msg)
-            if 'Errno 104' in str(msg):
+            if 'Errno 104' in str(msg) or 'Errno 9' in str(msg):
+                #[Errno 104] Connection reset by peer
+                #[Errno 9] Bad file descriptor
                 self.set_error('DRIVER_SOCKET_GONE')
                 #Handling Socket Close by Reconnect
                 self.socket_reconnect(config)
