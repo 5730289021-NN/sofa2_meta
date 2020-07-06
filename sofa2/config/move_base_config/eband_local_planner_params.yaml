@@ -5,7 +5,7 @@ EBandPlannerROS:
   rot_stopped_vel: 0.05
   trans_stopped_vel: 0.025
 
-  costmap_weight: 1.9 #7
+  costmap_weight: 5 #7
 
   max_vel_lin: 0.30
   min_vel_lin: 0.02
@@ -24,7 +24,7 @@ EBandPlannerROS:
   eband_min_relative_overlap: 0.5
 
   k_prop: 2.0
-  k_damp: 5.0
+  k_damp: 4.0
 
   rotation_threshold_multiplier: 0.6
   Ctrl_Rate: 10
