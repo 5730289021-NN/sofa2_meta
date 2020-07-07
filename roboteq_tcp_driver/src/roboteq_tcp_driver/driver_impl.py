@@ -216,6 +216,9 @@ class DriverImplementation(object):
 
 
     # protected region user additional functions begin #
+    def carryTimer(self, timer):
+        self.rospyTimer = timer
+
     def socket_reconnect(self, config):
         """
         Reconnect socket when SocketError arise
@@ -231,6 +234,7 @@ class DriverImplementation(object):
             rospy.loginfo('Socket is able to get reconnected')
             self.set_error('')
             self.socket_mutex = False
+            self.rospyTimer.start()
         except Exception as msg:
             rospy.logerr('Driver is completely gone: %s', msg)
 
@@ -260,7 +264,10 @@ class DriverImplementation(object):
                 #[Errno 9] Bad file descriptor
                 self.set_error('DRIVER_SOCKET_GONE')
                 #Handling Socket Close by Reconnect
+                self.rospyTimer.shutdown()
                 self.socket_reconnect(config)
+            else:
+                self.set_error(str(msg))
             return
         except Exception as msg:
             #Unknown Error Exception...
