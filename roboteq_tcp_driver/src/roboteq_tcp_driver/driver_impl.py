@@ -243,8 +243,8 @@ class DriverImplementation(object):
             try:
                 rospy.loginfo('Performing Reconnecting Procedure...in 3 Seconds')
                 time.sleep(3.0)
-                rospy.loginfo('Shut down Socket')
-                self.sock.shutdown(socket.SHUT_RDWR)
+                # rospy.loginfo('Shut down Socket')
+                # self.sock.shutdown(socket.SHUT_RDWR)
                 rospy.loginfo('Close Socket')
                 self.sock.close()
                 rospy.loginfo('Reconnecting Socket...in 2 Seconds')
