@@ -277,7 +277,7 @@ class DriverImplementation(object):
                 return self.data_sock
             else:
                 self.transaction_stack_cnt = self.transaction_stack_cnt + 1
-                raise Exception('TRANSACTION_STACKED')
+                raise Exception('TRANSACTION_STACKED %d' % self.transaction_stack_cnt)
         except socket.error as msg:
             rospy.logerr('Socket Error(%s): %s', description, msg)
             if 'Errno 104' in str(msg) or 'Errno 9' in str(msg) or self.transaction_stack_cnt >= 5:
