@@ -291,7 +291,8 @@ class DriverImplementation(object):
         """
         Update Error Status
         """
-        rospy.loginfo('/fault/driver was set to %s', description)
+        if description != ''
+            rospy.loginfo('/fault/driver was set to %s', description)
         rospy.set_param('/fault/driver', description)
         self.error = description
     # protected region user additional functions end #
