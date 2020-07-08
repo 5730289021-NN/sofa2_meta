@@ -158,6 +158,8 @@ class DriverImplementation(object):
 
         # Retrieve Encoder Data
         self.socket_transceive('?CR', config, description="Encoder Query")
+        if self.data_sock == '':
+            return
         # Wheel Odometry(http://docs.ros.org/melodic/api/nav_msgs/html/msg/Odometry.html)
         # Extract Data
         try:
