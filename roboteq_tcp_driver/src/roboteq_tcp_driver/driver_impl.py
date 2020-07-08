@@ -20,6 +20,7 @@ import tf
 from geometry_msgs.msg import Quaternion
 from math import sin, cos
 import socket
+import time
 # protected region user include package end #
 
 
@@ -125,8 +126,19 @@ class DriverImplementation(object):
         """
         # protected region user configure begin #
         rospy.loginfo('Connecting to Roboteq via TCP Socket....')
-        self.sock.connect((config.ip_addr, config.port_num))
-        self.sock.settimeout(0.5)
+        while True:
+            try:
+                self.sock.connect((config.ip_addr, config.port_num))
+                break
+            except socket.error as msg:
+                if 'Errno 113' in str(msg):
+                    self.set_error('DRIVER_CONNECTING')
+                else:
+                    self.set_error(msg)
+                rospy.loginfo('Trying to reconnecting in 5 Seconds...')
+                time.sleep(5.0)
+        self.set_error('')
+        self.sock.settimeout(0.1)
         # self.sock.setblocking(0)
         rospy.loginfo('Roboteq Driver successfully connected using blocking mode')
         return True
