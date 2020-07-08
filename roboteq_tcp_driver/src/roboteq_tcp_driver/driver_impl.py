@@ -116,6 +116,7 @@ class DriverImplementation(object):
         self.socket_mutex = False
         self.error = ''
         self.transaction_stack_cnt = 0
+        self.isConnected = False
         # protected region user member variables end #
 
     def configure(self, config):
@@ -142,6 +143,7 @@ class DriverImplementation(object):
         self.sock.settimeout(0.1)
         # self.sock.setblocking(0)
         rospy.loginfo('Roboteq Driver successfully connected using blocking mode')
+        self.isConnected = True
         return True
         # protected region user configure end #
 
@@ -156,7 +158,8 @@ class DriverImplementation(object):
         @return nothing
         """
         # protected region user update begin #
-
+        if not self.isConnected:
+            return
         # Retrieve Encoder Data
         self.socket_transceive('?CR', config, description="Encoder Query")
         if self.data_sock == '':
@@ -231,29 +234,28 @@ class DriverImplementation(object):
 
 
     # protected region user additional functions begin #
-    def carryTimer(self, timer):
-        self.rospyTimer = timer
-
     def socket_reconnect(self, config):
         """
         Reconnect socket when SocketError arise
         """
-        try:
-            rospy.loginfo('Performing Reconnecting Procedure...in 3 Seconds')
-            time.sleep(3.0)
-            rospy.loginfo('Shut down Socket')
-            self.sock.shutdown(socket.SHUT_RDWR)
-            rospy.loginfo('Close Socket')
-            self.sock.close()
-            rospy.loginfo('Reconnecting Socket...in 2 Seconds')
-            time.sleep(2.0)
-            self.sock.connect((config.ip_addr, config.port_num))
-            rospy.loginfo('Socket is able to get reconnected')
-            self.set_error('')
-            self.socket_mutex = False
-            self.rospyTimer.start()
-        except Exception as msg:
-            rospy.logerr('Driver is completely gone: %s', msg)
+        self.isConnected = False
+        while True:
+            try:
+                rospy.loginfo('Performing Reconnecting Procedure...in 3 Seconds')
+                time.sleep(3.0)
+                rospy.loginfo('Shut down Socket')
+                self.sock.shutdown(socket.SHUT_RDWR)
+                rospy.loginfo('Close Socket')
+                self.sock.close()
+                rospy.loginfo('Reconnecting Socket...in 2 Seconds')
+                time.sleep(2.0)
+                self.sock.connect((config.ip_addr, config.port_num))
+                rospy.loginfo('Socket is able to get reconnected')
+                self.set_error('')
+                self.socket_mutex = False
+                break
+            except Exception as msg:
+                rospy.logerr('Driver is completely gone: %s', msg)
 
     def socket_transceive(self, command, config, buff_size=64, description="Query"):
         """
@@ -283,7 +285,6 @@ class DriverImplementation(object):
                 #[Errno 9] Bad file descriptor
                 self.set_error('DRIVER_SOCKET_GONE')
                 #Handling Socket Close by Reconnect
-                self.rospyTimer.shutdown()
                 self.socket_reconnect(config)
             else:
                 self.set_error(str(msg))
