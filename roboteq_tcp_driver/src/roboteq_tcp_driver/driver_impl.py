@@ -278,21 +278,16 @@ class DriverImplementation(object):
             else:
                 self.transaction_stack_cnt = self.transaction_stack_cnt + 1
                 raise Exception('TRANSACTION_STACKED %d' % self.transaction_stack_cnt)
-        except socket.error as msg:
+        except Exception as msg:
             rospy.logerr('Socket Error(%s): %s', description, msg)
             if 'Errno 104' in str(msg) or 'Errno 9' in str(msg) or self.transaction_stack_cnt >= 5:
                 #[Errno 104] Connection reset by peer
                 #[Errno 9] Bad file descriptor
-                self.set_error('DRIVER_SOCKET_GONE')
+                self.set_error('msg')
                 #Handling Socket Close by Reconnect
                 self.socket_reconnect(config)
             else:
                 self.set_error(str(msg))
-            return
-        except Exception as msg:
-            #Unknown Error Exception...
-            self.set_error(str(msg))
-            rospy.logerr('Trasceiving Error: %s: %s', msg, self.data_sock)
             return
     
     def set_error(self, description):
