@@ -115,6 +115,7 @@ class DriverImplementation(object):
         self.data_sock = ''
         self.socket_mutex = False
         self.error = ''
+        self.transaction_stack_cnt = 0
         # protected region user member variables end #
 
     def configure(self, config):
@@ -238,12 +239,14 @@ class DriverImplementation(object):
         Reconnect socket when SocketError arise
         """
         try:
-            rospy.loginfo('Performing Reconnecting Procedure')
+            rospy.loginfo('Performing Reconnecting Procedure...in 3 Seconds')
+            time.sleep(3.0)
             rospy.loginfo('Shut down Socket')
             self.sock.shutdown(socket.SHUT_RDWR)
             rospy.loginfo('Close Socket')
             self.sock.close()
-            rospy.loginfo('Reconnecting Socket')
+            rospy.loginfo('Reconnecting Socket...in 2 Seconds')
+            time.sleep(2.0)
             self.sock.connect((config.ip_addr, config.port_num))
             rospy.loginfo('Socket is able to get reconnected')
             self.set_error('')
@@ -268,12 +271,14 @@ class DriverImplementation(object):
                     rospy.logdebug_throttle_identical(1, 'Received: %s', self.data_sock)
                 rospy.logdebug_throttle_identical(1, '%s Response: %s' % (description, self.data_sock))
                 self.socket_mutex = False
+                self.transaction_stack_cnt = 0
                 return self.data_sock
             else:
+                self.transaction_stack_cnt = self.transaction_stack_cnt + 1
                 raise Exception('TRANSACTION_STACKED')
         except socket.error as msg:
             rospy.logerr('Socket Error(%s): %s', description, msg)
-            if 'Errno 104' in str(msg) or 'Errno 9' in str(msg):
+            if 'Errno 104' in str(msg) or 'Errno 9' in str(msg) or self.transaction_stack_cnt >= 5:
                 #[Errno 104] Connection reset by peer
                 #[Errno 9] Bad file descriptor
                 self.set_error('DRIVER_SOCKET_GONE')
