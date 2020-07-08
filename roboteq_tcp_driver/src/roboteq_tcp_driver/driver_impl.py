@@ -253,6 +253,7 @@ class DriverImplementation(object):
                 self.sock.connect((config.ip_addr, config.port_num))
                 rospy.loginfo('Socket is able to get reconnected')
                 self.set_error('')
+                self.isConnected = True
                 self.socket_mutex = False
                 break
             except Exception as msg:
