@@ -249,6 +249,7 @@ class DriverImplementation(object):
                 self.sock.close()
                 rospy.loginfo('Reconnecting Socket...in 2 Seconds')
                 time.sleep(2.0)
+                self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self.sock.connect((config.ip_addr, config.port_num))
                 rospy.loginfo('Socket is able to get reconnected')
                 self.set_error('')

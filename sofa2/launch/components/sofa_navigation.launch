@@ -4,7 +4,7 @@
         <remap from="map_metadata" to="map_metadata_amcl" />
         <node pkg="map_server" type="map_server" name="map_amcl" args="$(find sofa2)/map/fibo-6.yaml" />
 
-        <node pkg="amcl" type="amcl" name="sofa_amcl">
+        <node pkg="amcl" type="amcl" name="sofa2_amcl">
             <remap from="scan" to="scan_fusion"/>
             <param name="use_map_topic" type="bool" value="true"/>
             <param name="update_min_d" type="double" value="0.05" />
