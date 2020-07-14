@@ -1,0 +1,11 @@
+<launch>
+    <node name="acc_lim_vel_filter" pkg="acc_lim_vel_filter" type="acc_lim_vel_filter" />
+    <!-- protected region acc_lim_vel_filter vel_out additional configuration begin -->
+    <!-- protected region acc_lim_vel_filter vel_out additional configuration end -->
+    <test test-name="hz_loop_test_acc_lim_vel_filter_vel_out" pkg="rostest" type="hztest" name="hz_test_acc_lim_vel_filter_vel_out">
+        <param name="topic" value="vel_out" />
+        <param name="hz" value="20" />
+        <param name="hzerror" value="1" />
+        <param name="test_duration" value="5.0" />
+    </test>
+</launch>

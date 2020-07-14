@@ -241,14 +241,14 @@ class DriverImplementation(object):
         self.isConnected = False
         while True:
             try:
-                rospy.loginfo('Performing Reconnecting Procedure...in 3 Seconds')
-                time.sleep(3.0)
+                rospy.loginfo('Performing Reconnecting Procedure...in 1.5 Seconds')
+                time.sleep(1.5)
                 # rospy.loginfo('Shut down Socket')
                 # self.sock.shutdown(socket.SHUT_RDWR)
                 rospy.loginfo('Close Socket')
                 self.sock.close()
-                rospy.loginfo('Reconnecting Socket...in 2 Seconds')
-                time.sleep(2.0)
+                rospy.loginfo('Reconnecting Socket...in 1 Seconds')
+                time.sleep(1.0)
                 self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self.sock.connect((config.ip_addr, config.port_num))
                 rospy.loginfo('Socket is able to get reconnected')
