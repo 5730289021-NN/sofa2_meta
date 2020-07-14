@@ -1,14 +1,15 @@
 <launch>
     <node pkg="joy" name="joy" type="joy_node" output="screen">
-        <param name="autorepeat_rate" value="10"/>
+        <param name="autorepeat_rate" value="20"/>
     </node>
     
     <node pkg="teleop_twist_joy" name="joy_twist" type="teleop_node" output="screen">
-        <remap from="cmd_vel" to="command_in"/>
+        <remap from="cmd_vel" to="vel_in"/>
     </node>
 
-    <node pkg="cob_collision_velocity_filter" name="cob_collision_velocity_filter" type="collision_velocity_filter" output="screen">
-        <remap from="obstacles" to="move_base/local_costmap/costmap"/>
-        <remap from="command" to="cmd_vel"/>
+    <node pkg="acc_lim_vel_filter" name="acc_lim_vel_filter" type="acc_lim_vel_filter" output="screen">
+        <remap from="move_base_status" to="move_base/status"/>
+        <remap from="move_base_goal" to="move_base/goal"/>
+        <remap from="vel_out" to="cmd_vel"/>
     </node>
 </launch>

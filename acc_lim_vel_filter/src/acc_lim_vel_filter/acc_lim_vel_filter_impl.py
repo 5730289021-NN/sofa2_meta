@@ -158,23 +158,17 @@ class AccLimVelFilterImplementation(object):
             # just normal acceleration limit velocity filter
             # 0.05 sec is from 20 Hz
 
-            # Find request linear acceleration
+        # Find request linear acceleration
         acc_lin = (data.out_vel_out.linear.x  - self.vel_prev.linear.x) / 0.05
         # Filter Linear Velocity
         if acc_lin > config.acc_lin_lim:
+            rospy.loginfo_once('Filter +')
             data.out_vel_out.linear.x = self.vel_prev.linear.x + config.acc_lin_lim * 0.05
-        elif acc_lin < config.acc_lin_lim:
+        elif acc_lin < -config.acc_lin_lim:
+            rospy.loginfo_once('Filter - %f, %f', acc_lin, config.acc_lin_lim)
             data.out_vel_out.linear.x = self.vel_prev.linear.x - config.acc_lin_lim * 0.05
             
-            # # Find request angular acceleration
-            # acc_ang = (data.in_vel_in.angular.z  - self.vel_prev.angular.z) / 0.05
-            # # Filter Linear Velocity
-            # if acc_ang > config.acc_ang_lim:
-            #     data.out_vel_out.angular.z = self.vel_prev.angular.z + config.acc_ang_lim * 0.05
-            # elif acc_ang < config.acc_ang_lim:
-            #     data.out_vel_out.angular.z = self.vel_prev.angular.z - config.acc_ang_lim * 0.05
-
-
+        self.vel_prev = data.out_vel_out
         # protected region user update end #
 
     def terminate(self):

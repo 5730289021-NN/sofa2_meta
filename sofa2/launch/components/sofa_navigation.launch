@@ -33,6 +33,7 @@
     </node>
 
     <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+        <remap from="cmd_vel" to="vel_in" />
         <param name="base_global_planner" value="navfn/NavfnROS" />
         <param name="base_local_planner" value="eband_local_planner/EBandPlannerROS" />
         <param name="planner_patience" type="double" value="2.0" />
