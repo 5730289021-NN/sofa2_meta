@@ -8,7 +8,7 @@
     <subscriber description="move_base Status" name="move_base_status" type="actionlib_msgs::GoalStatusArray"/>
     <parameter description="Limit Linear Acceleration" name="acc_lin_lim" type="double" value="0.6"/>
     <!-- <parameter description="Limit Angular Acceleration" name="acc_ang_lim" type="double" value="0.6"/> -->
-    <parameter description="Goal Distance Threshold" name="goal_dist_thres" type="double" value="5.0"/>
+    <parameter description="Goal Distance Threshold" name="goal_dist_thres" type="double" value="1.5"/>
     <parameter description="Autonomous Minimum Velocity" name="auto_min_vel" type="double" value="0.05"/>
     <parameter description="Displacement Gain which product of Kp * goal_dist_thres should less than 1" name="Kp" type="double" value="0.1"/>
   </component>

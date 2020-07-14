@@ -1,6 +1,8 @@
 <launch>
 
-    <node name="driver" pkg="roboteq_tcp_driver" type="driver" respawn="true" output="screen"/>
+    <node name="driver" pkg="roboteq_tcp_driver" type="driver" respawn="true" output="screen">
+        <remap from="cmd_vel" to="desired_vel" />
+    </node>
 
     <!--Front LIDAR-->
     <node name="sick_tim_781s" pkg="sick_scan" ns="front_lidar" type="sick_generic_caller" respawn="true" output="log">

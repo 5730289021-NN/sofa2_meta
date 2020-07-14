@@ -30,9 +30,9 @@ class AccLimVelFilterConfig(object):
         # parameters handled through the parameter server
         self.acc_lin_lim = 0.6
         self.acc_ang_lim = 0.6
-        self.goal_dist_thres = 5.0
+        self.goal_dist_thres = 1.5
         self.auto_min_vel = 0.05
-        self.Kp = 0.1
+        self.Kp = 0.5
         pass
 
     def __str__(self):
@@ -149,7 +149,9 @@ class AccLimVelFilterImplementation(object):
             # goal based velocity filter
             rospy.loginfo_once('Goal based Enhanced Filter Mode') 
             data.out_vel_out.linear.x = config.Kp * self.displacement * data.in_vel_in.linear.x
+            rospy.logdebug('Inside threshold reduce velocity from %f to %f' % (data.in_vel_in.linear.x, data.out_vel_out.linear.x))
             if data.out_vel_out.linear.x < config.auto_min_vel and config.auto_min_vel < data.in_vel_in.linear.x:
+                rospy.logdebug('Bounded to %f', config.auto_min_vel)
                 data.out_vel_out.linear.x = config.auto_min_vel
             # data.out_vel_out.angular.z = config.Kp * self.displacement * data.in_vel_in.angular.z
         else:

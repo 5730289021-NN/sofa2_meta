@@ -130,7 +130,7 @@ def main():
     Instanciate the node interface containing the Developer implementation
     @return nothing
     """
-    rospy.init_node("acc_lim_vel_filter", anonymous=False)
+    rospy.init_node("acc_lim_vel_filter", anonymous=False, log_level=rospy.DEBUG)
 
     node = AccLimVelFilterROS()
     if not node.configure():
