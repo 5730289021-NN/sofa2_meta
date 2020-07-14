@@ -61,8 +61,8 @@
     <!--odom -> base_footprint -> base_link-->
     <node pkg="tf" type="static_transform_publisher" name="base_footprint_to_base_link" args="0.0 0.0 0.0 0.0 0.0 0.0 /base_footprint /base_link 20" />
     <!--base_link -> lidar_f, lidar_r, lidar_fusion-->
-    <node pkg="tf" type="static_transform_publisher" name="base_link_to_cloud_f" args="0.4046 -0.2314 0.0833 -0.78540 0.0 3.14159 /base_link /cloud_f 20" />
-    <node pkg="tf" type="static_transform_publisher" name="base_link_to_cloud_r" args="-0.4046 0.2314 0.0833 2.35619 0.0 3.14159 /base_link /cloud_r 20" />
+    <node pkg="tf" type="static_transform_publisher" name="base_link_to_cloud_f" args="0.4046 -0.2314 0.3903 -0.78540 0.0 0 /base_link /cloud_f 20" />
+    <node pkg="tf" type="static_transform_publisher" name="base_link_to_cloud_r" args="-0.4046 0.2314 0.6433 2.35619 0.0 0 /base_link /cloud_r 20" />
     <node pkg="tf" type="static_transform_publisher" name="base_link_to_lidar_fusion" args="0.0 0.0 0.0833 0.0 0.0 0.0 /base_link /lidar_fusion 20" />
 
 
