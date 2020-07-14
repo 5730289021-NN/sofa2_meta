@@ -31,7 +31,7 @@ class AccLimVelFilterConfig(object):
         self.acc_lin_lim = 0.6
         self.acc_ang_lim = 0.6
         self.goal_dist_thres = 1.5
-        self.auto_min_vel = 0.05
+        self.auto_min_vel = 0.1
         self.Kp = 0.5
         pass
 
@@ -136,8 +136,9 @@ class AccLimVelFilterImplementation(object):
         # protected region user update begin #
         # can be removed once filled
         
-        # In -> Out
-        data.out_vel_out = data.in_vel_in
+        # Deep Copy in -> out
+        data.out_vel_out.linear.x = data.in_vel_in.linear.x
+        data.out_vel_out.angular.z = data.in_vel_in.angular.z
         
         # Get Current Displacement
         if data.in_amcl_pose_updated:
@@ -147,9 +148,9 @@ class AccLimVelFilterImplementation(object):
 
         if data.in_move_base_status.status_list and data.in_move_base_status.status_list[-1].status == 1 and self.displacement < config.goal_dist_thres:
             # goal based velocity filter
-            rospy.loginfo_once('Goal based Enhanced Filter Mode') 
+            rospy.logdebug('Goal based Enhanced Filter Mode: %f < %f'% (self.displacement, config.goal_dist_thres)) 
             data.out_vel_out.linear.x = config.Kp * self.displacement * data.in_vel_in.linear.x
-            rospy.logdebug('Inside threshold reduce velocity from %f to %f' % (data.in_vel_in.linear.x, data.out_vel_out.linear.x))
+            rospy.logdebug('Reduce velocity from %f to %f' % (data.in_vel_in.linear.x, data.out_vel_out.linear.x))
             if data.out_vel_out.linear.x < config.auto_min_vel and config.auto_min_vel < data.in_vel_in.linear.x:
                 rospy.logdebug('Bounded to %f', config.auto_min_vel)
                 data.out_vel_out.linear.x = config.auto_min_vel
