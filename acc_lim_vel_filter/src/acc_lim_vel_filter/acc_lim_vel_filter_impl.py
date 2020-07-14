@@ -162,10 +162,10 @@ class AccLimVelFilterImplementation(object):
         acc_lin = (data.out_vel_out.linear.x  - self.vel_prev.linear.x) / 0.05
         # Filter Linear Velocity
         if acc_lin > config.acc_lin_lim:
-            rospy.loginfo_once('Filter +')
+            rospy.logdebug('Filter + %f, %f', acc_lin, config.acc_lin_lim)
             data.out_vel_out.linear.x = self.vel_prev.linear.x + config.acc_lin_lim * 0.05
         elif acc_lin < -config.acc_lin_lim:
-            rospy.loginfo_once('Filter - %f, %f', acc_lin, config.acc_lin_lim)
+            rospy.logdebug('Filter - %f, %f', acc_lin, config.acc_lin_lim)
             data.out_vel_out.linear.x = self.vel_prev.linear.x - config.acc_lin_lim * 0.05
             
         self.vel_prev = data.out_vel_out
