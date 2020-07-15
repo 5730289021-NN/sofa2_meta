@@ -89,6 +89,9 @@ class StateManagerImplementation(object):
         self.set_rosparam('/system/status', 'NORMAL')
         self.set_rosparam('/system/response', 'STAND BY')
         self.set_rosparam('/system/fault_list', [])
+
+        self.set_rosparam('/plc/conn_status', "DISCONNECTED")
+        self.set_rosparam('/plc/status', 20)
         
         self.set_rosparam('/battery/level', 55)
         
