@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 """
-@package state_manager
-@file state_manager_ros.py
+@package system_checker
+@file system_checker_ros.py
 @author Norawit Nangsue
-@brief State Manager
+@brief System Checker
 
 Copyright (C) FIBO
 FIBO
@@ -14,12 +14,15 @@ import rospy
 
 # ROS message & services includes
 from actionlib_msgs.msg import GoalStatusArray
+from sensor_msgs.msg import LaserScan
+from sensor_msgs.msg import LaserScan
+from sensor_msgs.msg import LaserScan
 
 # other includes
-from state_manager import state_manager_impl
+from system_checker import system_checker_impl
 
 
-class StateManagerROS(object):
+class SystemCheckerROS(object):
     """
     ROS interface class, handling all communication with ROS
     """
@@ -27,12 +30,15 @@ class StateManagerROS(object):
         """
         Attributes definition
         """
-        self.component_data_ = state_manager_impl.StateManagerData()
-        self.component_config_ = state_manager_impl.StateManagerConfig()
-        self.component_implementation_ = state_manager_impl.StateManagerImplementation()
+        self.component_data_ = system_checker_impl.SystemCheckerData()
+        self.component_config_ = system_checker_impl.SystemCheckerConfig()
+        self.component_implementation_ = system_checker_impl.SystemCheckerImplementation()
 
         # handling subscribers
         self.move_base_status_ = rospy.Subscriber('move_base_status', GoalStatusArray, self.topic_callback_move_base_status)
+        self.scan_1_ = rospy.Subscriber('scan_1', LaserScan, self.topic_callback_scan_1)
+        self.scan_2_ = rospy.Subscriber('scan_2', LaserScan, self.topic_callback_scan_2)
+        self.scan_fusion_ = rospy.Subscriber('scan_fusion', LaserScan, self.topic_callback_scan_fusion)
 
     def topic_callback_move_base_status(self, msg):
         """
@@ -40,6 +46,27 @@ class StateManagerROS(object):
         """
         self.component_data_.in_move_base_status = msg
         self.component_data_.in_move_base_status_updated = True
+
+    def topic_callback_scan_1(self, msg):
+        """
+        callback called at message reception
+        """
+        self.component_data_.in_scan_1 = msg
+        self.component_data_.in_scan_1_updated = True
+
+    def topic_callback_scan_2(self, msg):
+        """
+        callback called at message reception
+        """
+        self.component_data_.in_scan_2 = msg
+        self.component_data_.in_scan_2_updated = True
+
+    def topic_callback_scan_fusion(self, msg):
+        """
+        callback called at message reception
+        """
+        self.component_data_.in_scan_fusion = msg
+        self.component_data_.in_scan_fusion_updated = True
 
     def configure(self):
         """
@@ -58,6 +85,9 @@ class StateManagerROS(object):
         set related flag to state that input has been read
         """
         self.component_data_.in_move_base_status_updated = False
+        self.component_data_.in_scan_1_updated = False
+        self.component_data_.in_scan_2_updated = False
+        self.component_data_.in_scan_fusion_updated = False
         pass
 
     def update(self, event):
@@ -82,15 +112,15 @@ def main():
     Instanciate the node interface containing the Developer implementation
     @return nothing
     """
-    rospy.init_node("state_manager", anonymous=False)
+    rospy.init_node("system_checker", anonymous=False)
 
-    node = StateManagerROS()
+    node = SystemCheckerROS()
     if not node.configure():
         rospy.logfatal("Could not configure the node")
         rospy.logfatal("Please check configuration parameters")
         rospy.logfatal("{}".format(node.component_config_))
         return
 
-    rospy.Timer(rospy.Duration(1.0 / 10), node.update)
+    rospy.Timer(rospy.Duration(1.0 / 1), node.update)
     rospy.spin()
     node.component_implementation_.terminate()

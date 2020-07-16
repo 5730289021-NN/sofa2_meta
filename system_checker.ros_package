@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package author="Norawit Nangsue" author_email="norawitn@hotmail.com" copyright="FIBO" description="System Checker" license="FIBO" name="system_checker" template="python_node_update">
+  <component frequency="1" name="system_checker">
+    <subscriber description="move base status" name="move_base_status" type="actionlib_msgs::GoalStatusArray" />
+    <subscriber description="Lidar 1 Topic" name="scan_1" type="sensor_msgs::LaserScan" />
+    <subscriber description="Lidar 2 Topic" name="scan_2" type="sensor_msgs::LaserScan" />
+    <subscriber description="Lidar 3 Topic" name="scan_fusion" type="sensor_msgs::LaserScan" />
+  </component>
+
+  <!--<component frequency="10" name="state_manager2">
+    <actionClient description="move base action client" name="move_base" type="move_base_msgs::MoveBase"/>
+  </component>-->
+
+  <depend>rospy</depend>
+  <depend>std_msgs</depend>
+  <depend>actionlib</depend>
+  <depend>actionlib_msgs</depend>
+  <depend>sensor_msgs</depend>
+
+</package>

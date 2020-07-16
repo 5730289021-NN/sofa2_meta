@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>state_manager</name>
-  <description>State Manager</description>
+  <name>system_checker</name>
+  <description>System Checker</description>
   <version>0.0.0</version>
   <maintainer email="norawitn@hotmail.com">Norawit Nangsue</maintainer>
   <author email="norawitn@hotmail.com">Norawit Nangsue</author>
@@ -14,6 +14,7 @@
   <depend>std_msgs</depend>
   <depend>actionlib</depend>
   <depend>actionlib_msgs</depend>
+  <depend>sensor_msgs</depend>
   <test_depend>rostest</test_depend>
 
   <!-- protected region additional package statements begin -->

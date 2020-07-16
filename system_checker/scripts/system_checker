@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 """
-@package state_manager
-@file state_manager
+@package system_checker
+@file system_checker
 @author Norawit Nangsue
-@brief State Manager
+@brief System Checker
         Entry point to the node.
 Copyright (C) FIBO
 FIBO
 """
-from state_manager.state_manager_ros import main
+from system_checker.system_checker_ros import main
 
 if __name__ == '__main__':
     main()

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(state_manager)
+project(system_checker)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   actionlib
   actionlib_msgs
+  sensor_msgs
 )
 
 # protected region additional user defined REQUIREMENTS begin #
@@ -35,6 +36,7 @@ catkin_package(
     std_msgs
     actionlib
     actionlib_msgs
+    sensor_msgs
 )
 
 ###########
@@ -57,7 +59,7 @@ endif()
 ## Install ##
 #############
 catkin_install_python(PROGRAMS
-                      scripts/state_manager
+                      scripts/system_checker
                       DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 # protected region user Cmake macros begin #

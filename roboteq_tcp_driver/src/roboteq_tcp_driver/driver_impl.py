@@ -136,7 +136,7 @@ class DriverImplementation(object):
                 if 'Errno 113' in str(msg):
                     self.set_error('DRIVER_CONNECTING')
                 else:
-                    self.set_error(msg)
+                    self.set_error('DRIVER_' + msg)
                 rospy.loginfo('Trying to reconnecting in 5 Seconds...')
                 time.sleep(5.0)
         self.set_error('')
@@ -285,11 +285,11 @@ class DriverImplementation(object):
             if 'Errno 104' in str(msg) or 'Errno 9' in str(msg) or self.transaction_stack_cnt >= 5:
                 #[Errno 104] Connection reset by peer
                 #[Errno 9] Bad file descriptor
-                self.set_error(str(msg))
+                self.set_error('DRIVER_' + str(msg))
                 #Handling Socket Close by Reconnect
                 self.socket_reconnect(config)
             else:
-                self.set_error(str(msg))
+                self.set_error('DRIVER_' + str(msg))
             return
     
     def set_error(self, description):
