@@ -16,14 +16,15 @@
       <remap from="move_base_status" to="move_base/status"/>
       <remap from="move_base_goal" to="move_base/goal"/>
       <remap from="vel_in" to="twisted_vel"/>
-      <remap from="vel_out" to="drive_vel"/>
+      <remap from="vel_out" to="acc_lim_vel"/>
+      <!-- <remap from="vel_out" to="drive_vel"/> -->
   </node>
-<!-- 
+
   <node pkg="costmap_based_vel_filter" name="costmap_based_vel_filter" type="costmap_based_vel_filter" output="screen">
       <remap from="move_base_status" to="move_base/status"/>
       <remap from="costmap" to=""/>
       <remap from="vel_in" to="acc_lim_vel"/>
       <remap from="vel_out" to="drive_vel"/>
-  </node> -->
+  </node>
 
 </launch>
