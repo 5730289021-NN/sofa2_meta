@@ -192,7 +192,7 @@ class CostmapBasedVelFilterImplementation(object):
             rospy.loginfo('Cost beyond than threshold %d, but current cost is %f' % (self.config.max_cost_threshold, max_cost_mul))
         else:
             msg = Twist()
-            vel_out.linear.x = msg.linear.x * (1 - max_cost_mul / 100)
+            vel_out.linear.x = msg.linear.x * (1 - max_cost_mul / self.max_feasable_cost)
             vel_out.angular.z = msg.angular.z
         self.passthrough.pub_pose_array.publish(vel_out)
         # protected region user implementation of direct subscriber callback for vel_in end #
@@ -205,7 +205,7 @@ class CostmapBasedVelFilterImplementation(object):
         if not pose_valid:
             rospy.loginfo('Invalid Pose at %f, %f' % (pose.position.x, pose.position.y))
         return pose_valid
-        
+
     def getCostfromPose(self, pose):
         index = (pose.position.y - self.costmap.info.origin.position.y) / self.costmap.info.resolution * self.costmap.info.width
         index += (pose.position.x - self.costmap.info.origin.position.x) / self.costmap.info.resolution
