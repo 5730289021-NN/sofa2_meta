@@ -48,10 +48,6 @@ Maximum Cost Threshold (cost > max_cost ? cost=255:cost)
 <!--- protected region param Kc begin -->
 Cost Multiplier [vel_out = vel_in * (1 - max(bound(Kc * cost[i], 255)) / 255)]
 <!--- protected region param Kc end -->
-`disable_param` *(string, default: "hard_control")*
-<!--- protected region param disable_param begin -->
-Disable ROS Parameter Name
-<!--- protected region param disable_param end -->
 
 ### Subscribed Topics
 
@@ -73,6 +69,10 @@ Rolling Window Costmap
 <!--- protected region subscriber move_base_status begin -->
 movebase status which will disable this node when status is active
 <!--- protected region subscriber move_base_status end -->
+`force_control` *(std_msgs::Bool)*
+<!--- protected region subscriber force_control begin -->
+Force Control
+<!--- protected region subscriber force_control end -->
 
 ### Direct Publishers
 

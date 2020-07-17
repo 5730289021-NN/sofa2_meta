@@ -16,6 +16,7 @@ import rospy
 from geometry_msgs.msg import PoseWithCovarianceStamped
 from nav_msgs.msg import OccupancyGrid
 from actionlib_msgs.msg import GoalStatusArray
+from std_msgs.msg import Bool
 from geometry_msgs.msg import PoseArray
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import Twist
@@ -43,11 +44,11 @@ class CostmapBasedVelFilterROS(object):
         self.component_config_.polyno = rospy.get_param("~polyno", 5)
         self.component_config_.max_cost_threshold = rospy.get_param("~max_cost_threshold", 85)
         self.component_config_.Kc = rospy.get_param("~Kc", 1.5)
-        self.component_config_.disable_param = rospy.get_param("~disable_param", "hard_control")
         # handling subscribers
         self.amcl_pose_ = rospy.Subscriber('amcl_pose', PoseWithCovarianceStamped, self.topic_callback_amcl_pose)
         self.costmap_ = rospy.Subscriber('costmap', OccupancyGrid, self.topic_callback_costmap)
         self.move_base_status_ = rospy.Subscriber('move_base_status', GoalStatusArray, self.topic_callback_move_base_status)
+        self.force_control_ = rospy.Subscriber('force_control', Bool, self.topic_callback_force_control)
         # Handling direct publisher
         self.component_implementation_.passthrough.pub_pose_array = rospy.Publisher('pose_array', PoseArray, queue_size=1)
         self.component_implementation_.passthrough.pub_vel_out = rospy.Publisher('vel_out', Twist, queue_size=1)
@@ -77,6 +78,13 @@ class CostmapBasedVelFilterROS(object):
         self.component_data_.in_move_base_status = msg
         self.component_data_.in_move_base_status_updated = True
 
+    def topic_callback_force_control(self, msg):
+        """
+        callback called at message reception
+        """
+        self.component_data_.in_force_control = msg
+        self.component_data_.in_force_control_updated = True
+
     def configure(self):
         """
         function setting the initial configuration of the node
@@ -96,6 +104,7 @@ class CostmapBasedVelFilterROS(object):
         self.component_data_.in_amcl_pose_updated = False
         self.component_data_.in_costmap_updated = False
         self.component_data_.in_move_base_status_updated = False
+        self.component_data_.in_force_control_updated = False
         pass
 
     def update(self, event):

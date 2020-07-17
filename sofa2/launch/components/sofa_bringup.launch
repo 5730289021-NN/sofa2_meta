@@ -1,7 +1,7 @@
 <launch>
 
     <node name="driver" pkg="roboteq_tcp_driver" type="driver" respawn="true" output="screen">
-        <remap from="cmd_vel" to="desired_vel" />
+        <remap from="cmd_vel" to="drive_vel" />
     </node>
 
     <!--Front LIDAR-->

@@ -4,6 +4,7 @@
     <subscriber description="Current Pose of the Robot" name="amcl_pose" type="geometry_msgs::PoseWithCovarianceStamped"/>
     <subscriber description="Rolling Window Costmap" name="costmap" type="nav_msgs::OccupancyGrid"/>
     <subscriber description="movebase status which will disable this node when status is active" name="move_base_status" type="actionlib_msgs::GoalStatusArray" />
+    <subscriber description="Force Control" name="force_control" type="std_msgs::Bool" />
     <directPublisher description="Array of Simulated Bound" name="pose_array" type="geometry_msgs::PoseArray"/>
     <directPublisher description="Filtered Velocity" name="vel_out" type="geometry_msgs::Twist"/>
     <directSubscriber description="Input Velocity" name="vel_in" type="geometry_msgs::Twist"/>
@@ -14,9 +15,11 @@
     <parameter description="Polygon Number" name="polyno" type="int" value="5" />
     <parameter description="Maximum Cost Threshold (cost > max_cost ? cost=255:cost)" name="max_cost_threshold" type="int" value="85"/>
     <parameter description="Cost Multiplier [vel_out = vel_in * (1 - max(bound(Kc * cost[i], 255)) / 255)]" name="Kc" type="double" value="1.5" />
-    <parameter description="Disable ROS Parameter Name" name="disable_param" type="string" value="hard_control" />
+    <!-- <parameter description="Disable ROS Parameter Name" name="disable_param" type="string" value="hard_control" /> -->
   </component>
+  
   <depend>rospy</depend>
+  <depend>std_msgs</depend>
   <depend>geometry_msgs</depend>
   <depend>nav_msgs</depend>
   <depend>actionlib_msgs</depend>

@@ -11,6 +11,7 @@
 
   <!-- user dependencies -->
   <depend>rospy</depend>
+  <depend>std_msgs</depend>
   <depend>geometry_msgs</depend>
   <depend>nav_msgs</depend>
   <depend>actionlib_msgs</depend>

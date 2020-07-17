@@ -6,6 +6,7 @@ project(costmap_based_vel_filter)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   rospy
+  std_msgs
   geometry_msgs
   nav_msgs
   actionlib_msgs
@@ -33,6 +34,7 @@ catkin_package(
   CATKIN_DEPENDS
     rospy
     rospy
+    std_msgs
     geometry_msgs
     nav_msgs
     actionlib_msgs

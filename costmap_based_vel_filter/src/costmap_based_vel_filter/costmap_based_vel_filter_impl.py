@@ -13,6 +13,7 @@ import rospy
 from geometry_msgs.msg import PoseWithCovarianceStamped
 from nav_msgs.msg import OccupancyGrid
 from actionlib_msgs.msg import GoalStatusArray
+from std_msgs.msg import Bool
 from geometry_msgs.msg import PoseArray
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import Twist
@@ -37,7 +38,6 @@ class CostmapBasedVelFilterConfig(object):
         self.polyno = 5
         self.max_cost_threshold = 85
         self.Kc = 1.5
-        self.disable_param = "hard_control"
         pass
 
     def __str__(self):
@@ -48,7 +48,6 @@ class CostmapBasedVelFilterConfig(object):
         msg += "polyno: {} ".format(self.polyno)
         msg += "max_cost_threshold: {} ".format(self.max_cost_threshold)
         msg += "Kc: {} ".format(self.Kc)
-        msg += "disable_param: {} ".format(self.disable_param)
         msg += "}"
         return msg
 
@@ -69,6 +68,8 @@ class CostmapBasedVelFilterData(object):
         self.in_costmap_updated = bool()
         self.in_move_base_status = GoalStatusArray()
         self.in_move_base_status_updated = bool()
+        self.in_force_control = Bool()
+        self.in_force_control_updated = bool()
         pass
 
     def __str__(self):
@@ -79,6 +80,8 @@ class CostmapBasedVelFilterData(object):
         msg += "in_costmap_updated: {} \n".format(self.in_costmap_updated)
         msg += "in_move_base_status: {} \n".format(self.in_move_base_status)
         msg += "in_move_base_status_updated: {} \n".format(self.in_move_base_status_updated)
+        msg += "in_force_control: {} \n".format(self.in_force_control)
+        msg += "in_force_control_updated: {} \n".format(self.in_force_control_updated)
         msg += "}"
         return msg
 
@@ -120,8 +123,10 @@ class CostmapBasedVelFilterImplementation(object):
         @return True on success
         """
         # protected region user configure begin #
+        self.enb = True
         self.config = config
         self.time_resolution = config.forecasting_time / config.h
+        rospy.loginfo('Costmap based Velocity Control Started')
         return True
         # protected region user configure end #
 
@@ -136,6 +141,8 @@ class CostmapBasedVelFilterImplementation(object):
         @return nothing
         """
         # protected region user update begin #
+        if data.in_force_control_updated:
+            self.enb = not data.in_force_control.data
         self.current_pose = data.in_amcl_pose.pose.pose
         self.costmap = data.in_costmap
         pass
@@ -156,44 +163,47 @@ class CostmapBasedVelFilterImplementation(object):
         Direct callback at reception of message on topic vel_in
         """
         # protected region user implementation of direct subscriber callback for vel_in begin #
-        for h in range(self.config.h):
-            vertice_h = []
-            pose_h = Pose()
-            pose_h.orientation.z = self.current_pose.orientation.z + msg.angular.z * self.time_resolution * h
-            pose_h.position.x = self.current_pose.position.x + msg.linear.x * self.time_resolution * h * cos(pose_h.orientation.z)
-            pose_h.position.y = self.current_pose.position.y + msg.linear.x * self.time_resolution * h * sin(pose_h.orientation.z)
-            for v in range(self.config.polyno):
-                vertex_pose = Pose()
-                vertex_orientation = pose_h.orientation.z + v / self.config.polyno * 2 * pi
-                vertex_pose.position.x = pose_h.position.x + h + self.config.radius * cos(vertex_orientation)
-                vertex_pose.position.y = pose_h.position.y + self.config.radius * sin(vertex_orientation)
-                vertex_pose.orientation = pose_h.orientation
-                if self.checkPoseValidity(vertex_pose):
-                    vertice_h.append(vertex_pose)
-            self.pose_lists.append(vertice_h)
-        unnested_poses = list(chain.from_iterable(self.pose_lists))
-        pose_array = PoseArray()
-        pose_array.poses = unnested_poses
-        self.passthrough.pub_pose_array.publish(pose_array)
+        if self.enb:
+            for h in range(self.config.h):
+                vertice_h = []
+                pose_h = Pose()
+                pose_h.orientation.z = self.current_pose.orientation.z + msg.angular.z * self.time_resolution * h
+                pose_h.position.x = self.current_pose.position.x + msg.linear.x * self.time_resolution * h * cos(pose_h.orientation.z)
+                pose_h.position.y = self.current_pose.position.y + msg.linear.x * self.time_resolution * h * sin(pose_h.orientation.z)
+                for v in range(self.config.polyno):
+                    vertex_pose = Pose()
+                    vertex_orientation = pose_h.orientation.z + v / self.config.polyno * 2 * pi
+                    vertex_pose.position.x = pose_h.position.x + h + self.config.radius * cos(vertex_orientation)
+                    vertex_pose.position.y = pose_h.position.y + self.config.radius * sin(vertex_orientation)
+                    vertex_pose.orientation = pose_h.orientation
+                    if self.checkPoseValidity(vertex_pose):
+                        vertice_h.append(vertex_pose)
+                self.pose_lists.append(vertice_h)
+            unnested_poses = list(chain.from_iterable(self.pose_lists))
+            pose_array = PoseArray()
+            pose_array.poses = unnested_poses
+            self.passthrough.pub_pose_array.publish(pose_array)
 
-        max_current_cost = 0
-        for pose in unnested_poses:
-            current_cost = self.getCostfromPose(pose) 
-            if max_current_cost < current_cost:
-                max_current_cost = current_cost
-        if max_current_cost > self.max_feasable_cost:
-            rospy.logerr('Unexpected cost %d but assigned to %d' % (max_current_cost, self.max_feasable_cost))
-            max_current_cost = self.max_feasable_cost
+            max_current_cost = 0
+            for pose in unnested_poses:
+                current_cost = self.getCostfromPose(pose) 
+                if max_current_cost < current_cost:
+                    max_current_cost = current_cost
+            if max_current_cost > self.max_feasable_cost:
+                rospy.logerr('Unexpected cost %d but assigned to %d' % (max_current_cost, self.max_feasable_cost))
+                max_current_cost = self.max_feasable_cost
 
-        max_cost_mul = max_current_cost * self.config.Kc 
+            max_cost_mul = max_current_cost * self.config.Kc 
 
-        vel_out = Twist()
-        if max_current_cost > self.config.max_cost_threshold:
-            rospy.loginfo('Cost beyond than threshold %d, but current cost is %f' % (self.config.max_cost_threshold, max_cost_mul))
+            vel_out = Twist()
+            if max_current_cost > self.config.max_cost_threshold:
+                rospy.loginfo('Cost beyond than threshold %d, but current cost is %f' % (self.config.max_cost_threshold, max_cost_mul))
+            else:
+                vel_out.linear.x = msg.linear.x * (1 - max_cost_mul / self.max_feasable_cost)
+                vel_out.angular.z = msg.angular.z
+            self.passthrough.pub_vel_out.publish(vel_out)
         else:
-            vel_out.linear.x = msg.linear.x * (1 - max_cost_mul / self.max_feasable_cost)
-            vel_out.angular.z = msg.angular.z
-        self.passthrough.pub_pose_array.publish(vel_out)
+            self.passthrough.pub_vel_out.publish(msg)
         # protected region user implementation of direct subscriber callback for vel_in end #
         pass
     # protected region user additional functions begin #
