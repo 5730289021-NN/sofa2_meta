@@ -117,6 +117,7 @@ class ModeControllerImplementation(object):
         @return True on success
         """
         # protected region user configure begin #
+        rospy.loginfo('Mode Controller Started')
         return True
         # protected region user configure end #
 
