@@ -9,12 +9,12 @@ topics:
 -
   name    : manual
   topic   : manual_vel
-  timeout : 0.5
+  timeout : 3.0
   priority: 80
 -
   name    : navigation
   topic   : nav_vel
-  timeout : 0.5
+  timeout : 1.0
   priority: 60
 -
   name    : followme
