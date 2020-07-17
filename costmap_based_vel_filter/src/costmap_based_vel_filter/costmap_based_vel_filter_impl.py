@@ -191,7 +191,6 @@ class CostmapBasedVelFilterImplementation(object):
         if max_current_cost > self.config.max_cost_threshold:
             rospy.loginfo('Cost beyond than threshold %d, but current cost is %f' % (self.config.max_cost_threshold, max_cost_mul))
         else:
-            msg = Twist()
             vel_out.linear.x = msg.linear.x * (1 - max_cost_mul / self.max_feasable_cost)
             vel_out.angular.z = msg.angular.z
         self.passthrough.pub_pose_array.publish(vel_out)
