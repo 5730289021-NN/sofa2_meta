@@ -28,15 +28,11 @@ rosrun acc_lim_vel_filter acc_lim_vel_filter [param_name]:=[new_value]
 <!--- protected region param acc_lin_lim begin -->
 Limit Linear Acceleration
 <!--- protected region param acc_lin_lim end -->
-`acc_ang_lim` *(double, default: 0.6)*
-<!--- protected region param acc_ang_lim begin -->
-Limit Angular Acceleration
-<!--- protected region param acc_ang_lim end -->
-`goal_dist_thres` *(double, default: 5.0)*
+`goal_dist_thres` *(double, default: 1.5)*
 <!--- protected region param goal_dist_thres begin -->
 Goal Distance Threshold
 <!--- protected region param goal_dist_thres end -->
-`auto_min_vel` *(double, default: 0.05)*
+`auto_min_vel` *(double, default: 0.1)*
 <!--- protected region param auto_min_vel begin -->
 Autonomous Minimum Velocity
 <!--- protected region param auto_min_vel end -->
@@ -78,10 +74,10 @@ Current Pose
 <!--- protected region subscriber move_base_goal begin -->
 move_base Goal Pose
 <!--- protected region subscriber move_base_goal end -->
-`move_base_status` *(actionlib_msgs::GoalStatusArray)*
-<!--- protected region subscriber move_base_status begin -->
-move_base Status
-<!--- protected region subscriber move_base_status end -->
+`control_mode` *(std_msgs::String)*
+<!--- protected region subscriber control_mode begin -->
+Control Mode
+<!--- protected region subscriber control_mode end -->
 
 ---
 

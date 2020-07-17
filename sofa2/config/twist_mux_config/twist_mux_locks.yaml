@@ -16,7 +16,7 @@ locks:
   # Same priority as joystick control, so it'll not block it.
   priority: 70
 -
-  name    : full_stop
-  topic   : full_stop
+  name    : stop_full
+  topic   : stop_full
   timeout : 0.0
   priority: 100

@@ -65,14 +65,10 @@ Current Pose of the Robot
 <!--- protected region subscriber costmap begin -->
 Rolling Window Costmap
 <!--- protected region subscriber costmap end -->
-`move_base_status` *(actionlib_msgs::GoalStatusArray)*
-<!--- protected region subscriber move_base_status begin -->
-movebase status which will disable this node when status is active
-<!--- protected region subscriber move_base_status end -->
-`force_control` *(std_msgs::Bool)*
-<!--- protected region subscriber force_control begin -->
-Force Control
-<!--- protected region subscriber force_control end -->
+`control_mode` *(std_msgs::String)*
+<!--- protected region subscriber control_mode begin -->
+Control Mode
+<!--- protected region subscriber control_mode end -->
 
 ### Direct Publishers
 

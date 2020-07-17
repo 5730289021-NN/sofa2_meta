@@ -12,8 +12,7 @@ FIBO
 import rospy
 from geometry_msgs.msg import PoseWithCovarianceStamped
 from nav_msgs.msg import OccupancyGrid
-from actionlib_msgs.msg import GoalStatusArray
-from std_msgs.msg import Bool
+from std_msgs.msg import String
 from geometry_msgs.msg import PoseArray
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import Twist
@@ -66,10 +65,8 @@ class CostmapBasedVelFilterData(object):
         self.in_amcl_pose_updated = bool()
         self.in_costmap = OccupancyGrid()
         self.in_costmap_updated = bool()
-        self.in_move_base_status = GoalStatusArray()
-        self.in_move_base_status_updated = bool()
-        self.in_force_control = Bool()
-        self.in_force_control_updated = bool()
+        self.in_control_mode = String()
+        self.in_control_mode_updated = bool()
         pass
 
     def __str__(self):
@@ -78,10 +75,8 @@ class CostmapBasedVelFilterData(object):
         msg += "in_amcl_pose_updated: {} \n".format(self.in_amcl_pose_updated)
         msg += "in_costmap: {} \n".format(self.in_costmap)
         msg += "in_costmap_updated: {} \n".format(self.in_costmap_updated)
-        msg += "in_move_base_status: {} \n".format(self.in_move_base_status)
-        msg += "in_move_base_status_updated: {} \n".format(self.in_move_base_status_updated)
-        msg += "in_force_control: {} \n".format(self.in_force_control)
-        msg += "in_force_control_updated: {} \n".format(self.in_force_control_updated)
+        msg += "in_control_mode: {} \n".format(self.in_control_mode)
+        msg += "in_control_mode_updated: {} \n".format(self.in_control_mode_updated)
         msg += "}"
         return msg
 
@@ -141,8 +136,7 @@ class CostmapBasedVelFilterImplementation(object):
         @return nothing
         """
         # protected region user update begin #
-        if data.in_force_control_updated:
-            self.enb = not data.in_force_control.data
+        self.enb = not (data.in_control_mode.data == 'FORCE' or data.in_control_mode.data == 'NAVIGATION' or data.in_control_mode.data == 'FORCE_OVERRIDE')
         self.current_pose = data.in_amcl_pose.pose.pose
         self.costmap = data.in_costmap
         pass

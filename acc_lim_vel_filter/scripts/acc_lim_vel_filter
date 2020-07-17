@@ -3,7 +3,7 @@
 @package acc_lim_vel_filter
 @file acc_lim_vel_filter
 @author Norawit Nangsue
-@brief Acceleration Limit Velocity Filter
+@brief Linear Acceleration Limit Velocity Filter
         Entry point to the node.
 Copyright (C) FIBO
 FIBO

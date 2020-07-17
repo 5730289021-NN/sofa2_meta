@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package author="Norawit Nangsue" author_email="norawitn@hotmail.com" copyright="FIBO" description="Custom Mode Controller for SOFA Robot" license="FIBO" name="mode_controller" template="python_node_update">
+  <component frequency="10" name="mode_controller">
+    <publisher description="Current Control Mode" name="control_mode" type="std_msgs::String"/>
+    <directPublisher description="move_base Cancel" name="move_base_cancel" type="actionlib_msgs::GoalID"/>
+    <directPublisher description="follow_me Enable" name="follow_me_enable" type="std_msgs::Bool"/>
+    <subscriber description="move_base Status" name="move_base_status" type="actionlib_msgs::GoalStatusArray"/>
+    <subscriber description="Joy" name="joy" type="sensor_msgs::Joy"/>
+    <subscriber description="follow_me Status" name="follow_me_status" type="std_msgs::String"/>
+    <parameter description="Manual/Override Control Button" name="manual_btn" type="int" value="0"/>
+    <parameter description="Cancel Control Button" name="cancel_btn" type="int" value="3"/>
+    <parameter description="Force/Force_Override Control Button" name="force_btn" type="int" value="1"/>
+    <!-- <parameter description="Manual/Override Control Button" name="manual_btn" type="int" value="0"/> -->
+  </component>
+  <depend>rospy</depend>
+</package>

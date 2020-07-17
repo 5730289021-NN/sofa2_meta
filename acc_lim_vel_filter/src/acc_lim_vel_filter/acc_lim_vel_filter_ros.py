@@ -3,7 +3,7 @@
 @package acc_lim_vel_filter
 @file acc_lim_vel_filter_ros.py
 @author Norawit Nangsue
-@brief Acceleration Limit Velocity Filter
+@brief Linear Acceleration Limit Velocity Filter
 
 Copyright (C) FIBO
 FIBO
@@ -17,7 +17,7 @@ from geometry_msgs.msg import Twist
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import PoseWithCovarianceStamped
 from move_base_msgs.msg import MoveBaseActionGoal
-from actionlib_msgs.msg import GoalStatusArray
+from std_msgs.msg import String
 
 # other includes
 from acc_lim_vel_filter import acc_lim_vel_filter_impl
@@ -37,17 +37,16 @@ class AccLimVelFilterROS(object):
 
         # handling parameters from the parameter server
         self.component_config_.acc_lin_lim = rospy.get_param("~acc_lin_lim", 0.6)
-        self.component_config_.acc_ang_lim = rospy.get_param("~acc_ang_lim", 0.6)
         self.component_config_.goal_dist_thres = rospy.get_param("~goal_dist_thres", 1.5)
         self.component_config_.auto_min_vel = rospy.get_param("~auto_min_vel", 0.1)
-        self.component_config_.Kp = rospy.get_param("~Kp", 0.5)
+        self.component_config_.Kp = rospy.get_param("~Kp", 0.1)
         # handling publishers
         self.vel_out_ = rospy.Publisher('vel_out', Twist, queue_size=1)
         # handling subscribers
         self.vel_in_ = rospy.Subscriber('vel_in', Twist, self.topic_callback_vel_in)
         self.amcl_pose_ = rospy.Subscriber('amcl_pose', PoseWithCovarianceStamped, self.topic_callback_amcl_pose)
         self.move_base_goal_ = rospy.Subscriber('move_base_goal', MoveBaseActionGoal, self.topic_callback_move_base_goal)
-        self.move_base_status_ = rospy.Subscriber('move_base_status', GoalStatusArray, self.topic_callback_move_base_status)
+        self.control_mode_ = rospy.Subscriber('control_mode', String, self.topic_callback_control_mode)
 
     def topic_callback_vel_in(self, msg):
         """
@@ -70,12 +69,12 @@ class AccLimVelFilterROS(object):
         self.component_data_.in_move_base_goal = msg
         self.component_data_.in_move_base_goal_updated = True
 
-    def topic_callback_move_base_status(self, msg):
+    def topic_callback_control_mode(self, msg):
         """
         callback called at message reception
         """
-        self.component_data_.in_move_base_status = msg
-        self.component_data_.in_move_base_status_updated = True
+        self.component_data_.in_control_mode = msg
+        self.component_data_.in_control_mode_updated = True
 
     def configure(self):
         """
@@ -97,7 +96,7 @@ class AccLimVelFilterROS(object):
         self.component_data_.in_vel_in_updated = False
         self.component_data_.in_amcl_pose_updated = False
         self.component_data_.in_move_base_goal_updated = False
-        self.component_data_.in_move_base_status_updated = False
+        self.component_data_.in_control_mode_updated = False
         pass
 
     def update(self, event):
@@ -130,7 +129,7 @@ def main():
     Instanciate the node interface containing the Developer implementation
     @return nothing
     """
-    rospy.init_node("acc_lim_vel_filter", anonymous=False, log_level=rospy.DEBUG)
+    rospy.init_node("acc_lim_vel_filter", anonymous=False)
 
     node = AccLimVelFilterROS()
     if not node.configure():

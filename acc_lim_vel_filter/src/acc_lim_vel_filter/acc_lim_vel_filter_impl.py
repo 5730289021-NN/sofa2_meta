@@ -3,7 +3,7 @@
 @package acc_lim_vel_filter
 @file acc_lim_vel_filter_impl.py
 @author Norawit Nangsue
-@brief Acceleration Limit Velocity Filter
+@brief Linear Acceleration Limit Velocity Filter
 
 Copyright (C) FIBO
 FIBO
@@ -14,7 +14,7 @@ from geometry_msgs.msg import Twist
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import PoseWithCovarianceStamped
 from move_base_msgs.msg import MoveBaseActionGoal
-from actionlib_msgs.msg import GoalStatusArray
+from std_msgs.msg import String
 
 # protected region user include package begin #
 from math import sqrt
@@ -29,16 +29,14 @@ class AccLimVelFilterConfig(object):
     def __init__(self):
         # parameters handled through the parameter server
         self.acc_lin_lim = 0.6
-        self.acc_ang_lim = 0.6
         self.goal_dist_thres = 1.5
         self.auto_min_vel = 0.1
-        self.Kp = 0.5
+        self.Kp = 0.1
         pass
 
     def __str__(self):
         msg = "Instance of AccLimVelFilterConfig class: {"
         msg += "acc_lin_lim: {} ".format(self.acc_lin_lim)
-        msg += "acc_ang_lim: {} ".format(self.acc_ang_lim)
         msg += "goal_dist_thres: {} ".format(self.goal_dist_thres)
         msg += "auto_min_vel: {} ".format(self.auto_min_vel)
         msg += "Kp: {} ".format(self.Kp)
@@ -62,8 +60,8 @@ class AccLimVelFilterData(object):
         self.in_amcl_pose_updated = bool()
         self.in_move_base_goal = MoveBaseActionGoal()
         self.in_move_base_goal_updated = bool()
-        self.in_move_base_status = GoalStatusArray()
-        self.in_move_base_status_updated = bool()
+        self.in_control_mode = String()
+        self.in_control_mode_updated = bool()
         # output data
         self.out_vel_out = Twist()
         self.out_vel_out_active = bool()
@@ -77,8 +75,8 @@ class AccLimVelFilterData(object):
         msg += "in_amcl_pose_updated: {} \n".format(self.in_amcl_pose_updated)
         msg += "in_move_base_goal: {} \n".format(self.in_move_base_goal)
         msg += "in_move_base_goal_updated: {} \n".format(self.in_move_base_goal_updated)
-        msg += "in_move_base_status: {} \n".format(self.in_move_base_status)
-        msg += "in_move_base_status_updated: {} \n".format(self.in_move_base_status_updated)
+        msg += "in_control_mode: {} \n".format(self.in_control_mode)
+        msg += "in_control_mode_updated: {} \n".format(self.in_control_mode_updated)
         msg += "out_vel_out: {} \n".format(self.out_vel_out_active)
         msg += "out_vel_out_active: {} \n".format(self.out_vel_out_active)
         msg += "}"
@@ -146,7 +144,7 @@ class AccLimVelFilterImplementation(object):
             dy = data.in_amcl_pose.pose.pose.position.y - data.in_move_base_goal.goal.target_pose.pose.position.y
             self.displacement = sqrt(dx * dx + dy * dy)
 
-        if data.in_move_base_status.status_list and data.in_move_base_status.status_list[-1].status == 1 and self.displacement < config.goal_dist_thres:
+        if data.in_control_mode == 'NAVIGATION' and self.displacement < config.goal_dist_thres:
             # goal based velocity filter
             rospy.logdebug('Goal based Enhanced Filter Mode: %f < %f'% (self.displacement, config.goal_dist_thres)) 
             data.out_vel_out.linear.x = config.Kp * self.displacement * data.in_vel_in.linear.x

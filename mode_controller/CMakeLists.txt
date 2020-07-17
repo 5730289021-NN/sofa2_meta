@@ -1,17 +1,14 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(acc_lim_vel_filter)
+project(mode_controller)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  std_msgs
-  geometry_msgs
-  move_base_msgs
-  actionlib_msgs
-  tf
   rospy
+  std_msgs
+  actionlib_msgs
+  sensor_msgs
 )
 
 # protected region additional user defined REQUIREMENTS begin #
@@ -34,13 +31,10 @@ catkin_python_setup()
 catkin_package(
   CATKIN_DEPENDS
     rospy
-    roscpp
-    std_msgs
-    geometry_msgs
-    move_base_msgs
-    actionlib_msgs
-    tf
     rospy
+    std_msgs
+    actionlib_msgs
+    sensor_msgs
 )
 
 ###########
@@ -57,14 +51,14 @@ include_directories(${catkin_INCLUDE_DIRS})
 
 if (CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
-  add_rostest(test/test_acc_lim_vel_filter_hz_loop.test)
+  add_rostest(test/test_mode_controller_hz_loop.test)
 endif()
 
 #############
 ## Install ##
 #############
 catkin_install_python(PROGRAMS
-                      scripts/acc_lim_vel_filter
+                      scripts/mode_controller
                       DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 # protected region user Cmake macros begin #

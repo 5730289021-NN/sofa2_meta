@@ -3,8 +3,7 @@
   <component frequency="10" name="costmap_based_vel_filter">
     <subscriber description="Current Pose of the Robot" name="amcl_pose" type="geometry_msgs::PoseWithCovarianceStamped"/>
     <subscriber description="Rolling Window Costmap" name="costmap" type="nav_msgs::OccupancyGrid"/>
-    <subscriber description="movebase status which will disable this node when status is active" name="move_base_status" type="actionlib_msgs::GoalStatusArray" />
-    <subscriber description="Force Control" name="force_control" type="std_msgs::Bool" />
+    <subscriber description="Control Mode" name="control_mode" type="std_msgs::String"/>
     <directPublisher description="Array of Simulated Bound" name="pose_array" type="geometry_msgs::PoseArray"/>
     <directPublisher description="Filtered Velocity" name="vel_out" type="geometry_msgs::Twist"/>
     <directSubscriber description="Input Velocity" name="vel_in" type="geometry_msgs::Twist"/>

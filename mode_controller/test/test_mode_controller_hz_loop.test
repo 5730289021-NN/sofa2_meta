@@ -1,0 +1,11 @@
+<launch>
+    <node name="mode_controller" pkg="mode_controller" type="mode_controller" />
+    <!-- protected region mode_controller control_mode additional configuration begin -->
+    <!-- protected region mode_controller control_mode additional configuration end -->
+    <test test-name="hz_loop_test_mode_controller_control_mode" pkg="rostest" type="hztest" name="hz_test_mode_controller_control_mode">
+        <param name="topic" value="control_mode" />
+        <param name="hz" value="10" />
+        <param name="hzerror" value="1" />
+        <param name="test_duration" value="5.0" />
+    </test>
+</launch>

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>acc_lim_vel_filter</name>
-  <description>Linear Acceleration Limit Velocity Filter</description>
+  <name>mode_controller</name>
+  <description>Custom Mode Controller for SOFA Robot</description>
   <version>0.0.0</version>
   <maintainer email="norawitn@hotmail.com">Norawit Nangsue</maintainer>
   <author email="norawitn@hotmail.com">Norawit Nangsue</author>
@@ -10,13 +10,10 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <!-- user dependencies -->
-  <depend>roscpp</depend>
-  <depend>std_msgs</depend>
-  <depend>geometry_msgs</depend>
-  <depend>move_base_msgs</depend>
-  <depend>actionlib_msgs</depend>
-  <depend>tf</depend>
   <depend>rospy</depend>
+  <depend>std_msgs</depend>
+  <depend>actionlib_msgs</depend>
+  <depend>sensor_msgs</depend>
   <test_depend>rostest</test_depend>
 
   <!-- protected region additional package statements begin -->

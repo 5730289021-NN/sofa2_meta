@@ -1,0 +1,14 @@
+#!/usr/bin/env python
+"""
+@package mode_controller
+@file mode_controller
+@author Norawit Nangsue
+@brief Custom Mode Controller for SOFA Robot
+        Entry point to the node.
+Copyright (C) FIBO
+FIBO
+"""
+from mode_controller.mode_controller_ros import main
+
+if __name__ == '__main__':
+    main()

@@ -15,8 +15,7 @@ import rospy
 # ROS message & services includes
 from geometry_msgs.msg import PoseWithCovarianceStamped
 from nav_msgs.msg import OccupancyGrid
-from actionlib_msgs.msg import GoalStatusArray
-from std_msgs.msg import Bool
+from std_msgs.msg import String
 from geometry_msgs.msg import PoseArray
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import Twist
@@ -47,8 +46,7 @@ class CostmapBasedVelFilterROS(object):
         # handling subscribers
         self.amcl_pose_ = rospy.Subscriber('amcl_pose', PoseWithCovarianceStamped, self.topic_callback_amcl_pose)
         self.costmap_ = rospy.Subscriber('costmap', OccupancyGrid, self.topic_callback_costmap)
-        self.move_base_status_ = rospy.Subscriber('move_base_status', GoalStatusArray, self.topic_callback_move_base_status)
-        self.force_control_ = rospy.Subscriber('force_control', Bool, self.topic_callback_force_control)
+        self.control_mode_ = rospy.Subscriber('control_mode', String, self.topic_callback_control_mode)
         # Handling direct publisher
         self.component_implementation_.passthrough.pub_pose_array = rospy.Publisher('pose_array', PoseArray, queue_size=1)
         self.component_implementation_.passthrough.pub_vel_out = rospy.Publisher('vel_out', Twist, queue_size=1)
@@ -71,19 +69,12 @@ class CostmapBasedVelFilterROS(object):
         self.component_data_.in_costmap = msg
         self.component_data_.in_costmap_updated = True
 
-    def topic_callback_move_base_status(self, msg):
+    def topic_callback_control_mode(self, msg):
         """
         callback called at message reception
         """
-        self.component_data_.in_move_base_status = msg
-        self.component_data_.in_move_base_status_updated = True
-
-    def topic_callback_force_control(self, msg):
-        """
-        callback called at message reception
-        """
-        self.component_data_.in_force_control = msg
-        self.component_data_.in_force_control_updated = True
+        self.component_data_.in_control_mode = msg
+        self.component_data_.in_control_mode_updated = True
 
     def configure(self):
         """
@@ -103,8 +94,7 @@ class CostmapBasedVelFilterROS(object):
         """
         self.component_data_.in_amcl_pose_updated = False
         self.component_data_.in_costmap_updated = False
-        self.component_data_.in_move_base_status_updated = False
-        self.component_data_.in_force_control_updated = False
+        self.component_data_.in_control_mode_updated = False
         pass
 
     def update(self, event):
