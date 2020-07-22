@@ -212,5 +212,5 @@ class CostmapBasedVelFilterImplementation(object):
     def getCostfromPose(self, pose):
         index = (pose.position.y - self.costmap.info.origin.position.y) / self.costmap.info.resolution * self.costmap.info.width
         index += (pose.position.x - self.costmap.info.origin.position.x) / self.costmap.info.resolution
-        return self.costmap.info.data[index]
+        return self.costmap.data[index]
     # protected region user additional functions end #
