@@ -13,7 +13,6 @@
   </node>
 
   <node pkg="acc_lim_vel_filter" name="acc_lim_vel_filter" type="acc_lim_vel_filter" output="screen">
-      <remap from="move_base_status" to="move_base/status"/>
       <remap from="move_base_goal" to="move_base/goal"/>
       <remap from="vel_in" to="mux_vel"/>
       <remap from="vel_out" to="acc_lim_vel"/>
@@ -21,10 +20,16 @@
   </node>
 
   <node pkg="costmap_based_vel_filter" name="costmap_based_vel_filter" type="costmap_based_vel_filter" output="screen">
-      <remap from="move_base_status" to="move_base/status"/>
       <remap from="costmap" to="/move_base/local_costmap/costmap"/>
       <remap from="vel_in" to="acc_lim_vel"/>
       <remap from="vel_out" to="drive_vel"/>
+  </node>
+
+  <node pkg="mode_controller" name="mode_controller" type="mode_controller" output="screen">
+      <remap from="move_base_status" to="move_base/status"/>
+      <remap from="move_base_cancel" to="move_base/cancel"/>
+      <remap from="follow_me_enable" to="follow_me/enable"/>
+      <remap from="follow_me_status" to="follow_me/status"/>
   </node>
 
 </launch>
