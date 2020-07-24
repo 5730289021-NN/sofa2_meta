@@ -38,8 +38,8 @@ class CostmapBasedVelFilterROS(object):
 
         # handling parameters from the parameter server
         self.component_config_.radius = rospy.get_param("~radius", 0.5)
-        self.component_config_.forecasting_time = rospy.get_param("~forecasting_time", 0.5)
-        self.component_config_.h = rospy.get_param("~h", 5)
+        self.component_config_.forecasting_time = rospy.get_param("~forecasting_time", 0.1)
+        self.component_config_.h = rospy.get_param("~h", 2)
         self.component_config_.polyno = rospy.get_param("~polyno", 5)
         self.component_config_.max_cost_threshold = rospy.get_param("~max_cost_threshold", 85)
         self.component_config_.Kc = rospy.get_param("~Kc", 1.5)

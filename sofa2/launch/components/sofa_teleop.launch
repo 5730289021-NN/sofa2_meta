@@ -3,6 +3,13 @@
   </node>
   
   <node pkg="teleop_twist_joy" name="joy_twist" type="teleop_node" output="screen">
+      <param name="enable_button" type="int" value="0"/>
+      <param name="enable_turbo_button" type="int" value="1"/>
+      <param name="axis_linear" type="int" value="1"/>
+      <param name="axis_angular" type="int" value="0"/>
+      <param name="scale_linear" type="double" value="0.5"/>
+      <param name="scale_linear_turbo" type="double" value="0.5"/>
+      <param name="scale_angular" type="double" value="0.5"/>
       <remap from="cmd_vel" to="manual_vel"/>
   </node>
 
@@ -12,16 +19,14 @@
     <rosparam file="$(find sofa2)/config/twist_mux_config/twist_mux_topics.yaml" command="load"/>
   </node>
 
-  <node pkg="acc_lim_vel_filter" name="acc_lim_vel_filter" type="acc_lim_vel_filter" output="screen">
-      <remap from="move_base_goal" to="move_base/goal"/>
-      <remap from="vel_in" to="mux_vel"/>
-      <remap from="vel_out" to="acc_lim_vel"/>
-      <!-- <remap from="vel_out" to="drive_vel"/> -->
-  </node>
-
   <node pkg="costmap_based_vel_filter" name="costmap_based_vel_filter" type="costmap_based_vel_filter" output="screen">
       <remap from="costmap" to="/move_base/local_costmap/costmap"/>
-      <remap from="vel_in" to="acc_lim_vel"/>
+      <remap from="vel_in" to="mux_vel"/>
+      <remap from="vel_out" to="acc_lim_vel"/>
+  </node>
+
+  <node pkg="acc_lim_vel_filter" name="acc_lim_vel_filter" type="acc_lim_vel_filter" output="screen">
+      <remap from="vel_in" to="mux_vel"/>
       <remap from="vel_out" to="drive_vel"/>
   </node>
 

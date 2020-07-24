@@ -8,8 +8,8 @@
     <directPublisher description="Filtered Velocity" name="vel_out" type="geometry_msgs::Twist"/>
     <directSubscriber description="Input Velocity" name="vel_in" type="geometry_msgs::Twist"/>
     <parameter description="Robot Radius" name="radius" type="double" value="0.5"/>
-    <parameter description="Forecasting Time" name="forecasting_time" type="double" value="0.5" />
-    <parameter description="Horizon Number(Amount of sample within forecast time)" name="h" type="int" value="5" />
+    <parameter description="Forecasting Time" name="forecasting_time" type="double" value="0.1" />
+    <parameter description="Horizon Number(Amount of sample within forecast time)" name="h" type="int" value="2" />
     <!-- <parameter description="Time Resolution" name="resolution" type="double" value="0.2" /> -->
     <parameter description="Polygon Number" name="polyno" type="int" value="5" />
     <parameter description="Maximum Cost Threshold (cost > max_cost ? cost=255:cost)" name="max_cost_threshold" type="int" value="85"/>
@@ -21,6 +21,5 @@
   <depend>std_msgs</depend>
   <depend>geometry_msgs</depend>
   <depend>nav_msgs</depend>
-  <depend>actionlib_msgs</depend>
-  <depend>actionlib</depend>
+  <depend>tf</depend>
 </package>

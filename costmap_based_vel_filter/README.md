@@ -28,11 +28,11 @@ rosrun costmap_based_vel_filter costmap_based_vel_filter [param_name]:=[new_valu
 <!--- protected region param radius begin -->
 Robot Radius
 <!--- protected region param radius end -->
-`forecasting_time` *(double, default: 0.5)*
+`forecasting_time` *(double, default: 0.1)*
 <!--- protected region param forecasting_time begin -->
 Forecasting Time
 <!--- protected region param forecasting_time end -->
-`h` *(int, default: 5)*
+`h` *(int, default: 2)*
 <!--- protected region param h begin -->
 Horizon Number(Amount of sample within forecast time)
 <!--- protected region param h end -->

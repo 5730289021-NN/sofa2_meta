@@ -9,8 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   geometry_msgs
   nav_msgs
-  actionlib_msgs
-  actionlib
+  tf
 )
 
 # protected region additional user defined REQUIREMENTS begin #
@@ -37,8 +36,7 @@ catkin_package(
     std_msgs
     geometry_msgs
     nav_msgs
-    actionlib_msgs
-    actionlib
+    tf
 )
 
 ###########

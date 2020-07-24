@@ -13,7 +13,6 @@ import rospy
 from std_msgs.msg import String
 from actionlib_msgs.msg import GoalStatusArray
 from sensor_msgs.msg import Joy
-from std_msgs.msg import String
 from actionlib_msgs.msg import GoalID
 from std_msgs.msg import Bool
 
@@ -28,6 +27,7 @@ class ModeControllerConfig(object):
     """
     def __init__(self):
         # parameters handled through the parameter server
+        self.follow_me_status_param = "/follow_me_status_param"
         self.manual_btn = 0
         self.cancel_btn = 3
         self.force_btn = 1
@@ -35,6 +35,7 @@ class ModeControllerConfig(object):
 
     def __str__(self):
         msg = "Instance of ModeControllerConfig class: {"
+        msg += "follow_me_status_param: {} ".format(self.follow_me_status_param)
         msg += "manual_btn: {} ".format(self.manual_btn)
         msg += "cancel_btn: {} ".format(self.cancel_btn)
         msg += "force_btn: {} ".format(self.force_btn)
@@ -56,8 +57,6 @@ class ModeControllerData(object):
         self.in_move_base_status_updated = bool()
         self.in_joy = Joy()
         self.in_joy_updated = bool()
-        self.in_follow_me_status = String()
-        self.in_follow_me_status_updated = bool()
         # output data
         self.out_control_mode = String()
         self.out_control_mode_active = bool()
@@ -69,8 +68,6 @@ class ModeControllerData(object):
         msg += "in_move_base_status_updated: {} \n".format(self.in_move_base_status_updated)
         msg += "in_joy: {} \n".format(self.in_joy)
         msg += "in_joy_updated: {} \n".format(self.in_joy_updated)
-        msg += "in_follow_me_status: {} \n".format(self.in_follow_me_status)
-        msg += "in_follow_me_status_updated: {} \n".format(self.in_follow_me_status_updated)
         msg += "out_control_mode: {} \n".format(self.out_control_mode_active)
         msg += "out_control_mode_active: {} \n".format(self.out_control_mode_active)
         msg += "}"
@@ -105,8 +102,9 @@ class ModeControllerImplementation(object):
         self.manual_mode = False
         self.follow_me_mode = False
         self.navigation_mode = False
-        
         self.autonomous_mode = False
+
+        self.joy_init = False
         # protected region user member variables end #
 
     def configure(self, config):
@@ -132,21 +130,28 @@ class ModeControllerImplementation(object):
         @return nothing
         """
         # protected region user update begin #
-        self.force_mode = bool(data.in_joy.buttons[config.force_btn])
-        self.manual_mode = bool(data.in_joy.buttons[config.manual_btn])
+        
         self.follow_me_mode = rospy.get_param(config.follow_me_status_param, 'UNFOLLOWED') == 'FOLLOWING'
         self.navigation_mode = data.in_move_base_status.status_list and data.in_move_base_status.status_list[-1].status == 1
         self.autonomous_mode = self.follow_me_mode or self.navigation_mode
 
-        if bool(data.in_joy.buttons[config.cancel_btn]):
-            rospy.loginfo('Cancel Button Triggered')
-            if self.navigation_mode:
-                rospy.loginfo('Navigation Canceled')
-                self.passthrough.pub_move_base_cancel.publish(GoalID())
-            elif self.follow_me_mode:
-                rospy.loginfo('Follow Me Canceled')
-                self.passthrough.pub_follow_me_enable.publish(Bool())
-        
+        if data.in_joy_updated and not self.joy_init:
+            self.joy_init = True
+        else:
+            pass
+
+        if self.joy_init:
+            self.force_mode = bool(data.in_joy.buttons[config.force_btn])
+            self.manual_mode = bool(data.in_joy.buttons[config.manual_btn])
+            if bool(data.in_joy.buttons[config.cancel_btn]):
+                rospy.loginfo('Cancel Button Triggered')
+                if self.navigation_mode:
+                    rospy.loginfo('Navigation Canceled')
+                    self.passthrough.pub_move_base_cancel.publish(GoalID())
+                elif self.follow_me_mode:
+                    rospy.loginfo('Follow Me Canceled')
+                    self.passthrough.pub_follow_me_enable.publish(Bool())
+            
         # modes = ['STAND_BY', 'MANUAL', 'OVERRIDE', 'FORCE', 'FORCE_OVERRIDE', 'FOLLOW_ME', 'NAVIGATION', 'UNKNOWN']
         data.out_control_mode.data = self.getCurrentMode()
         pass

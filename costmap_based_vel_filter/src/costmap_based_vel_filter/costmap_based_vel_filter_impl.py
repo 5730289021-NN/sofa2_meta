@@ -15,12 +15,13 @@ from nav_msgs.msg import OccupancyGrid
 from std_msgs.msg import String
 from geometry_msgs.msg import PoseArray
 from geometry_msgs.msg import Twist
-from geometry_msgs.msg import Twist
 
 # protected region user include package begin #
+from tf.transformations import quaternion_from_euler, quaternion_multiply, euler_from_quaternion
 from math import pi, cos, sin
-from geometry_msgs.msg import Pose
+from geometry_msgs.msg import Pose, Quaternion
 from itertools import chain
+
 # protected region user include package end #
 
 
@@ -32,8 +33,8 @@ class CostmapBasedVelFilterConfig(object):
     def __init__(self):
         # parameters handled through the parameter server
         self.radius = 0.5
-        self.forecasting_time = 0.5
-        self.h = 5
+        self.forecasting_time = 0.1
+        self.h = 2
         self.polyno = 5
         self.max_cost_threshold = 85
         self.Kc = 1.5
@@ -106,6 +107,10 @@ class CostmapBasedVelFilterImplementation(object):
         self.passthrough = CostmapBasedVelFilterPassthrough()
 
         # protected region user member variables begin #
+        self.costmap = OccupancyGrid()
+        self.current_pose = Pose()
+        self.current_pose_init = False
+        self.costmap_init = False
         self.pose_lists = []
         self.max_feasable_cost = 100
         # protected region user member variables end #
@@ -136,8 +141,12 @@ class CostmapBasedVelFilterImplementation(object):
         @return nothing
         """
         # protected region user update begin #
-        self.enb = not (data.in_control_mode.data == 'FORCE' or data.in_control_mode.data == 'NAVIGATION' or data.in_control_mode.data == 'FORCE_OVERRIDE')
+        self.enb = data.in_control_mode.data == 'MANUAL' or data.in_control_mode == 'FOLLOW_ME'
+        if data.in_amcl_pose_updated:
+            self.current_pose_init = True
         self.current_pose = data.in_amcl_pose.pose.pose
+        if data.in_costmap:
+            self.costmap_init = True
         self.costmap = data.in_costmap
         pass
         # protected region user update end #
@@ -157,24 +166,36 @@ class CostmapBasedVelFilterImplementation(object):
         Direct callback at reception of message on topic vel_in
         """
         # protected region user implementation of direct subscriber callback for vel_in begin #
-        if self.enb:
+        if self.enb and self.current_pose_init and self.costmap_init:
             for h in range(self.config.h):
                 vertice_h = []
                 pose_h = Pose()
-                pose_h.orientation.z = self.current_pose.orientation.z + msg.angular.z * self.time_resolution * h
+                quat_np_op = quaternion_from_euler(0, 0, msg.angular.z * self.time_resolution * h)
+                quat_cur = [self.current_pose.orientation.x, self.current_pose.orientation.y, self.current_pose.orientation.z, self.current_pose.orientation.w] 
+                pose_h.orientation = Quaternion(*quaternion_multiply(quat_cur, quat_np_op))
                 pose_h.position.x = self.current_pose.position.x + msg.linear.x * self.time_resolution * h * cos(pose_h.orientation.z)
                 pose_h.position.y = self.current_pose.position.y + msg.linear.x * self.time_resolution * h * sin(pose_h.orientation.z)
                 for v in range(self.config.polyno):
                     vertex_pose = Pose()
-                    vertex_orientation = pose_h.orientation.z + v / self.config.polyno * 2 * pi
+
+                    orientation_q = pose_h.orientation
+                    orientation_list = [orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w]
+                    (roll, pitch, yaw) = euler_from_quaternion (orientation_list)
+
+                    vertex_orientation = yaw + float(v) / self.config.polyno * 2 * pi
+
                     vertex_pose.position.x = pose_h.position.x + h + self.config.radius * cos(vertex_orientation)
                     vertex_pose.position.y = pose_h.position.y + self.config.radius * sin(vertex_orientation)
                     vertex_pose.orientation = pose_h.orientation
                     if self.checkPoseValidity(vertex_pose):
+                        rospy.loginfo('Successfully added vertex')
                         vertice_h.append(vertex_pose)
                 self.pose_lists.append(vertice_h)
             unnested_poses = list(chain.from_iterable(self.pose_lists))
+            self.pose_lists = []
             pose_array = PoseArray()
+            pose_array.header.stamp = rospy.get_rostime()
+            pose_array.header.frame_id = 'map'
             pose_array.poses = unnested_poses
             self.passthrough.pub_pose_array.publish(pose_array)
 
@@ -193,7 +214,7 @@ class CostmapBasedVelFilterImplementation(object):
             if max_current_cost > self.config.max_cost_threshold:
                 rospy.loginfo('Cost beyond than threshold %d, but current cost is %f' % (self.config.max_cost_threshold, max_cost_mul))
             else:
-                vel_out.linear.x = msg.linear.x * (1 - max_cost_mul / self.max_feasable_cost)
+                vel_out.linear.x = msg.linear.x * (1 - float(max_cost_mul) / self.max_feasable_cost)
                 vel_out.angular.z = msg.angular.z
             self.passthrough.pub_vel_out.publish(vel_out)
         else:
@@ -202,11 +223,11 @@ class CostmapBasedVelFilterImplementation(object):
         pass
     # protected region user additional functions begin #
     def checkPoseValidity(self, pose):
-        height_cond = (pose.position.y - self.costmap.info.origin.position.y) / self.costmap.info.resolution < self.costmap.info.height
-        width_cond = (pose.position.x - self.costmap.info.origin.position.x) / self.costmap.info.resolution < self.costmap.info.width
+        height_cond = ((pose.position.y - self.costmap.info.origin.position.y) / self.costmap.info.resolution) < self.costmap.info.height
+        width_cond = ((pose.position.x - self.costmap.info.origin.position.x) / self.costmap.info.resolution) < self.costmap.info.width
         pose_valid = height_cond and width_cond
         if not pose_valid:
-            rospy.loginfo('Invalid Pose at %f, %f' % (pose.position.x, pose.position.y))
+            rospy.logerr('Invalid Pose at %f, %f' % (pose.position.x, pose.position.y))
         return pose_valid
 
     def getCostfromPose(self, pose):

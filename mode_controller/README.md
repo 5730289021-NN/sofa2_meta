@@ -24,6 +24,10 @@ All static parameters can be set through the command line:
 rosrun mode_controller mode_controller [param_name]:=[new_value]
 ```
 
+`follow_me_status_param` *(string, default: "/follow_me_status_param")*
+<!--- protected region param follow_me_status_param begin -->
+follow_me Status Parameter
+<!--- protected region param follow_me_status_param end -->
 `manual_btn` *(int, default: 0)*
 <!--- protected region param manual_btn begin -->
 Manual/Override Control Button
@@ -66,10 +70,6 @@ move_base Status
 <!--- protected region subscriber joy begin -->
 Joy
 <!--- protected region subscriber joy end -->
-`follow_me_status` *(std_msgs::String)*
-<!--- protected region subscriber follow_me_status begin -->
-follow_me Status
-<!--- protected region subscriber follow_me_status end -->
 
 ### Direct Publishers
 

@@ -16,7 +16,6 @@ import rospy
 from std_msgs.msg import String
 from actionlib_msgs.msg import GoalStatusArray
 from sensor_msgs.msg import Joy
-from std_msgs.msg import String
 from actionlib_msgs.msg import GoalID
 from std_msgs.msg import Bool
 
@@ -37,6 +36,7 @@ class ModeControllerROS(object):
         self.component_implementation_ = mode_controller_impl.ModeControllerImplementation()
 
         # handling parameters from the parameter server
+        self.component_config_.follow_me_status_param = rospy.get_param("~follow_me_status_param", "/follow_me_status_param")
         self.component_config_.manual_btn = rospy.get_param("~manual_btn", 0)
         self.component_config_.cancel_btn = rospy.get_param("~cancel_btn", 3)
         self.component_config_.force_btn = rospy.get_param("~force_btn", 1)
@@ -45,7 +45,6 @@ class ModeControllerROS(object):
         # handling subscribers
         self.move_base_status_ = rospy.Subscriber('move_base_status', GoalStatusArray, self.topic_callback_move_base_status)
         self.joy_ = rospy.Subscriber('joy', Joy, self.topic_callback_joy)
-        self.follow_me_status_ = rospy.Subscriber('follow_me_status', String, self.topic_callback_follow_me_status)
         # Handling direct publisher
         self.component_implementation_.passthrough.pub_move_base_cancel = rospy.Publisher('move_base_cancel', GoalID, queue_size=1)
         self.component_implementation_.passthrough.pub_follow_me_enable = rospy.Publisher('follow_me_enable', Bool, queue_size=1)
@@ -63,13 +62,6 @@ class ModeControllerROS(object):
         """
         self.component_data_.in_joy = msg
         self.component_data_.in_joy_updated = True
-
-    def topic_callback_follow_me_status(self, msg):
-        """
-        callback called at message reception
-        """
-        self.component_data_.in_follow_me_status = msg
-        self.component_data_.in_follow_me_status_updated = True
 
     def configure(self):
         """
@@ -90,7 +82,6 @@ class ModeControllerROS(object):
         """
         self.component_data_.in_move_base_status_updated = False
         self.component_data_.in_joy_updated = False
-        self.component_data_.in_follow_me_status_updated = False
         pass
 
     def update(self, event):
