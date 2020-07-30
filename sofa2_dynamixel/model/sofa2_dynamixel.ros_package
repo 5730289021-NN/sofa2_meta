@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package author="Norawit Nangsue" author_email="norawitn@hotmail.com" copyright="FIBO" description="A Dynamixel Controller for SOFA-2 Robot" license="FIBO" name="sofa2_dynamixel" template="cpp_node_update">
+  <component frequency="20" name="dynamixel_controller">
+    <publisher description="Dynamixel Joint State" name="joint_state" type="sensor_msgs::JointState"/>
+    <subscriber description="Input Joy" name="joy" type="sensor_msgs::Joy"/>
+    <parameter description="Head Pitch Axis Index" name="hpai" type="int" value="4"/>
+    <parameter description="Head Yaw Axis Index" name="hyai" type="int" value="3"/>
+    <parameter description="Camera Pitch UP Axis Index" name="cpuai" type="int" value="2"/>
+    <parameter description="Camera Pitch DOWN Axis Index" name="cpdai" type="int" value="5"/>
+  </component>
+  <depend>roscpp</depend>
+  <depend>sensor_msgs</depend>
+</package>
