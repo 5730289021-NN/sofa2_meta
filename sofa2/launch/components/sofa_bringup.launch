@@ -1,7 +1,7 @@
 <launch>
 
     <node name="driver" pkg="roboteq_tcp_driver" type="driver" respawn="true" output="screen">
-        <param name="ip_addr" type="string" value="192.168.16.22"/>
+        <param name="ip_addr" type="string" value="192.168.16.23"/>
         <remap from="cmd_vel" to="drive_vel" />
     </node>
 
