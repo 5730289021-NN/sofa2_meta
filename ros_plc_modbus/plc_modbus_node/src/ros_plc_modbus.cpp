@@ -5,6 +5,7 @@
 #include <std_msgs/UInt16MultiArray.h>
 #include <std_msgs/ByteMultiArray.h>
 #include <std_msgs/ColorRGBA.h>
+#include <std_srvs/SetBool.h>
 #include <modbus/modbus.h>
 
 class plc_modbus_manager {
@@ -21,6 +22,8 @@ private:
 
     ros::Subscriber led_head;
     ros::Subscriber led_tray1;
+    ros::ServiceServer display_lift_service;
+    ros::ServiceServer camera_service;
 
     std::vector<int> holding_regs_addr;
     std::vector<int> coils_addr;
@@ -38,6 +41,8 @@ private:
     void coils_callBack(const std_msgs::ByteMultiArray::ConstPtr &coils_data);
     void led_head_callBack(const std_msgs::ColorRGBA::ConstPtr &led_head_data);
     void led_tray1_callBack(const std_msgs::ColorRGBA::ConstPtr &led_tray1_data);
+    bool display_lift_callback(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res);
+    bool camera_callback(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res);
     int get_color_code(const std_msgs::ColorRGBA::ConstPtr &color_data);
 
 };
@@ -46,18 +51,17 @@ private:
 plc_modbus_manager::plc_modbus_manager() {
 
     holding_regs_read = node.advertise<std_msgs::UInt16MultiArray>("modbus/holding_regs_read", 100);
-    holding_regs_write = node.subscribe<std_msgs::UInt16MultiArray>("modbus/holding_regs_write", 100,
-                                                            &plc_modbus_manager::holding_regs_callBack, this);
+    holding_regs_write = node.subscribe<std_msgs::UInt16MultiArray>("modbus/holding_regs_write", 100, &plc_modbus_manager::holding_regs_callBack, this);
     coils_read = node.advertise<std_msgs::ByteMultiArray>("modbus/coils_read", 100);
-    coils_write = node.subscribe<std_msgs::ByteMultiArray>("modbus/coils_write", 100,
-                                                           &plc_modbus_manager::coils_callBack, this);
+    coils_write = node.subscribe<std_msgs::ByteMultiArray>("modbus/coils_write", 100, &plc_modbus_manager::coils_callBack, this);
 
-    led_head = node.subscribe<std_msgs::ColorRGBA>("led/head", 100,
-                                                           &plc_modbus_manager::led_head_callBack, this);
-    led_tray1 = node.subscribe<std_msgs::ColorRGBA>("led/tray1", 100,
-                                                           &plc_modbus_manager::led_tray1_callBack, this);
+    led_head = node.subscribe<std_msgs::ColorRGBA>("led/head", 100, &plc_modbus_manager::led_head_callBack, this);
+    led_tray1 = node.subscribe<std_msgs::ColorRGBA>("led/tray1", 100, &plc_modbus_manager::led_tray1_callBack, this);
 
-    node.param<std::string>("plc_modbus_node/ip", ip_address, "192.168.0.100");
+    display_lift_service = node.advertiseService("display/lift", &plc_modbus_manager::display_lift_callback, this);
+    camera_service = node.advertiseService("camera/enable", &plc_modbus_manager::camera_callback, this);
+
+    node.param<std::string>("plc_modbus_node/ip", ip_address, "192.168.16.23");
     node.param("plc_modbus_node/port", port, 502);
     node.param("plc_modbus_node/spin_rate",spin_rate,10);
 
@@ -197,6 +201,42 @@ void plc_modbus_manager::led_tray1_callBack(const std_msgs::ColorRGBA::ConstPtr 
     }
 
 }
+
+bool plc_modbus_manager::display_lift_callback(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res){
+    uint8_t plc_tray[2] = {false, false};
+    if (req.data){
+        plc_tray[0] = true;         
+        res.message = "Lifted";
+        ROS_INFO("Display Lifted");
+    } else
+    {
+        plc_tray[1] = true;
+        res.message = "Unlifted";
+        ROS_INFO("Display Unlifted");
+    }
+    if(modbus_write_bits(plc, 31, 2, plc_tray) == -1) {
+        ROS_ERROR("Modbus holding reg write failed at lifting tray");
+        ROS_ERROR("%s", modbus_strerror(errno));
+        res.success = false;
+        res.message = "Failed";
+    } else {
+        res.success = true;
+    }
+    return true;
+}
+
+bool plc_modbus_manager::camera_callback(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res){
+    if(modbus_write_bit(plc, 7, req.data) == -1) {
+        ROS_ERROR("Modbus holding reg write failed at enbable/disable camera");
+        ROS_ERROR("%s", modbus_strerror(errno));
+        res.success = false;
+        res.message = "Failed";
+    } else {
+        res.success = true;
+    }
+    return true;
+}
+
 int plc_modbus_manager::get_color_code(const std_msgs::ColorRGBA::ConstPtr &color_data) {
     int color_code = 0;
     if(color_data->r > 0) {
