@@ -61,7 +61,7 @@ plc_modbus_manager::plc_modbus_manager() {
     display_lift_service = node.advertiseService("display/lift", &plc_modbus_manager::display_lift_callback, this);
     camera_service = node.advertiseService("camera/enable", &plc_modbus_manager::camera_callback, this);
 
-    node.param<std::string>("plc_modbus_node/ip", ip_address, "192.168.16.23");
+    node.param<std::string>("plc_modbus_node/ip", ip_address, "192.168.16.22");
     node.param("plc_modbus_node/port", port, 502);
     node.param("plc_modbus_node/spin_rate",spin_rate,10);
 
