@@ -18,12 +18,25 @@ public:
 	void updatePosition(int pos){
 		cur_pos = pos;
 	}
+	int getID() const{
+		return id;
+	}
 private:
 	int id;
 	int cw_lim;
 	int ccw_lim;
 	int inv;
 	int cur_pos;
+};
+
+struct MotorMessage
+{
+	uint8_t id;
+	uint8_t len;
+	uint8_t err;
+	unsigned int p1;
+	unsigned int p2;
+	unsigned int chksum;
 };
 
 class DynamixelController
@@ -53,22 +66,82 @@ private:
 
 	void joyCallback(const sensor_msgs::Joy::ConstPtr &msg);
 	void tcpCallback(const uint8_t *buf, size_t len);
-
+	void processMotorMessage(MotorMessage& mm);
 };
 
 void DynamixelController::tcpCallback(const uint8_t *buf, size_t len)
 {
 	//std::stringstream ss;
 	//ss << std::hex;
+	enum StateList {ZERO, HEADER1, HEADER2, ID, LENGTH, ERROR, P1, P2, CHKSUM, ERROR};
+	StateList state = ZERO;
+	MotorMessage mm;
 	for (size_t i = 0; i < len; i++)
 	{
-		ROS_INFO_STREAM(std::hex << (int) buf[i]);
+		switch(state): {
+			case ZERO:
+				if(buf[i] == 0) break;
+				else if (buf[i] == 255) state = HEADER1;
+				else state = ERROR;
+				break;
+			case HEADER1:
+				if(buf[i] == 255) state = HEADER2; else state = ERROR;
+				break;
+			case HEADER2:
+				mm.id = buf[i]; state = ID;
+				break;
+			case ID:
+				mm.len = buf[i]; state = LENGTH;
+				break;
+			case LENGTH:
+				if(buf[i] != 4) state = ERROR;
+				mm.err = buf[i]; state = P1;
+				break;
+			case P1:
+				mm.p1 = buf[i]; state = P2;
+				break;
+			case P2:
+				mm.p2 = buf[i]; state = CHKSUM;
+				break;
+			case CHKSUM:
+				mm.chksum = buf[i];
+				//Process Message
+				processMotorMessage(mm);
+				break;
+			default:
+				ROS_ERROR("Error while reading Dynamixel message");
+				return;
+		}
+		std::cout << std::hex << (int) buf[i];
 		std::cout << " ";
-		//ss << (uint8_t) buf[i];
 	}
 	std::cout << std::endl;
 	//ROS_INFO_STREAM("TCP Received: " << ss.str());
 	//ROS_INFO_STREAM("size: " << len);
+}
+
+void DynamixelController::processMotorMessage(MotorMessage& mm)
+{
+	// int id;
+	// int len;
+	// int err;
+	// int p1;
+	// int p2;
+	// int chksum;
+	// 1. Process Checksum
+	unsigned int calsum = 255 - ((mm.id + mm.len + mm.err + mm.p1 + mm.p2) % 256);
+	if(calsum != mm.chksum)
+	{
+		ROS_ERROR("Wrong Checksum Calculated: " << calsum << " Actual Sum: " << mm.chksum);
+		return;
+	}
+	// Collect p1 p2 to 'id'
+	for(auto m:motors){
+		if(m.getID() == mm.id){
+			m.updatePosition(p2 * 256 + p1);
+		}
+	}
+	ROS_ERROR_STREAM("Unknown ID " << mm.id);
 }
 
 void DynamixelController::joyCallback(const sensor_msgs::Joy::ConstPtr &msg)
