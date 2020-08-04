@@ -2,6 +2,5 @@
     <include file="$(find sofa2)/launch/components/sofa_bringup.launch"/>
     <include file="$(find sofa2)/launch/components/sofa_joy.launch"/>
     <include file="$(find sofa2)/launch/components/sofa_navigation.launch"/>
-    
-    <node name="state_manager" pkg="state_manager" type="state_manager" respawn="true" output="screen"/>
+    <include file="$(find sofa2)/launch/components/sofa_plc.launch"/>
 </launch>
