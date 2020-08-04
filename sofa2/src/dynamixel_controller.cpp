@@ -59,7 +59,7 @@ void DynamixelController::tcpCallback(const uint8_t *buf, size_t len)
 	{
 		ss << std::hex << buf[i];
 	}
-	ROS_INFO_STREAM("TCP Received: " << ss.str());
+	ROS_INFO_STREAM("TCP Received: " << ss.str() << "size %d" << len);
 }
 
 void DynamixelController::joyCallback(const sensor_msgs::Joy::ConstPtr &msg)
@@ -103,7 +103,7 @@ DynamixelController::DynamixelController()
 	tcp_client = new async_comm::TCPClient(ip_addr, port);
 	tcp_client->register_receive_callback(std::bind(&DynamixelController::tcpCallback, this, std::placeholders::_1, std::placeholders::_2));
 	
-	if (tcp_client->init())
+	if (!tcp_client->init())
 	{
 		ROS_ERROR("Failed to initialize TCP client");
 	}
