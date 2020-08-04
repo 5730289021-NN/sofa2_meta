@@ -47,7 +47,6 @@ private:
 
 };
 
-
 plc_modbus_manager::plc_modbus_manager() {
 
     holding_regs_read = node.advertise<std_msgs::UInt16MultiArray>("modbus/holding_regs_read", 100);
@@ -95,6 +94,7 @@ plc_modbus_manager::plc_modbus_manager() {
 
         for (int i = 0; i < holding_regs_addr.size(); i++) {
             uint16_t temp[1] = {0};
+            //if (modbus_read_registers(plc, holding_regs_addr,))
             if (modbus_read_registers(plc, holding_regs_addr.at(i), 1, temp) == -1) {
                 ROS_ERROR("Unable to read reg addr:%d", holding_regs_addr.at(i));
                 ROS_ERROR("%s", modbus_strerror(errno));
@@ -233,6 +233,7 @@ bool plc_modbus_manager::camera_callback(std_srvs::SetBool::Request& req, std_sr
         res.message = "Failed";
     } else {
         res.success = true;
+        res.message = "Successfully Turn On/Off Camera";
     }
     return true;
 }

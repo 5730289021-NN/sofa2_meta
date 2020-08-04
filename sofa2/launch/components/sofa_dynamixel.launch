@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="ip_addr" default="192.168.16.23" />
+    <arg name="port" default="5002" /> 
+    <node pkg="sofa2" type="dynamixel_controller" name="dynamixel_controller" output="screen">
+        <param name="ip_addr" type="str" value="$(arg ip_addr)"/>
+        <param name="port" type="int" value="$(arg port)"/>
+        <rosparam param="id">[0, 1, 2]</rosparam>
+        <rosparam param="cw_lim">[1536, 2048, 1655]</rosparam>
+        <rosparam param="ccw_lim">[2286, 2450, 2455]</rosparam>
+        <rosparam param="inv">[1, 1, 1]</rosparam>
+    </node>
+</launch>

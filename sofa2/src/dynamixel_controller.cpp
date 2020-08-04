@@ -1,71 +1,134 @@
 #include "ros/ros.h"
-#include "std_msgs/String.h"
-
+#include "sensor_msgs/Joy.h"
+#include "sensor_msgs/JointState.h"
 #include <async_comm/tcp_client.h>
 #include <sstream>
+#include <string>
 
-#include <chrono>
-#include <thread>
-#include <vector>
-
-/**
- * This tutorial demonstrates simple sending of messages over the ROS system.
- */
-
-void TCPCallback(const uint8_t* buf, size_t len)
+class Motor
 {
-  std::stringstream ss;
-  for (size_t i = 0; i < len; i++)
-  {
-    ss << buf[i];
-  }
-  ROS_INFO_STREAM("TCP Received: " << ss.str());
+public:
+	Motor(int id, int cw_lim, int ccw_lim, int inv): id(id), cw_lim(cw_lim), ccw_lim(ccw_lim), inv(inv){}
+	std::string getInfo(){
+		std::stringstream ss;
+		ss << "Motor ID:" << id << " CW_LIM:" << cw_lim << " CCW_LIM:" << ccw_lim << " INV:" << inv;
+		return ss.str();
+	}
+private:
+	int id;
+	int cw_lim;
+	int ccw_lim;
+	int inv;
+};
+
+class DynamixelController
+{
+public:
+	DynamixelController();
+	~DynamixelController();
+
+private:
+	ros::NodeHandle nh;
+	ros::Publisher dynamixelJointPublisher;
+	ros::Subscriber joySubscriber;
+	sensor_msgs::Joy currentJoyMessage;
+
+	std::vector<int> id_list;
+    std::vector<int> cw_lim_list;
+	std::vector<int> ccw_lim_list;
+    std::vector<int> inv_list;
+
+	std::string ip_addr;
+	int port;
+	int spin_rate;
+
+	std::vector<Motor> motors;
+
+	async_comm::TCPClient *tcp_client;
+
+	void joyCallback(const sensor_msgs::Joy::ConstPtr &msg);
+	void tcpCallback(const uint8_t *buf, size_t len);
+
+};
+
+void DynamixelController::tcpCallback(const uint8_t *buf, size_t len)
+{
+	std::stringstream ss;
+	for (size_t i = 0; i < len; i++)
+	{
+		ss << buf[i];
+	}
+	ROS_INFO_STREAM("TCP Received: " << ss.str());
+}
+
+void DynamixelController::joyCallback(const sensor_msgs::Joy::ConstPtr &msg)
+{
+	//TODO: Implement here
+	ROS_INFO("I heard: [s]");
+}
+
+DynamixelController::DynamixelController()
+{
+	dynamixelJointPublisher = nh.advertise<sensor_msgs::JointState>("dynamixel_jointstate", 1);
+	joySubscriber = nh.subscribe<sensor_msgs::Joy>("joy", 3, &DynamixelController::joyCallback, this);
+
+	nh.param<std::string>("dynamixel_controller/ip_addr", ip_addr, "192.168.16.23");
+	nh.param("dynamixel_controller/port", port, 5002);
+	nh.param("dynamixel_controller/spin_rate", spin_rate, 10);
+
+	if (!nh.getParam("dynamixel_controller/id", id_list))
+	{
+		ROS_ERROR("No Dynamixel ID Given!");
+	}
+	if (!nh.getParam("dynamixel_controller/cw_lim", cw_lim_list))
+	{
+		ROS_ERROR("No Dynamixel Clockwise Limit Given!");
+	}
+	if (!nh.getParam("dynamixel_controller/ccw_lim", ccw_lim_list))
+	{
+		ROS_ERROR("No Dynamixel Counter-Clockwise Limit Given!");
+	}
+	if (!nh.getParam("dynamixel_controller/inv", inv_list))
+	{
+		ROS_ERROR("No Dynamixel Counter-Clockwise Limit Given!");
+	}
+
+	for(int i = 0; i < id_list.size(); i++){
+		Motor m(id_list[i], cw_lim_list[i], ccw_lim_list[i], inv_list[i]);
+		motors.push_back(m);
+		ROS_INFO_STREAM(m.getInfo()); //ROS_INFO requires c_str() probably
+	}
+
+	tcp_client = new async_comm::TCPClient(ip_addr, port);
+	tcp_client->register_receive_callback(std::bind(&DynamixelController::tcpCallback, this, std::placeholders::_1, std::placeholders::_2));
+	
+	if (tcp_client->init())
+	{
+		ROS_ERROR("Failed to initialize TCP client");
+	}
+
+	ros::Rate loop_rate(spin_rate);
+	if (ros::ok()) {
+		std::vector<uint8_t> buf = {0xFF, 0xFF, 0xFE, 0x0C, 0x92, 0x00, 0x02, 0x00, 0x24, 0x02, 0x01, 0x24, 0x02, 0x02, 0x24, 0xEE};
+		//                                     , ALL , LEN, INST, CONST, 2BY.R,ID:0, C.POS,2BY.R,ID:1, C.POS,2BY.R,ID:2, C.POS, CKSUM
+    	//ROS_INFO_STREAM("Sending: " << buf);
+		tcp_client->send_bytes(buf.data(), buf.size());
+        ros::spinOnce();
+        loop_rate.sleep();
+    }
+}
+
+DynamixelController::~DynamixelController()
+{
+	delete tcp_client;
+	for(auto m:motors) {
+		m.~Motor();
+	}
 }
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "dynamixel_controller");
-  ros::NodeHandle n;
-  
-  // ros::Publisher chatter_pub = n.advertise<std_msgs::String>("chatter", 1000);
-  //ros::Rate loop_rate(10);
-
-  async_comm::TCPClient tcp_client("localhost", 10000);
-  tcp_client.register_receive_callback(&TCPCallback);
-
-  if (!tcp_client.init())
-  {
-    ROS_ERROR("Failed to initialize TCP client");
-    return 1;
-  }
-
-  ROS_INFO("Start Sending Message");
-  for (size_t i = 0; i < 10; ++i)
-  {
-    std::string msg = "hello world " + std::to_string(i) + "!";
-    ROS_INFO_STREAM("Sending: " << msg);
-    tcp_client.send_bytes((uint8_t*) msg.data(), msg.size());
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
-  }
-  ROS_INFO("Stop Sending Message");
-  tcp_client.close();
-
-  // int count = 0;
-  // while (ros::ok())
-  // {
-  //   std_msgs::String msg;
-  //   std::stringstream ss;
-  //   ss << "hello world " << count;
-  //   msg.data = ss.str();
-
-  //   ROS_INFO("%s", msg.data.c_str());
-
-  //   chatter_pub.publish(msg);
-
-  //   ros::spinOnce();
-
-  //   loop_rate.sleep();
-  //   ++count;
-  // }
-  return 0;
+	ros::init(argc, argv, "dynamixel_controller");
+	DynamixelController dc;
+	return 0;
 }
