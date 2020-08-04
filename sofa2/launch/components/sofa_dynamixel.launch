@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
     <arg name="ip_addr" default="192.168.16.23" />
-    <arg name="port" default="5002" /> 
+    <arg name="port" default="9002" /> 
     <node pkg="sofa2" type="dynamixel_controller" name="dynamixel_controller" output="screen">
         <param name="ip_addr" type="str" value="$(arg ip_addr)"/>
         <param name="port" type="int" value="$(arg port)"/>
