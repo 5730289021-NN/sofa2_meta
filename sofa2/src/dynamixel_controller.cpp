@@ -108,11 +108,11 @@ DynamixelController::DynamixelController()
 	}
 
 	ros::Rate loop_rate(spin_rate);
-	if (ros::ok()) {
-		std::vector<uint8_t> buf = {0xFF, 0xFF, 0xFE, 0x0C, 0x92, 0x00, 0x02, 0x00, 0x24, 0x02, 0x01, 0x24, 0x02, 0x02, 0x24, 0xEE};
-		//                                     , ALL , LEN, INST, CONST, 2BY.R,ID:0, C.POS,2BY.R,ID:1, C.POS,2BY.R,ID:2, C.POS, CKSUM
-    	//ROS_INFO_STREAM("Sending: " << buf);
-		tcp_client->send_bytes(buf.data(), buf.size());
+	std::vector<uint8_t> buf = {0xFF, 0xFF, 0xFE, 0x0C, 0x92, 0x00, 0x02, 0x00, 0x24, 0x02, 0x01, 0x24, 0x02, 0x02, 0x24, 0xEE};
+	//                                     , ALL , LEN, INST, CONST, 2BY.R,ID:0, C.POS,2BY.R,ID:1, C.POS,2BY.R,ID:2, C.POS, CKSUM
+    //ROS_INFO_STREAM("Sending: " << buf);
+	tcp_client->send_bytes(buf.data(), buf.size());
+	while (ros::ok()) {
         ros::spinOnce();
         loop_rate.sleep();
     }
