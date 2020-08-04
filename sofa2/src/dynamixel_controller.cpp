@@ -3,6 +3,7 @@
 #include "sensor_msgs/JointState.h"
 #include <async_comm/tcp_client.h>
 #include <sstream>
+#include <iostream>
 #include <string>
 
 class Motor
@@ -56,7 +57,7 @@ void DynamixelController::tcpCallback(const uint8_t *buf, size_t len)
 	std::stringstream ss;
 	for (size_t i = 0; i < len; i++)
 	{
-		ss << buf[i];
+		ss << std::hex << buf[i];
 	}
 	ROS_INFO_STREAM("TCP Received: " << ss.str());
 }
