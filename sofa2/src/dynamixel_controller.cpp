@@ -62,7 +62,7 @@ void DynamixelController::tcpCallback(const uint8_t *buf, size_t len)
 		std::cout << " ";
 		//ss << (uint8_t) buf[i];
 	}
-	std::cout << endl;
+	std::cout << std::endl;
 	//ROS_INFO_STREAM("TCP Received: " << ss.str());
 	//ROS_INFO_STREAM("size: " << len);
 }
