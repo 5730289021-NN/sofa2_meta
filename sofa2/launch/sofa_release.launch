@@ -1,6 +1,6 @@
 <launch>
     <include file="$(find sofa2)/launch/components/sofa_bringup.launch"/>
-    <include file="$(find sofa2)/launch/components/sofa_joy.launch"/>
+    <include file="$(find sofa2)/launch/components/sofa_teleop.launch"/>
     <include file="$(find sofa2)/launch/components/sofa_navigation.launch"/>
     <include file="$(find sofa2)/launch/components/sofa_plc.launch"/>
 </launch>
