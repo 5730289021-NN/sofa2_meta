@@ -16,7 +16,7 @@ public:
 		return ss.str();
 	}
 	void updatePosition(int pos){
-		cur_pos = pos
+		cur_pos = pos;
 	}
 private:
 	int id;
