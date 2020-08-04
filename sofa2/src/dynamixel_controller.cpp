@@ -60,8 +60,9 @@ void DynamixelController::tcpCallback(const uint8_t *buf, size_t len)
 		ss << std::hex << buf[i];
 	}
 
-	ROS_INFO_STREAM("t");
-	ROS_INFO_STREAM("TCP Received: " << ss.str() << "size %d" << len);
+	
+	ROS_INFO_STREAM("TCP Received: " << ss.str());
+	ROS_INFO_STREAM("size: " << len);
 }
 
 void DynamixelController::joyCallback(const sensor_msgs::Joy::ConstPtr &msg)
