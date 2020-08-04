@@ -15,11 +15,15 @@ public:
 		ss << "Motor ID:" << id << " CW_LIM:" << cw_lim << " CCW_LIM:" << ccw_lim << " INV:" << inv;
 		return ss.str();
 	}
+	void updatePosition(int pos){
+		cur_pos = pos
+	}
 private:
 	int id;
 	int cw_lim;
 	int ccw_lim;
 	int inv;
+	int cur_pos;
 };
 
 class DynamixelController
@@ -58,7 +62,7 @@ void DynamixelController::tcpCallback(const uint8_t *buf, size_t len)
 	//ss << std::hex;
 	for (size_t i = 0; i < len; i++)
 	{
-		std::cout << std::hex << (int) buf[i];
+		ROS_INFO_STREAM(std::hex << (int) buf[i]);
 		std::cout << " ";
 		//ss << (uint8_t) buf[i];
 	}
