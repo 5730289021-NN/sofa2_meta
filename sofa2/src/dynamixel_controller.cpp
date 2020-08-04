@@ -116,6 +116,7 @@ DynamixelController::DynamixelController()
         ros::spinOnce();
         loop_rate.sleep();
     }
+	tcp_client->close();
 }
 
 DynamixelController::~DynamixelController()
