@@ -86,15 +86,19 @@ void DynamixelController::tcpCallback(const uint8_t *buf, size_t len)
 				if(buf[i] == 0) break;
 				else if (buf[i] == 255) state = HEADER1;
 				else state = LOST;
+				ROS_INFO("Z")
 				break;
 			case HEADER1:
 				if(buf[i] == 255) state = HEADER2; else state = LOST;
+				ROS_INFO("H1")
 				break;
 			case HEADER2:
 				mm.id = buf[i]; state = ID;
+				ROS_INFO("H2")
 				break;
 			case ID:
 				mm.len = buf[i]; state = LENGTH;
+				ROS_INFO("ID")
 				break;
 			case LENGTH:
 				if(buf[i] == 4) {
@@ -102,15 +106,19 @@ void DynamixelController::tcpCallback(const uint8_t *buf, size_t len)
 					state = ERROR;
 				}
 				else state = LOST;
+				ROS_INFO("L")
 				break;
 			case ERROR:
 				mm.p1 = buf[i]; state = P1;
+				ROS_INFO("E")
 				break;
 			case P1:
 				mm.p2 = buf[i]; state = P2;
+				ROS_INFO("P1")
 				break;
 			case P2:
 				mm.chksum = buf[i]; state = ZERO;
+				ROS_INFO("P2")
 				processMotorMessage(mm);
 				break;
 			// case CHKSUM:
@@ -129,7 +137,7 @@ void DynamixelController::tcpCallback(const uint8_t *buf, size_t len)
 		std::cout << " ";
 	}
 	std::cout << std::endl;
-	ROS_INFO_STREAM("Packet ended with: " << (int) buf[len-1] << "len: " << len);
+	ROS_INFO_STREAM("Packet ended with: " << (int) buf[len-1] << " len: " << len);
 }
 
 void DynamixelController::processMotorMessage(MotorMessage& mm)
