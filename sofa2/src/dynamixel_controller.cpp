@@ -186,18 +186,6 @@ void DynamixelController::joyCallback(const sensor_msgs::Joy::ConstPtr &msg)
 	ROS_INFO("I heard: [s]");
 }
 
-sensor_msgs::JointState DynamixelController::getJointState() const 
-{
-	sensor_msgs::JointState js;
-	for(auto motor: motors)
-	{
-		js.name.push_back(motor.getStringID());
-		ROS_WARN_STREAM(motor.getPosition());
-		js.position.push_back(motor.getPosition());
-	}
-	return js;
-};
-
 DynamixelController::DynamixelController()
 {
 	dynamixelJointPublisher = nh.advertise<sensor_msgs::JointState>("dynamixel_jointstate", 1);
@@ -244,7 +232,14 @@ DynamixelController::DynamixelController()
     //ROS_INFO_STREAM("Sending: " << buf);
 	while (ros::ok()) {
 		tcp_client->send_bytes(buf.data(), buf.size());
-		dynamixelJointPublisher.publish(getJointState());
+		sensor_msgs::JointState js;
+		for(auto motor: motors)
+		{
+			js.name.push_back(motor.getStringID());
+			ROS_WARN_STREAM(motor.getPosition());
+			js.position.push_back(motor.getPosition());
+		}
+		dynamixelJointPublisher.publish(js);
         ros::spinOnce();
         loop_rate.sleep();
     }
