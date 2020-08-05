@@ -127,7 +127,8 @@ void DynamixelController::tcpCallback(const uint8_t *buf, size_t len)
 		std::cout << std::hex << (int) buf[i];
 		std::cout << " ";
 	}
-	ROS_INFO_STREAM("Packet ended with: " << buf[len-1]);
+	std::cout << std::endl;
+	ROS_INFO_STREAM("Packet ended with: " << (int) buf[len-1]);
 	std::cout << std::endl;
 }
 
