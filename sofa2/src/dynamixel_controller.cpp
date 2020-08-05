@@ -21,6 +21,12 @@ public:
 	int getID() const{
 		return id;
 	}
+	std::string getStringID() const{
+		return std::to_string(id);
+	}
+	int getPosition() const{
+		return cur_pos;
+	}
 	void printMotorRecord() const{
 		ROS_INFO_STREAM("Record ID: " << id << " Position: " << cur_pos);
 	}
@@ -183,10 +189,10 @@ void DynamixelController::joyCallback(const sensor_msgs::Joy::ConstPtr &msg)
 sensor_msgs::JointState DynamixelController::getJointState() const 
 {
 	sensor_msgs::JointState js;
-	for(int i = 0; i < motors;i++)
+	for(int i = 0; i < motors.size();i++)
 	{
-		js.name.push_back(motors[i].id);
-		js.position.push_back(motors[i].cur_pos);
+		js.name.push_back(motors[i].getStringID());
+		js.position.push_back(motors[i].getPosition());
 	}
 	return js;
 };
