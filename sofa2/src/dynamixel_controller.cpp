@@ -22,7 +22,7 @@ public:
 		return id;
 	}
 	void printMotorRecord() const{
-		ROS_DEBUG_STREAM("Record ID: " << id << " Position: " << cur_pos);
+		ROS_INFO_STREAM("Record ID: " << id << " Position: " << cur_pos);
 	}
 private:
 	int id;
