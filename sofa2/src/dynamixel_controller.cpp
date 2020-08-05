@@ -189,11 +189,11 @@ void DynamixelController::joyCallback(const sensor_msgs::Joy::ConstPtr &msg)
 sensor_msgs::JointState DynamixelController::getJointState() const 
 {
 	sensor_msgs::JointState js;
-	for(int i = 0; i < motors.size();i++)
+	for(auto motor: motors)
 	{
-		js.name.push_back(motors[i].getStringID());
-		ROS_WARN_STREAM(motors[i].getPosition());
-		js.position.push_back(motors[i].getPosition());
+		js.name.push_back(motor.getStringID());
+		ROS_WARN_STREAM(motor.getPosition());
+		js.position.push_back(motor.getPosition());
 	}
 	return js;
 };
