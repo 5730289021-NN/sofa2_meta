@@ -233,13 +233,13 @@ DynamixelController::DynamixelController()
     //ROS_INFO_STREAM("Sending: " << buf);
 	while (ros::ok()) {
 		tcp_client->send_bytes(buf.data(), buf.size());
-		sensor_msgs::JointState js;
+		/*sensor_msgs::JointState js;
 		for(auto motor: motors)
 		{
 			js.name.push_back(motor.getStringID());
 			ROS_WARN_STREAM("a" << motor.getPosition());
 			js.position.push_back(motor.getPosition());
-		}
+		}*/
 		dynamixelJointPublisher.publish(js);
         ros::spinOnce();
         loop_rate.sleep();
