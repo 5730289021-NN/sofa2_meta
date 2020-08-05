@@ -125,12 +125,13 @@ void DynamixelController::tcpCallback(const uint8_t *buf, size_t len)
 		}
 		if(state == LOST) {
 			//Analyze Error before break
+			std::cout << std::endl;
 			ROS_ERROR_STREAM("State Lost from Packet :");
 			for(int j = 0; j < len; j++) {
 				std::cout << std::hex << (int) buf[j];
 				std::cout << " ";
 			}
-			std::cout << endl;
+			std::cout << std::endl << std::endl;
 			break;
 		}
 	}
