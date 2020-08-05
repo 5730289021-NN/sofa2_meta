@@ -94,9 +94,12 @@ void DynamixelController::tcpCallback(const uint8_t *buf, size_t len)
 				}
 				break;
 			case HEADER1:
-				if(buf[i] == 255) state = HEADER2; else {
+				if(buf[i] == 255) state = HEADER2; 
+				else {
+					/*By pass error in case of 1 ff
 					state = LOST;
-					prevState = HEADER1;
+					prevState = HEADER1;*/
+					mm.id = buf[i]; state = ID;
 				}
 				break;
 			case HEADER2:
