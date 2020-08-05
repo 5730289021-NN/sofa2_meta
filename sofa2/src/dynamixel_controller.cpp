@@ -99,7 +99,7 @@ void DynamixelController::tcpCallback(const uint8_t *buf, size_t len)
 					/*By pass error in case of 1 ff
 					state = LOST;
 					prevState = HEADER1;*/
-					ROS_ERROR("Bypass when there's only one ff");
+					ROS_WARN("Bypass when there's only one ff");
 					mm.id = buf[i]; state = ID;
 				}
 				break;
