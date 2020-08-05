@@ -24,8 +24,8 @@ public:
 	std::string getStringID() const{
 		return std::to_string(id);
 	}
-	int getPosition() const{
-		return cur_pos;
+	float getPosition() const{
+		return (float) cur_pos;
 	}
 	void printMotorRecord() const{
 		ROS_INFO_STREAM("Record ID: " << id << " Position: " << cur_pos);
