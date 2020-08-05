@@ -81,6 +81,8 @@ void DynamixelController::tcpCallback(const uint8_t *buf, size_t len)
 	MotorMessage mm;
 	for (size_t i = 0; i < len; i++)
 	{
+		std::cout << std::hex << (int) buf[i];
+		std::cout << " ";
 		switch(state) {
 			case ZERO:
 				if(buf[i] == 0) break;
@@ -126,8 +128,6 @@ void DynamixelController::tcpCallback(const uint8_t *buf, size_t len)
 			ROS_ERROR("State = Lost");
 			break;
 		}
-		std::cout << std::hex << (int) buf[i];
-		std::cout << " ";
 	}
 	std::cout << std::endl;
 	ROS_INFO_STREAM("Packet ended with: " << (int) buf[len-1] << " len: " << len);
