@@ -21,6 +21,9 @@ public:
 	int getID() const{
 		return id;
 	}
+	void printMotorRecord() const{
+		ROS_DEBUG_STREAM("Record ID: " << id << " Position: " << cur_pos);
+	}
 private:
 	int id;
 	int cw_lim;
@@ -140,6 +143,7 @@ void DynamixelController::processMotorMessage(MotorMessage& mm)
 	for(auto m:motors){
 		if(m.getID() == mm.id){
 			m.updatePosition(mm.p2 * 256 + mm.p1);
+			m.printMotorRecord();
 			return;
 		}
 	}
@@ -214,6 +218,10 @@ DynamixelController::~DynamixelController()
 
 int main(int argc, char **argv)
 {
+	if (ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug))
+    {
+        ros::console::notifyLoggerLevelsChanged();
+    }
 	ros::init(argc, argv, "dynamixel_controller");
 	DynamixelController dc;
 	return 0;
