@@ -192,6 +192,7 @@ sensor_msgs::JointState DynamixelController::getJointState() const
 	for(int i = 0; i < motors.size();i++)
 	{
 		js.name.push_back(motors[i].getStringID());
+		ROS_WARN_STREAM(motors[i].getPosition());
 		js.position.push_back(motors[i].getPosition());
 	}
 	return js;
