@@ -124,10 +124,10 @@ void DynamixelController::tcpCallback(const uint8_t *buf, size_t len)
 			//Analyze Error before break
 			break;
 		}
-		//std::cout << std::hex << (int) buf[i];
-		//std::cout << " ";
+		std::cout << std::hex << (int) buf[i];
+		std::cout << " ";
 	}
-	//std::cout << std::endl;
+	std::cout << std::endl;
 }
 
 void DynamixelController::processMotorMessage(MotorMessage& mm)
