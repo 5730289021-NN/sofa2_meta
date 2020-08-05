@@ -30,6 +30,7 @@ public:
 	}
 	void printMotorRecord() const{
 		ROS_INFO_STREAM("Record ID: " << id << " Position: " << cur_pos);
+		getPosition();
 	}
 private:
 	int id;
