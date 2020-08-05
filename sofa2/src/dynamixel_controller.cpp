@@ -73,19 +73,19 @@ void DynamixelController::tcpCallback(const uint8_t *buf, size_t len)
 {
 	//std::stringstream ss;
 	//ss << std::hex;
-	enum StateList {ZERO, HEADER1, HEADER2, ID, LENGTH, ERROR, P1, P2, CHKSUM, ERROR};
+	enum StateList {ZERO, HEADER1, HEADER2, ID, LENGTH, ERROR, P1, P2, CHKSUM, LOST};
 	StateList state = ZERO;
 	MotorMessage mm;
 	for (size_t i = 0; i < len; i++)
 	{
-		switch(state): {
+		switch(state) {
 			case ZERO:
 				if(buf[i] == 0) break;
 				else if (buf[i] == 255) state = HEADER1;
-				else state = ERROR;
+				else state = LOST;
 				break;
 			case HEADER1:
-				if(buf[i] == 255) state = HEADER2; else state = ERROR;
+				if(buf[i] == 255) state = HEADER2; else state = LOST;
 				break;
 			case HEADER2:
 				mm.id = buf[i]; state = ID;
@@ -94,51 +94,53 @@ void DynamixelController::tcpCallback(const uint8_t *buf, size_t len)
 				mm.len = buf[i]; state = LENGTH;
 				break;
 			case LENGTH:
-				if(buf[i] != 4) state = ERROR;
-				mm.err = buf[i]; state = P1;
+				if(buf[i] == 4) {
+					mm.err = buf[i];
+					state = ERROR;
+				}
+				else state = LOST;
+				break;
+			case ERROR:
+				mm.p1 = buf[i]; state = P1;
 				break;
 			case P1:
-				mm.p1 = buf[i]; state = P2;
+				mm.p2 = buf[i]; state = P2;
 				break;
 			case P2:
-				mm.p2 = buf[i]; state = CHKSUM;
-				break;
-			case CHKSUM:
-				mm.chksum = buf[i];
-				//Process Message
+				mm.chksum = buf[i]; state = ZERO;
 				processMotorMessage(mm);
 				break;
+			// case CHKSUM:
+			// 	mm.chksum = buf[i];
+			// 	break;
 			default:
 				ROS_ERROR("Error while reading Dynamixel message");
-				return;
+				break;
 		}
-		std::cout << std::hex << (int) buf[i];
-		std::cout << " ";
+		if(state == LOST) {
+			//Analyze Error before break
+			break;
+		}
+		//std::cout << std::hex << (int) buf[i];
+		//std::cout << " ";
 	}
-	std::cout << std::endl;
-	//ROS_INFO_STREAM("TCP Received: " << ss.str());
-	//ROS_INFO_STREAM("size: " << len);
+	//std::cout << std::endl;
 }
 
 void DynamixelController::processMotorMessage(MotorMessage& mm)
 {
-	// int id;
-	// int len;
-	// int err;
-	// int p1;
-	// int p2;
-	// int chksum;
 	// 1. Process Checksum
 	unsigned int calsum = 255 - ((mm.id + mm.len + mm.err + mm.p1 + mm.p2) % 256);
 	if(calsum != mm.chksum)
 	{
-		ROS_ERROR("Wrong Checksum Calculated: " << calsum << " Actual Sum: " << mm.chksum);
+		ROS_ERROR_STREAM("Wrong Checksum Calculated: " << calsum << " Actual Sum: " << mm.chksum);
 		return;
 	}
-	// Collect p1 p2 to 'id'
+	// 2. Collect p1 p2 to 'id'
 	for(auto m:motors){
 		if(m.getID() == mm.id){
-			m.updatePosition(p2 * 256 + p1);
+			m.updatePosition(mm.p2 * 256 + mm.p1);
+			return;
 		}
 	}
 	ROS_ERROR_STREAM("Unknown ID " << mm.id);
