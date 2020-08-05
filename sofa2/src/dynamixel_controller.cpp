@@ -239,8 +239,8 @@ DynamixelController::DynamixelController()
 			js.name.push_back(motor.getStringID());
 			ROS_WARN_STREAM("a" << motor.getPosition());
 			js.position.push_back(motor.getPosition());
-		}*/
-		dynamixelJointPublisher.publish(js);
+		}
+		dynamixelJointPublisher.publish(js);*/
         ros::spinOnce();
         loop_rate.sleep();
     }
