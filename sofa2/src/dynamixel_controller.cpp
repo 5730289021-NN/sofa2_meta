@@ -128,8 +128,7 @@ void DynamixelController::tcpCallback(const uint8_t *buf, size_t len)
 		std::cout << " ";
 	}
 	std::cout << std::endl;
-	ROS_INFO_STREAM("Packet ended with: " << (int) buf[len-1]);
-	std::cout << std::endl;
+	ROS_INFO_STREAM("Packet ended with: " << (int) buf[len-1] << "len: " << len);
 }
 
 void DynamixelController::processMotorMessage(MotorMessage& mm)
