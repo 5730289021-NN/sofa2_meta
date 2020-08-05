@@ -24,8 +24,8 @@ public:
 	std::string getStringID() const{
 		return std::to_string(id);
 	}
-	float getPosition() const{
-		return (float) cur_pos;
+	int getPosition() const{
+		return cur_pos;
 	}
 	void printMotorRecord() const{
 		ROS_INFO_STREAM("Record ID: " << id << " Position: " << cur_pos);
@@ -236,7 +236,7 @@ DynamixelController::DynamixelController()
 		for(auto motor: motors)
 		{
 			js.name.push_back(motor.getStringID());
-			ROS_WARN_STREAM(motor.getPosition());
+			ROS_WARN_STREAM("a" << motor.getPosition());
 			js.position.push_back(motor.getPosition());
 		}
 		dynamixelJointPublisher.publish(js);
