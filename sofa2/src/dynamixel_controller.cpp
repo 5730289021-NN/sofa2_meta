@@ -97,15 +97,16 @@ void DynamixelController::tcpCallback(const uint8_t *buf, size_t len)
 				ROS_INFO("H2");
 				break;
 			case ID:
-				mm.len = buf[i]; state = LENGTH;
+				if(buf[i] == 4) {
+					mm.len = buf[i];
+					state = LENGTH;
+				} else
+					state = LOST;
 				ROS_INFO("ID");
 				break;
 			case LENGTH:
-				if(buf[i] == 4) {
-					mm.err = buf[i];
-					state = ERROR;
-				}
-				else state = LOST;
+				mm.err = buf[i];
+				state = ERROR;
 				ROS_INFO("L");
 				break;
 			case ERROR:
