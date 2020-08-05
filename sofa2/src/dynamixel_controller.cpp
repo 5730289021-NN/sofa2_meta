@@ -78,6 +78,7 @@ void DynamixelController::tcpCallback(const uint8_t *buf, size_t len)
 	//ss << std::hex;
 	enum StateList {ZERO, HEADER1, HEADER2, ID, LENGTH, ERROR, P1, P2, CHKSUM, LOST};
 	StateList state = ZERO;
+	StateList prevState = ZERO;
 	MotorMessage mm;
 	for (size_t i = 0; i < len; i++)
 	{
@@ -87,10 +88,16 @@ void DynamixelController::tcpCallback(const uint8_t *buf, size_t len)
 			case ZERO:
 				if(buf[i] == 0) break;
 				else if (buf[i] == 255) state = HEADER1;
-				else state = LOST;
+				else {
+					state = LOST;
+					prevState = ZERO;
+				}
 				break;
 			case HEADER1:
-				if(buf[i] == 255) state = HEADER2; else state = LOST;
+				if(buf[i] == 255) state = HEADER2; else {
+					state = LOST;
+					prevState = HEADER1;
+				}
 				break;
 			case HEADER2:
 				mm.id = buf[i]; state = ID;
@@ -99,8 +106,10 @@ void DynamixelController::tcpCallback(const uint8_t *buf, size_t len)
 				if(buf[i] == 4) {
 					mm.len = buf[i];
 					state = LENGTH;
-				} else
+				} else {
 					state = LOST;
+					prevState = ID;
+				}
 				break;
 			case LENGTH:
 				mm.err = buf[i];
@@ -126,7 +135,7 @@ void DynamixelController::tcpCallback(const uint8_t *buf, size_t len)
 		if(state == LOST) {
 			//Analyze Error before break
 			std::cout << std::endl;
-			ROS_ERROR_STREAM("State Lost from Packet :");
+			ROS_ERROR_STREAM("State Lost at State :" << prevState << " with Packet: ");
 			for(int j = 0; j < len; j++) {
 				std::cout << std::hex << (int) buf[j];
 				std::cout << " ";
