@@ -61,6 +61,10 @@
         <param name="range_max" value="25.0"/>
     </node>
 
+    <node pkg="system_checker" type="system_checker" name="system_checker" output="screen">
+        <remap from="move_base_status_id" to="move_base/status"/>
+    </node>
+
     <!--odom -> base_footprint -> base_link-->
     <node pkg="tf" type="static_transform_publisher" name="base_footprint_to_base_link" args="0.0 0.0 0.0 0.0 0.0 0.0 /base_footprint /base_link 20" />
     <!--base_link -> lidar_f, lidar_r, lidar_fusion-->
