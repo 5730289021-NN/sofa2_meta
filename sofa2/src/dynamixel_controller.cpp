@@ -25,6 +25,7 @@ public:
 		return std::to_string(id);
 	}
 	int getPosition() const{
+		ROS_INFO_STREAM("Returning Position: " << cur_pos);
 		return cur_pos;
 	}
 	void printMotorRecord() const{
