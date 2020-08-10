@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0.2)
 project(sofa2)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
+add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -119,7 +119,7 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 #   src/${PROJECT_NAME}/sofa2_bringup.cpp
 # )
 
-add_executable(dynamixel_controller src/dynamixel_controller.cpp)
+add_executable(dynamixel_controller src/dynamixel_controller/dynamixel_controller.cpp)
 target_link_libraries(dynamixel_controller ${catkin_LIBRARIES} ${async_comm_LIBRARIES})
 #add_dependencies(dynamixel_controller beginner_tutorials_generate_messages_cpp)
 
