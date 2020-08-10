@@ -7,6 +7,7 @@
 #include <std_msgs/ColorRGBA.h>
 #include <std_srvs/SetBool.h>
 #include <modbus/modbus.h>
+//include <modbus/modbus.h>
 
 class plc_modbus_manager {
 public:
@@ -48,6 +49,7 @@ private:
 };
 
 plc_modbus_manager::plc_modbus_manager() {
+    node.setParam("/system/status", "NORMAL");
 
     holding_regs_read = node.advertise<std_msgs::UInt16MultiArray>("modbus/holding_regs_read", 100);
     holding_regs_write = node.subscribe<std_msgs::UInt16MultiArray>("modbus/holding_regs_write", 100, &plc_modbus_manager::holding_regs_callBack, this);
@@ -222,6 +224,14 @@ bool plc_modbus_manager::display_lift_callback(std_srvs::SetBool::Request& req, 
     } else {
         res.success = true;
     }
+
+    /*SPECIAL CODE*/
+    if (req.data)
+        node.setParam("/display/status", "UP");
+    else 
+        node.setParam("/display/status", "DOWN");
+    
+    /*SPECIAL CODE*/
     return true;
 }
 
@@ -235,6 +245,12 @@ bool plc_modbus_manager::camera_callback(std_srvs::SetBool::Request& req, std_sr
         res.success = true;
         res.message = "Successfully Turn On/Off Camera";
     }
+    /*SPECIAL CODE*/
+    if (req.data)
+        node.setParam("/camera/status", true);
+    else 
+        node.setParam("/camera/status", false);
+    /*SPECIAL CODE*/
     return true;
 }
 

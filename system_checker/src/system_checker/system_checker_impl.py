@@ -118,6 +118,9 @@ class SystemCheckerImplementation(object):
         self.set_rosparam('/camera/depth_status', 'OFF')
         self.set_rosparam('/camera/thermal_status', 'OFF')
 
+        self.set_rosparam('/camera/status', False)
+        self.set_rosparam('/display/status', 'DOWN')
+
         self.set_rosparam('/android/sing', 'DISABLED')
         self.set_rosparam('/android/stt', '')
         self.set_rosparam('/android/sound', 'UNMUTED')

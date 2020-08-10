@@ -6,4 +6,9 @@
         <rosparam param="coils_addr">[4,5,6,7,8]</rosparam>
         <rosparam param="holding_regs_addr">[1,2,3]</rosparam>
     </node>
+
+
+    <node pkg="system_checker" type="system_checker" name="system_checker" output="screen">
+        <remap from="move_base_status_id" to="move_base/status"/>
+    </node>
 </launch>
