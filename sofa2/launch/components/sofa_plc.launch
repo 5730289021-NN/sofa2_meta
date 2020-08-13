@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
     <arg name="ip" default="192.168.16.22" /> 
-    <node pkg="sofa2" type="ros_plc_modbus" name="plc_modbus_node" output="screen">
+    <node pkg="ros_plc_modbus" type="ros_plc_modbus" name="plc_modbus_node" output="screen">
         <param name="ip" value="$(arg ip)"/>
         <rosparam param="coils_addr">[4,5,6,7,8]</rosparam>
         <rosparam param="holding_regs_addr">[1,2,3]</rosparam>
