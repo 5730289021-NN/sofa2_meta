@@ -119,8 +119,11 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 #   src/${PROJECT_NAME}/sofa2_bringup.cpp
 # )
 
-add_executable(dynamixel_controller src/dynamixel_controller/dynamixel_controller.cpp)
+add_executable(dynamixel_controller src/dynamixel_controller.cpp)
+add_executable(ros_plc_modbus src/ros_plc_modbus.cpp)
+
 target_link_libraries(dynamixel_controller ${catkin_LIBRARIES} ${async_comm_LIBRARIES})
+target_link_libraries(ros_plc_modbus ${catkin_LIBRARIES} modbus)
 #add_dependencies(dynamixel_controller beginner_tutorials_generate_messages_cpp)
 
 ## Add cmake target dependencies of the library
