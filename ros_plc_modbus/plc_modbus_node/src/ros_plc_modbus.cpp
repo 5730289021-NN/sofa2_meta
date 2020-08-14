@@ -6,8 +6,13 @@
 #include <std_msgs/ByteMultiArray.h>
 #include <std_msgs/ColorRGBA.h>
 #include <std_srvs/SetBool.h>
-#include <sensor_msgs/BatteryState>
+#include <std_srvs/Trigger.h>
+#include <sensor_msgs/BatteryState.h>
 #include <modbus/modbus.h>
+#include <map>
+#include <cstdlib>
+#include <chrono>
+#include <thread>
 
 class plc_modbus_manager {
 public:
@@ -16,32 +21,46 @@ public:
 private:
     ros::NodeHandle node;
 
-    // ros::Publisher holding_regs_read;
-    // ros::Subscriber holding_regs_write;
-    // ros::Publisher coils_read;
-    // ros::Subscriber coils_write;
-
     ros::Subscriber led_head;
     ros::Subscriber led_tray1;
+
+    ros::Publisher battery_publisher;
+    sensor_msgs::BatteryState battery_message;
+
     ros::ServiceServer display_lift_service;
     ros::ServiceServer camera_service;
 
     ros::ServiceServer shutdown_service;
 
-    // std::vector<int> holding_regs_addr;
-    // std::vector<int> coils_addr;
+    static const int coil_size = 5;
+    static const std::string coil_name[coil_size];
+    uint8_t coil_buffer[coil_size]; /*Coil No.4-8*/
 
-    // std_msgs::UInt16MultiArray holding_regs_val;
-    // std_msgs::ByteMultiArray coils_val;
+    static const int coil_2_size = 2;
+    static const std::string coil_2_name[coil_2_size];
+    uint8_t coil_2_buffer[coil_2_size]; /*Coil No. 31-32*/
+
+    static const int holding_reg_size = 10;
+    static const std::string holding_reg_name[holding_reg_size];
+    uint16_t holding_reg_buffer[holding_reg_size]; /*Holding Register No. 0-9*/
+
+    static const int input_reg_size = 4;
+    static const std::string input_reg_name[input_reg_size];
+    uint16_t input_reg_buffer[input_reg_size]; /*Input Register No. 20-23*/
+
+    int heartbeat_count;
+
+    std::map<std::string, int> modbus_map; 
 
     modbus_t *plc;
-
+    
     std::string ip_address;
     int port;
     int spin_rate;
 
-    // void holding_regs_callBack(const std_msgs::UInt16MultiArray::ConstPtr &holding_regs_data);
-    // void coils_callBack(const std_msgs::ByteMultiArray::ConstPtr &coils_data);
+    void initialize_plc();
+    bool modbus_read_value();
+
     void led_head_callBack(const std_msgs::ColorRGBA::ConstPtr &led_head_data);
     void led_tray1_callBack(const std_msgs::ColorRGBA::ConstPtr &led_tray1_data);
     bool display_lift_callback(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res);
@@ -52,80 +71,238 @@ private:
 
 };
 
-plc_modbus_manager::plc_modbus_manager() {
-    node.setParam("/system/status", "NORMAL");
+const std::string plc_modbus_manager::coil_name[coil_size] = {"shutdown_sw", "com_shutdown", "heartbeat", "camera_onoff", "enb_charging"};
+const std::string plc_modbus_manager::coil_2_name[coil_2_size] = {"display_up", "display_down"};
+const std::string plc_modbus_manager::holding_reg_name[holding_reg_size] = {"head_rgb", "head_time", "tray1_rgb", "tray1_time", "tray2_rgb", "tray2_time", 
+                                                    "tray3_rgb", "tray3_time", "sw_bumper", "plc_status"};
+const std::string plc_modbus_manager::input_reg_name[input_reg_size] = {"current", "voltage", "capacity_rem", "capacity_tot"};
 
-    // holding_regs_read = node.advertise<std_msgs::UInt16MultiArray>("modbus/holding_regs_read", 100);
-    // holding_regs_write = node.subscribe<std_msgs::UInt16MultiArray>("modbus/holding_regs_write", 100, &plc_modbus_manager::holding_regs_callBack, this);
-    // coils_read = node.advertise<std_msgs::ByteMultiArray>("modbus/coils_read", 100);
-    // coils_write = node.subscribe<std_msgs::ByteMultiArray>("modbus/coils_write", 100, &plc_modbus_manager::coils_callBack, this);
-
-    
-
-    led_head = node.subscribe<std_msgs::ColorRGBA>("led/head", 100, &plc_modbus_manager::led_head_callBack, this);
-    led_tray1 = node.subscribe<std_msgs::ColorRGBA>("led/tray1", 100, &plc_modbus_manager::led_tray1_callBack, this);
-
-    display_lift_service = node.advertiseService("display/lift", &plc_modbus_manager::display_lift_callback, this);
-    camera_service = node.advertiseService("camera/enable", &plc_modbus_manager::camera_callback, this);
-
-    node.param<std::string>("plc_modbus_node/ip", ip_address, "192.168.16.22");
-    node.param("plc_modbus_node/port", port, 502);
-    node.param("plc_modbus_node/spin_rate",spin_rate,10);
-
-    // if (!node.getParam("plc_modbus_node/holding_regs_addr", holding_regs_addr)) {
-    //     ROS_WARN("No reg addrs given!");
-    // }
-    // if (!node.getParam("plc_modbus_node/coils_addr", coils_addr)) {
-    //     ROS_WARN("No coil addrs given!");
-    // }
-
+void plc_modbus_manager::initialize_plc() {
     ROS_INFO("Connecting to modbus device on %s/%d", ip_address.c_str(), port);
     plc = modbus_new_tcp(ip_address.c_str(), port);
     if (plc == NULL) {
-        ROS_FATAL("Unable to allocate libmodbus context\n");
+        ROS_ERROR("Unable to allocate libmodbus context\n");
         return;
     }
     if (modbus_connect(plc) == -1) {
-        ROS_FATAL("Failed to connect to modbus device!!!");
-        ROS_FATAL("%s", modbus_strerror(errno));
+        ROS_ERROR("Failed to connect to modbus device!!!");
+        ROS_ERROR("%s", modbus_strerror(errno));
         modbus_free(plc);
         return;
     } else {
         ROS_INFO("Connection to modbus device established");
     }
+}
+
+bool plc_modbus_manager::modbus_read_value() {
+    bool success = true;
+    if(modbus_read_bits(plc, 4, coil_size, coil_buffer) == -1) {
+        ROS_ERROR("Error while reading coil_1");
+        ROS_ERROR("%s", modbus_strerror(errno));
+        success = false;
+    } else {
+        for(int i = 0; i < coil_size; i++) {
+            modbus_map[coil_name[i]] = coil_buffer[i];
+        }
+    }
+
+    if(modbus_read_bits(plc, 31, coil_2_size, coil_2_buffer) == -1) {
+        ROS_ERROR("Error while reading coil_1");
+        ROS_ERROR("%s", modbus_strerror(errno));
+        success = false;
+    } else {
+        for(int i = 0; i < coil_2_size; i++) {
+            modbus_map[coil_2_name[i]] = coil_2_buffer[i];
+        }
+    }
+
+    if(modbus_read_registers(plc, 0, 10, holding_reg_buffer) == -1) {
+        ROS_ERROR("Error while reading holding register");
+        ROS_ERROR("%s", modbus_strerror(errno));
+        success = false;
+    } else {
+        for(int i = 0; i < holding_reg_size; i++) {
+            modbus_map[holding_reg_name[i]] = holding_reg_buffer[i];
+        }
+    }
+
+    if(modbus_read_input_registers(plc, 20, 4, input_reg_buffer) == -1) {
+        ROS_ERROR("Error while reading input register");
+        ROS_ERROR("%s", modbus_strerror(errno));
+        success = false;
+    } else {
+        for(int i = 0; i < input_reg_size; i++) {
+            modbus_map[input_reg_name[i]] = input_reg_buffer[i];
+        }
+    }
+
+    return success;
+}
+
+bool plc_modbus_manager::shutdown_callback(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res) {
+    /*req: true -> shutdown*/
+    /*req: false -> restart*/
+    if(req.data == true) {
+        /*Shutdown whole system*/
+        for(int i = 5; i > 0; i--) {
+            if(modbus_write_bit(plc, 5, 0) != -1) {
+                break;
+            } else {
+                ROS_ERROR_STREAM("Unable to call PLC shutdown command" << i);
+                std::this_thread::sleep_for(std::chrono::seconds(1));
+            }
+        }
+        for(int i = 5; i > 0; i--) {
+            ROS_INFO_STREAM("Shutting down in..." << i);
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+        system("poweroff");
+    } else {
+        /*Restart only Intel NUC*/
+        for(int i = 5; i > 0; i--) {
+            ROS_INFO_STREAM("Rebooting in..." << i);
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+        system("reboot");
+    }
+}
+
+// <rosparam param="coil_addr">[4, 5, 6, 7, 8, 31, 32]</rosparam>
+// <rosparam param="holding_addr">[0, 1, 2, 3, 8, 9]</rosparam>
+// <rosparam param="input_reg_addr">[20, 21, 22, 23]</rosparam>
+
+plc_modbus_manager::plc_modbus_manager() {
+    ROS_INFO("PLC Modbus Started");
+    node.setParam("/system/status", "NORMAL");
+
+    heartbeat_count = 0;
+    modbus_map["plc_status"] = 99;
+
+    /*Subscriber*/
+    led_head = node.subscribe<std_msgs::ColorRGBA>("led/head", 100, &plc_modbus_manager::led_head_callBack, this);
+    led_tray1 = node.subscribe<std_msgs::ColorRGBA>("led/tray1", 100, &plc_modbus_manager::led_tray1_callBack, this);
+
+    /*Publisher*/
+    battery_publisher = node.advertise<sensor_msgs::BatteryState>("battery", 1); //TODO
+    battery_message.power_supply_technology = sensor_msgs::BatteryState::POWER_SUPPLY_TECHNOLOGY_LIMN;
+    battery_message.present = true;
+
+    /*Service*/
+    display_lift_service = node.advertiseService("display/lift", &plc_modbus_manager::display_lift_callback, this);
+    camera_service = node.advertiseService("camera/enable", &plc_modbus_manager::camera_callback, this);
+    shutdown_service = node.advertiseService("system/shutdown", &plc_modbus_manager::shutdown_callback, this);
+
+    node.param<std::string>("plc_modbus_node/ip", ip_address, "192.168.16.22");
+    node.param("plc_modbus_node/port", port, 502);
+    node.param("plc_modbus_node/spin_rate", spin_rate, 2);
+
+    initialize_plc();
 
     ros::Rate loop_rate(spin_rate);
-
     while (ros::ok()) {
-        // holding_regs_val.data.clear();
-        // coils_val.data.clear();
+        modbus_read_value();
+        /*Coil No.4 Check if shutdown switch is pushed*/
+        if(modbus_map["shutdown_sw"] == 1) {
+        /*Start Shutdown Procedure*/
+            /*Write back to PLC on Shutdown Acknowledge*/
+            for(int i = 5; i > 0; i--) {
+                if(modbus_write_bit(plc, 4, 0) != -1) {
+                    break;
+                } else {
+                    ROS_ERROR_STREAM("Unable to call write shutdown back..." << i);
+                    std::this_thread::sleep_for(std::chrono::seconds(1));
+                }
+            }
 
-        // for (int i = 0; i < holding_regs_addr.size(); i++) {
-        //     uint16_t temp[1] = {0};
-        //     //if (modbus_read_registers(plc, holding_regs_addr,))
-        //     if (modbus_read_registers(plc, holding_regs_addr.at(i), 1, temp) == -1) {
-        //         ROS_ERROR("Unable to read reg addr:%d", holding_regs_addr.at(i));
-        //         ROS_ERROR("%s", modbus_strerror(errno));
-        //     } else {
-        //         holding_regs_val.data.push_back(temp[0]);
-        //     }
-        // }
-        // if (holding_regs_val.data.size() > 0) {
-        //     holding_regs_read.publish(holding_regs_val);
-        // }
+            /*Tell android to turnoff codex*/
+            ros::ServiceClient client = node.serviceClient<std_srvs::Trigger>("android/codex_off");
+            std_srvs::Trigger codex_off_srv;
+            
+            for(int i = 5; i > 0; i--) {
+                if(client.call(codex_off_srv)) {
+                    break;
+                } else {
+                    ROS_ERROR_STREAM("Unable to call turnoff codex service..." << i);
+                    std::this_thread::sleep_for(std::chrono::seconds(1));
+                }
+            }
+            /*Call Android to shutdown*/
+            system("/usr/bin/adb shell reboot -p");
 
-        // for (int i = 0; i < coils_addr.size(); i++) {
-        //     uint8_t temp[1] = {0};
-        //     if (modbus_read_bits(plc, coils_addr.at(i), 1, temp) == -1) {
-        //         ROS_ERROR("Unable to read coil addr:%d", coils_addr.at(i));
-        //         ROS_ERROR("%s", modbus_strerror(errno));
-        //     } else {
-        //         coils_val.data.push_back(temp[0]);
-        //     }
-        // }
-        // if (coils_val.data.size() > 0) {
-        //     coils_read.publish(coils_val);
-        // }
+            /*Write confirm shutdown to PLC*/
+            for(int i = 5; i > 0; i--) {
+                if(modbus_write_bit(plc, 5, 1) != -1) {
+                    break;
+                } else {
+                    ROS_ERROR_STREAM("Unable to call write confirm shutdown..." << i);
+                    std::this_thread::sleep_for(std::chrono::seconds(1));
+                }
+            }
+
+            /*Shutdown self*/
+            for(int i = 5; i > 0; i--) {
+                ROS_INFO_STREAM("Shutting down in..." << i);
+                std::this_thread::sleep_for(std::chrono::seconds(1));
+            }
+            system("poweroff"); /*requires to perform sudo chmod a+s /sbin/shutdown*/
+        }
+
+        /*Coil No. 5 Shutdown from Android triggered from service callback*/
+        //Handle at shutdown_callback()
+
+        /*Coil No. 6 Heartbeat*/
+        if(modbus_map["heartbeat"] == 0) {
+            if(modbus_write_bit(plc, 6, 1) == -1) {
+                ROS_WARN_STREAM("Unable to Write Heartbeat");
+            } else {
+                node.setParam("/plc/heartbeat", "NORMAL");
+            }
+            heartbeat_count = 0;
+        } else {
+            heartbeat_count++;
+            if(heartbeat_count % 5 == 0) {
+                ROS_ERROR_STREAM("PLC_UNPINGABLE");
+                node.setParam("/plc/heartbeat", "ERROR");
+            }
+        }
+
+        /*Coil No. 7 Camera Status*/
+        node.setParam("/plc/status", modbus_map["camera_onoff"] == 1);
+
+        /*Coil No. 8 Auto Charge*/
+        //For future
+
+        /*Coil No. 31-32 Up/Down Display*/
+        node.setParam("/display/status", modbus_map["display_up"] && !modbus_map["display_down"] ? "UP" : "DOWN");
+
+        /*Holding Register No. 0-7 LED Color*/
+        //No need to publish
+
+        /*Holding Register No. 8 SW-Bumper*/
+        node.setParam("/plc/bumper", modbus_map["sw_bumper"]);
+
+        /*Holding Register No. 9 PLC Status*/
+        node.setParam("/plc/status", modbus_map["plc_status"]);
+
+        // /*Input Register No. 20 Total Current*/
+        // nh.setParam("/battery/current", modbus_map["current"]);
+
+        // /*Input Register No. 21 Total Current*/
+        // nh.setParam("/battery/voltage", modbus_map["voltage"]);
+
+        // /*Input Register No. 22 Total Current*/
+        // nh.setParam("/battery/capacity_rem", modbus_map["capacity_rem"]);
+
+        // /*Input Register No. 23 Total Current*/
+        // nh.setParam("/battery/capacity_tot", modbus_map["capacity_tot"]);
+        
+        //Battery
+        battery_message.voltage = 0.001 * modbus_map["voltage"];
+        battery_message.current = 0.001 * modbus_map["current"];
+        battery_message.charge = 0.001 * modbus_map["capacity_rem"];
+        battery_message.design_capacity = 0.001 * modbus_map["capacity_tot"];
+        battery_message.header.stamp = ros::Time::now();
+        battery_publisher.publish(battery_message);
 
         ros::spinOnce();
         loop_rate.sleep();
@@ -135,40 +312,6 @@ plc_modbus_manager::plc_modbus_manager() {
     modbus_free(plc);
     return;
 }
-
-// void plc_modbus_manager::holding_regs_callBack(const std_msgs::UInt16MultiArray::ConstPtr &holding_regs_data) {
-//     if (holding_regs_data->data.size() != holding_regs_addr.size()) {
-//         ROS_ERROR("%d holding registers to write but only %d given!", holding_regs_addr.size(), holding_regs_data->data.size());
-//         return;
-//     }
-//     for (int i = 0; i < holding_regs_data->data.size(); i++) {
-//         ROS_DEBUG("holding regs_out[%d]:%u", i, holding_regs_data->data.at(i));
-//         uint16_t temp[1] = {holding_regs_data->data.at(i)};
-//         if (modbus_write_registers(plc, holding_regs_addr.at(i), 1, temp) == -1) {
-//             ROS_ERROR("Modbus holding reg write failed at addr:%d with value:%u", holding_regs_addr.at(i), holding_regs_data->data.at(i));
-//             ROS_ERROR("%s", modbus_strerror(errno));
-//         } else {
-//             ROS_INFO("Modbus holding register write at addr:%d with value:%u", holding_regs_addr.at(i), holding_regs_data->data.at(i));
-//         }
-//     }
-// }
-
-// void plc_modbus_manager::coils_callBack(const std_msgs::ByteMultiArray::ConstPtr &coils_data) {
-//     if (coils_data->data.size() != coils_addr.size()) {
-//         ROS_ERROR("%d coils to write but %d given!", coils_addr.size(), coils_data->data.size());
-//         return;
-//     }
-//     for (int i = 0; i < coils_data->data.size(); i++) {
-//         ROS_DEBUG("regs_out[%d]:%u", i, coils_data->data.at(i));
-//         uint8_t temp[1] = {coils_data->data.at(i)};
-//         if (modbus_write_bits(plc, coils_addr.at(i), 1, temp) == -1) {
-//             ROS_ERROR("Modbus coil write failed at addr:%d with value:%u", coils_addr.at(i), coils_data->data.at(i));
-//             ROS_ERROR("%s", modbus_strerror(errno));
-//         } else {
-//             ROS_INFO("Modbus coil write at addr:%d with value:%u", coils_addr.at(i), coils_data->data.at(i));
-//         }
-//     }
-// }
 
 void plc_modbus_manager::led_head_callBack(const std_msgs::ColorRGBA::ConstPtr &led_head_data) {
 
