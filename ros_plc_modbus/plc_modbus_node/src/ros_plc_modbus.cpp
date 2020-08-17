@@ -107,6 +107,7 @@ bool plc_modbus_manager::modbus_read_value() {
     } else {
         for(int i = 0; i < coil_size; i++) {
             modbus_map[coil_name[i]] = coil_buffer[i];
+            //ROS_INFO_STREAM("Coil Name " << coil_name[i] << " Value : " << (int) coil_buffer[i]);
         }
     }
 
