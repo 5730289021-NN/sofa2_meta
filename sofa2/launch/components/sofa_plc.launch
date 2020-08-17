@@ -3,13 +3,15 @@
     <arg name="ip" default="192.168.16.22" /> 
     <node pkg="plc_modbus_node" type="ros_plc_modbus" name="plc_modbus_node" output="screen">
         <param name="ip" value="$(arg ip)"/>
-        <rosparam param="coil_addr">[4, 5, 6, 7, 8, 31, 32]</rosparam>
+        <!-- <rosparam param="coil_addr">[4, 5, 6, 7, 8, 31, 32]</rosparam>
         <rosparam param="holding_addr">[0, 1, 2, 3, 8, 9]</rosparam>
-        <rosparam param="input_reg_addr">[20, 21, 22, 23]</rosparam>
+        <rosparam param="input_reg_addr">[20, 21, 22, 23]</rosparam> -->
     </node>
 
 
     <node pkg="system_checker" type="system_checker" name="system_checker" output="screen">
-        <remap from="move_base_status_id" to="move_base/status"/>
+        <remap from="move_base_status" to="move_base/status"/>
+        <remap from="scan_1" to="/front_lidar/scan" />
+        <remap from="scan_2" to="/rear_lidar/scan" />
     </node>
 </launch>

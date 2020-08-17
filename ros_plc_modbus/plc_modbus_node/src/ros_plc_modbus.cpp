@@ -60,9 +60,10 @@ private:
 
     void initialize_plc();
     bool modbus_read_value();
+    void perform_shutdown();
 
-    void led_head_callBack(const std_msgs::ColorRGBA::ConstPtr &led_head_data);
-    void led_tray1_callBack(const std_msgs::ColorRGBA::ConstPtr &led_tray1_data);
+    void led_head_callback(const std_msgs::ColorRGBA::ConstPtr &led_head_data);
+    void led_tray1_callback(const std_msgs::ColorRGBA::ConstPtr &led_tray1_data);
     bool display_lift_callback(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res);
     bool camera_callback(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res);
     bool shutdown_callback(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res);
@@ -82,15 +83,18 @@ void plc_modbus_manager::initialize_plc() {
     plc = modbus_new_tcp(ip_address.c_str(), port);
     if (plc == NULL) {
         ROS_ERROR("Unable to allocate libmodbus context\n");
+        node.setParam("/plc/conn_status", "UNALLOCATED");
         return;
     }
     if (modbus_connect(plc) == -1) {
         ROS_ERROR("Failed to connect to modbus device!!!");
         ROS_ERROR("%s", modbus_strerror(errno));
+        node.setParam("/plc/conn_status", "DISCONNECTED");
         modbus_free(plc);
         return;
     } else {
         ROS_INFO("Connection to modbus device established");
+        node.setParam("/plc/conn_status", "CONNECTED");
     }
 }
 
@@ -132,7 +136,7 @@ bool plc_modbus_manager::modbus_read_value() {
         success = false;
     } else {
         for(int i = 0; i < input_reg_size; i++) {
-            modbus_map[input_reg_name[i]] = input_reg_buffer[i];
+            modbus_map[input_reg_name[i]] = (int16_t) input_reg_buffer[i];
         }
     }
 
@@ -145,7 +149,7 @@ bool plc_modbus_manager::shutdown_callback(std_srvs::SetBool::Request& req, std_
     if(req.data == true) {
         /*Shutdown whole system*/
         for(int i = 5; i > 0; i--) {
-            if(modbus_write_bit(plc, 5, 0) != -1) {
+            if(modbus_write_bit(plc, 5, 1) != -1) {
                 break;
             } else {
                 ROS_ERROR_STREAM("Unable to call PLC shutdown command" << i);
@@ -167,20 +171,15 @@ bool plc_modbus_manager::shutdown_callback(std_srvs::SetBool::Request& req, std_
     }
 }
 
-// <rosparam param="coil_addr">[4, 5, 6, 7, 8, 31, 32]</rosparam>
-// <rosparam param="holding_addr">[0, 1, 2, 3, 8, 9]</rosparam>
-// <rosparam param="input_reg_addr">[20, 21, 22, 23]</rosparam>
-
 plc_modbus_manager::plc_modbus_manager() {
     ROS_INFO("PLC Modbus Started");
-    node.setParam("/system/status", "NORMAL");
 
     heartbeat_count = 0;
     modbus_map["plc_status"] = 99;
 
     /*Subscriber*/
-    led_head = node.subscribe<std_msgs::ColorRGBA>("led/head", 100, &plc_modbus_manager::led_head_callBack, this);
-    led_tray1 = node.subscribe<std_msgs::ColorRGBA>("led/tray1", 100, &plc_modbus_manager::led_tray1_callBack, this);
+    led_head = node.subscribe<std_msgs::ColorRGBA>("led/head", 100, &plc_modbus_manager::led_head_callback, this);
+    led_tray1 = node.subscribe<std_msgs::ColorRGBA>("led/tray1", 100, &plc_modbus_manager::led_tray1_callback, this);
 
     /*Publisher*/
     battery_publisher = node.advertise<sensor_msgs::BatteryState>("battery", 1); //TODO
@@ -202,50 +201,7 @@ plc_modbus_manager::plc_modbus_manager() {
     while (ros::ok()) {
         modbus_read_value();
         /*Coil No.4 Check if shutdown switch is pushed*/
-        if(modbus_map["shutdown_sw"] == 1) {
-        /*Start Shutdown Procedure*/
-            /*Write back to PLC on Shutdown Acknowledge*/
-            for(int i = 5; i > 0; i--) {
-                if(modbus_write_bit(plc, 4, 0) != -1) {
-                    break;
-                } else {
-                    ROS_ERROR_STREAM("Unable to call write shutdown back..." << i);
-                    std::this_thread::sleep_for(std::chrono::seconds(1));
-                }
-            }
-
-            /*Tell android to turnoff codex*/
-            ros::ServiceClient client = node.serviceClient<std_srvs::Trigger>("android/codex_off");
-            std_srvs::Trigger codex_off_srv;
-            
-            for(int i = 5; i > 0; i--) {
-                if(client.call(codex_off_srv)) {
-                    break;
-                } else {
-                    ROS_ERROR_STREAM("Unable to call turnoff codex service..." << i);
-                    std::this_thread::sleep_for(std::chrono::seconds(1));
-                }
-            }
-            /*Call Android to shutdown*/
-            system("/usr/bin/adb shell reboot -p");
-
-            /*Write confirm shutdown to PLC*/
-            for(int i = 5; i > 0; i--) {
-                if(modbus_write_bit(plc, 5, 1) != -1) {
-                    break;
-                } else {
-                    ROS_ERROR_STREAM("Unable to call write confirm shutdown..." << i);
-                    std::this_thread::sleep_for(std::chrono::seconds(1));
-                }
-            }
-
-            /*Shutdown self*/
-            for(int i = 5; i > 0; i--) {
-                ROS_INFO_STREAM("Shutting down in..." << i);
-                std::this_thread::sleep_for(std::chrono::seconds(1));
-            }
-            system("poweroff"); /*requires to perform sudo chmod a+s /sbin/shutdown*/
-        }
+        if(modbus_map["shutdown_sw"] == 1) perform_shutdown();
 
         /*Coil No. 5 Shutdown from Android triggered from service callback*/
         //Handle at shutdown_callback()
@@ -267,7 +223,7 @@ plc_modbus_manager::plc_modbus_manager() {
         }
 
         /*Coil No. 7 Camera Status*/
-        node.setParam("/plc/status", modbus_map["camera_onoff"] == 1);
+        node.setParam("/camera/status", modbus_map["camera_onoff"] == 1);
 
         /*Coil No. 8 Auto Charge*/
         //For future
@@ -283,24 +239,12 @@ plc_modbus_manager::plc_modbus_manager() {
 
         /*Holding Register No. 9 PLC Status*/
         node.setParam("/plc/status", modbus_map["plc_status"]);
-
-        // /*Input Register No. 20 Total Current*/
-        // nh.setParam("/battery/current", modbus_map["current"]);
-
-        // /*Input Register No. 21 Total Current*/
-        // nh.setParam("/battery/voltage", modbus_map["voltage"]);
-
-        // /*Input Register No. 22 Total Current*/
-        // nh.setParam("/battery/capacity_rem", modbus_map["capacity_rem"]);
-
-        // /*Input Register No. 23 Total Current*/
-        // nh.setParam("/battery/capacity_tot", modbus_map["capacity_tot"]);
         
-        //Battery
+        /*Input Register No. 20 - 23 Battery*/
         battery_message.voltage = 0.001 * modbus_map["voltage"];
         battery_message.current = 0.001 * modbus_map["current"];
         battery_message.charge = 0.001 * modbus_map["capacity_rem"];
-        battery_message.design_capacity = 0.001 * modbus_map["capacity_tot"];
+        battery_message.design_capacity = 0.001 * (int8_t) modbus_map["capacity_tot"];
         battery_message.header.stamp = ros::Time::now();
         battery_publisher.publish(battery_message);
 
@@ -313,7 +257,51 @@ plc_modbus_manager::plc_modbus_manager() {
     return;
 }
 
-void plc_modbus_manager::led_head_callBack(const std_msgs::ColorRGBA::ConstPtr &led_head_data) {
+void plc_modbus_manager::perform_shutdown() {
+    /*Write back to PLC on Shutdown Acknowledge*/
+    for(int i = 5; i > 0; i--) {
+        if(modbus_write_bit(plc, 4, 0) != -1) {
+            break;
+        } else {
+            ROS_ERROR_STREAM("Unable to call write shutdown back..." << i);
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+    }
+
+    /*Tell android to turnoff codex*/
+    ros::ServiceClient client = node.serviceClient<std_srvs::Trigger>("android/codex_off");
+    std_srvs::Trigger codex_off_srv;
+    
+    for(int i = 5; i > 0; i--) {
+        if(client.call(codex_off_srv)) {
+            break;
+        } else {
+            ROS_ERROR_STREAM("Unable to call turnoff codex service..." << i);
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+    }
+    /*Call Android to shutdown*/
+    system("/usr/bin/adb shell reboot -p");
+
+    /*Write confirm shutdown to PLC*/
+    for(int i = 5; i > 0; i--) {
+        if(modbus_write_bit(plc, 5, 1) != -1) {
+            break;
+        } else {
+            ROS_ERROR_STREAM("Unable to call write confirm shutdown..." << i);
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+    }
+
+    /*Shutdown self*/
+    for(int i = 5; i > 0; i--) {
+        ROS_INFO_STREAM("Shutting down in..." << i);
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+    system("poweroff"); /*requires to perform sudo chmod a+s /sbin/shutdown*/
+}
+
+void plc_modbus_manager::led_head_callback(const std_msgs::ColorRGBA::ConstPtr &led_head_data) {
 
     int color_code = get_color_code(led_head_data);
     
@@ -333,7 +321,7 @@ void plc_modbus_manager::led_head_callBack(const std_msgs::ColorRGBA::ConstPtr &
 
 }
 
-void plc_modbus_manager::led_tray1_callBack(const std_msgs::ColorRGBA::ConstPtr &led_tray1_data) {
+void plc_modbus_manager::led_tray1_callback(const std_msgs::ColorRGBA::ConstPtr &led_tray1_data) {
 
     int color_code = get_color_code(led_tray1_data);
     
@@ -374,18 +362,12 @@ bool plc_modbus_manager::display_lift_callback(std_srvs::SetBool::Request& req, 
         res.success = true;
     }
 
-    /*SPECIAL CODE*/
-    if (req.data)
-        node.setParam("/display/status", "UP");
-    else 
-        node.setParam("/display/status", "DOWN");
-    /*SPECIAL CODE*/
     return true;
 }
 
 bool plc_modbus_manager::camera_callback(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res){
     if(modbus_write_bit(plc, 7, req.data) == -1) {
-        ROS_ERROR("Modbus holding reg write failed at enbable/disable camera");
+        ROS_ERROR("Modbus holding reg write failed at enable/disable camera");
         ROS_ERROR("%s", modbus_strerror(errno));
         res.success = false;
         res.message = "Failed";
@@ -393,12 +375,6 @@ bool plc_modbus_manager::camera_callback(std_srvs::SetBool::Request& req, std_sr
         res.success = true;
         res.message = "Successfully Turn On/Off Camera";
     }
-    /*SPECIAL CODE*/
-    if (req.data)
-        node.setParam("/camera/status", true);
-    else 
-        node.setParam("/camera/status", false);
-    /*SPECIAL CODE*/
     return true;
 }
 

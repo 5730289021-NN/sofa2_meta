@@ -12,10 +12,10 @@ FIBO
 import rospy
 from actionlib_msgs.msg import GoalStatusArray
 from sensor_msgs.msg import LaserScan
-from sensor_msgs.msg import LaserScan
-from sensor_msgs.msg import LaserScan
 
 # protected region user include package begin #
+from enum import IntEnum
+from abc import ABCMeta, abstractmethod    
 # protected region user include package end #
 
 
@@ -89,6 +89,19 @@ class SystemCheckerImplementation(object):
         self.passthrough = SystemCheckerPassthrough()
 
         # protected region user member variables begin #
+
+        #LIDAR
+        self.lidar_front = LidarUpdate('/fault/lidar_f', 'FRONT_LIDAR_')
+        self.lidar_rear = LidarUpdate('/fault/lidar_r', 'REAR_LIDAR_')
+        self.lidar_merge = LidarUpdate('/fault/lidar_m', 'MERGED_LIDAR_')
+
+        #MOVE_BASE
+        self.move_base = MoveBaseFilterUpdate('/system/response')
+
+        #FAULT_CHECKER
+        self.updateObject = [self.lidar_front, self.lidar_rear, self.lidar_merge, self.move_base]
+        self.fault_map = {}
+        self.fault_level = FaultLevel.NORMAL
         # protected region user member variables end #
 
     def configure(self, config):
@@ -99,43 +112,26 @@ class SystemCheckerImplementation(object):
         @return True on success
         """
         # protected region user configure begin #
-        rospy.loginfo('State Manager Started')
+        rospy.loginfo('State Checker Started')
 
-        self.set_rosparam('/system/status', 'NORMAL')
-        self.set_rosparam('/system/response', 'STAND BY')
-        self.set_rosparam('/system/fault_list', [])
+        #REQUIRED for android to start
+        rospy.set_param('/map_1/scale', 0.03)
+        rospy.set_param('/android/sing', 'DISABLED')
+        rospy.set_param('/android/stt', '')
+        rospy.set_param('/android/sound', 'UNMUTED')
+        rospy.set_param('/android/destination', '')
+        rospy.set_param('/android/patient/birth_date', '')
+        rospy.set_param('/android/patient/name', '')
+        rospy.set_param('/android/patient/confirm', '')
 
-        self.set_rosparam('/plc/conn_status', "DISCONNECTED")
-        self.set_rosparam('/plc/status', 20)
-        
-        self.set_rosparam('/battery/level', 55)
-        
-        self.set_rosparam('/map_1/scale', 0.03)
-        
-        self.set_rosparam('/follow_me/status', 'UNFOLLOWED')
+        #TODO
+        rospy.set_param('/follow_me/status', 'UNFOLLOWED')
 
-        self.set_rosparam('/camera/zoom_status', 'OFF')
-        self.set_rosparam('/camera/depth_status', 'OFF')
-        self.set_rosparam('/camera/thermal_status', 'OFF')
+        #FAULT_CHECKER
+        # rospy.set_param('/system/status', 'NORMAL')        
+        # rospy.set_param('/system/fault_list', [])
+        # self.fault_addresses = ['/fault/driver', '/fault/lidar_f', '/fault/lidar_r', '/fault/lidar_m']
 
-        self.set_rosparam('/camera/status', False)
-        self.set_rosparam('/display/status', 'DOWN')
-
-        self.set_rosparam('/android/sing', 'DISABLED')
-        self.set_rosparam('/android/stt', '')
-        self.set_rosparam('/android/sound', 'UNMUTED')
-        self.set_rosparam('/android/destination', '')
-        self.set_rosparam('/android/patient/birth_date', '')
-        self.set_rosparam('/android/patient/name', '')
-        self.set_rosparam('/android/patient/confirm', '')
-
-        self.set_rosparam('/fault/lidar_f', 'FRONT_LIDAR_NOT_UPDATED')
-        self.set_rosparam('/fault/lidar_r', 'REAR_LIDAR_NOT_UPDATED')
-        self.set_rosparam('/fault/lidar_m', 'MERGED_LIDAR_NOT_UPDATED')
-
-        self.fault_addresses = ['/fault/driver', '/fault/lidar_f', '/fault/lidar_r', '/fault/lidar_m']
-        self.fault_list = []
-        
         return True
         # protected region user configure end #
 
@@ -150,50 +146,45 @@ class SystemCheckerImplementation(object):
         @return nothing
         """
         # protected region user update begin #
+        # LIDAR
+        self.lidar_front.getUpdate(data.in_scan_1_updated)
+        self.lidar_rear.getUpdate(data.in_scan_2_updated)
+        self.lidar_merge.getUpdate(data.in_scan_fusion_updated)
+        # MOVE_BASE
+        self.move_base.getUpdate(data.in_move_base_status_updated, data.in_move_base_status.status_list)
         
-        # move_base_string_status_map = {
-        #     "0": "PENDING", "1": "ACTIVE",
-        #     "2": "PREEMPTED", "3": "SUCCEEDED",
-        #     "4": "ABORTED", "5": "REJECTED",
-        #     "6": "PREEMPTING", "7": "RECALLING",
-        #     "8": "RECALLED", "9": "LOST"
-        # }
+        # Query Fault from LIDAR and MOVE_BASE
+        self.neutralize_fault()
+        for updateObj in self.updateObject:
+            if not updateObj.getStatus():
+                if(type(updateObj) == LidarUpdate):
+                    self.fault_map["LIDAR"] = "LIDAR_ERROR"
+                    self.assign_fault(FaultLevel.ERROR)
+                elif(type(updateObj) == MoveBaseFilterUpdate):
+                    self.fault_map["MOVE_BASE"] = "MOVE_BASE_ERROR"
+                    self.assign_fault(FaultLevel.WARNING)
 
-        if data.in_move_base_status_updated and data.in_move_base_status.status_list:
-            move_base_status_id = data.in_move_base_status.status_list[-1].status
-            rospy.loginfo("move_base_status_id %d", move_base_status_id)
-            if move_base_status_id == 1:
-                self.set_rosparam('/system/response', 'GOING TO POSITION')
-            elif move_base_status_id == 4 or move_base_status_id == 5:
-                self.set_rosparam('/system/response', 'ALARM')
-            elif move_base_status_id == 3:
-                self.set_rosparam('/system/response', 'COMPLETE')
-            elif move_base_status_id == 6 or move_base_status_id == 7:
-                self.set_rosparam('/system/response', 'STOPPING')
-            elif move_base_status_id == 2 or move_base_status_id == 8:
-                self.set_rosparam('/system/response', 'STOPPED')
+        # Additional fault from DRIVER and PLC
         
-        if data.in_scan_1_updated:
-            if not rospy.get_param('/fault/lidar_f', '') == '':
-                self.set_rosparam('/fault/lidar_f', '')
-        else:
-            self.set_rosparam('/fault/lidar_f', 'FRONT_LIDAR_NOT_UPDATED')
+        # DRIVER
+        driver_error = rospy.get_param('/fault/driver', 'DRIVER_UNKNOWN')
+        if driver_error != '': 
+            self.fault_map["DRIVER"] = driver_error
+            self.assign_fault(FaultLevel.ERROR)
 
+        #PLC
+        plc_hb = rospy.get_param('/plc/heartbeat', 'ERROR')
+        if plc_hb != 'NORMAL':
+            self.fault_map["PLC_HB"] = "PLC_NO_HB"
+            self.assign_fault(FaultLevel.WARNING)
         
-        if data.in_scan_2_updated:
-            if not rospy.get_param('/fault/lidar_r', '') == '':
-                self.set_rosparam('/fault/lidar_r', '')
-        else:
-            self.set_rosparam('/fault/lidar_r', 'REAR_LIDAR_NOT_UPDATED')
+        plc_commstat = rospy.get_param('/plc/conn_status', 'DISCONNECTED')
+        if plc_commstat != 'CONNECTED':
+            self.fault_map["PLC_CONN"] = "PLC_NO_CONN"
+            self.assign_fault(FaultLevel.ERROR)
         
-        if data.in_scan_fusion_updated:
-            if not rospy.get_param('/fault/lidar_m', '') == '':
-                self.set_rosparam('/fault/lidar_m', '')
-        else:
-            self.set_rosparam('/fault/lidar_m', 'MERGED_LIDAR_NOT_UPDATED')
-
-        self.fault_list = self.query_fault_list()
-        self.set_rosparam('/fault_list', self.fault_list)
+        rospy.set_param('/system/status', FaultLevel.toString(self.fault_level))
+        rospy.set_param('/system/fault_list', list(self.fault_map.values()))
         # protected region user update end #
 
     def terminate(self):
@@ -202,20 +193,110 @@ class SystemCheckerImplementation(object):
 	    This gives you a chance to save important data or clean clean object if needed
         """
         # protected region user terminate begin #
-        rospy.set_param('/status', 'TERMINATED')
+        rospy.set_param('/system/status', 'TERMINATED')
         pass
         # protected region user terminate end #
 
 
     # protected region user additional functions begin #
-    def set_rosparam(self, param, value):
-        rospy.loginfo('Setting %s: %s', param, value)
-        rospy.set_param(param, value)
+
+    def assign_fault(self, level):
+        if self.fault_level < level:
+            self.fault_level = level
     
-    def query_fault_list(self):
-        fault_list = []
-        for fault_address in self.fault_addresses:
-            if not rospy.get_param(fault_address, '') == '':
-                self.fault_list.append(rospy.get_param(fault_address))
-        return fault_list
+    def neutralize_fault(self):
+        self.fault_map = {}
+        self.fault_level = FaultLevel.NORMAL
+    
+
+class FaultLevel(IntEnum):
+    NORMAL = 0
+    WARNING = 1
+    ERROR = 2
+    @staticmethod
+    def toString(level):
+        if level == 0:
+            return "NORMAL"
+        elif level == 1:
+            return "WARNING"
+        elif level == 2:
+            return "ERROR"
+        else:
+            return "FATAL"
+    
+class FaultChecker:
+    def __init__(self, update):
+        self.fault_list = []
+        self.update_obj_list = []
+    
+    def spin(self):
+        pass
+
+    def getFaultStatus(self):
+        return self.fault_list
+
+
+class UpdateObject():
+    __metaclass__ = ABCMeta
+    @abstractmethod
+    def getUpdate(self):
+        pass
+    
+    @abstractmethod
+    def getStatus(self):
+        pass
+
+
+class LidarUpdate(UpdateObject):
+    def __init__(self, publish_param, prefix):
+        self.publish_param = publish_param
+        self.prefix = prefix
+        self.status = False
+    
+    def getUpdate(self, isUpdated):
+        if isUpdated and not self.status:
+            rospy.loginfo('Setting %s: %s', self.publish_param, True)
+            self.status = True
+            rospy.set_param(self.publish_param, '')
+        elif self.status and not isUpdated:
+            rospy.loginfo('Setting %s: %s', self.publish_param, False)
+            self.status = False
+            rospy.set_param(self.publish_param, self.prefix + 'NOT_UPDATED')
+
+    def getStatus(self):
+        return self.status
+
+class MoveBaseFilterUpdate(UpdateObject):
+    def __init__(self, publish_param):
+        self.publish_param = publish_param
+        self.id = -1
+    
+    def getUpdate(self, isUpdated, status_list):
+        if isUpdated:
+            if not status_list and self.id != 0:
+                rospy.loginfo('Setting %s: %s', self.publish_param, 'STAND BY')
+                rospy.set_param(self.publish_param, 'STAND BY')
+                self.id = 0
+            elif status_list and self.id != status_list[-1].status:
+                self.id = status_list[-1].status
+                rospy.loginfo("move_base_status_id : %d", move_base_status_id)
+                if self.id == 1:
+                    rospy.set_param(self.publish_param, 'GOING TO POSITION')
+                elif self.id == 4 or self.id == 5:
+                    rospy.set_param(self.publish_param, 'ALARM')
+                elif self.id == 3 or self.id == -1:
+                    rospy.set_param(self.publish_param, 'COMPLETE')
+                elif self.id == 6 or self.id == 7:
+                    rospy.set_param(self.publish_param, 'STOPPING')
+                elif self.id == 2 or self.id == 8:
+                    rospy.set_param(self.publish_param, 'STOPPED')
+                rospy.loginfo('Setting %s: %d', self.publish_param, self.id)
+        elif self.id != -99:
+            rospy.loginfo('Setting %s: %s', self.publish_param, 'BROKEN')
+            self.id = -99
+            rospy.set_param(self.publish_param, 'BROKEN')
+
+    def getStatus(self):
+        return self.id != 4 and self.id != 5 and self.id != -99
+
     # protected region user additional functions end #
