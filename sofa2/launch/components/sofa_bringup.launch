@@ -15,9 +15,9 @@
         <!--<param name="robot_description" command="$(find xacro)/xacro.py '$(find sick_scan)/urdf/example.urdf.xacro'" />-->
         <param name="scanner_type" type="string" value="sick_tim_7xxS"/>
         <!-- -135° -->
-        <param name="min_ang" type="double" value="-2.35619449"/>
+        <param name="min_ang" type="double" value="-2.2"/>
         <!-- 135° -->
-        <param name="max_ang" type="double" value="2.35619449"/>
+        <param name="max_ang" type="double" value="2.2"/>
         <param name="use_binary_protocol" type="bool" value="true"/>
         <param name="range_max" type="double" value="100.0"/>
         <param name="intensity" type="bool" value="True"/>
@@ -33,9 +33,9 @@
         <!--<param name="robot_description" command="$(find xacro)/xacro.py '$(find sick_scan)/urdf/example.urdf.xacro'" />-->
         <param name="scanner_type" type="string" value="sick_tim_7xxS"/>
         <!-- -135° -->
-        <param name="min_ang" type="double" value="-2.35619449"/>
+        <param name="min_ang" type="double" value="-2.2"/>
         <!-- 135° -->
-        <param name="max_ang" type="double" value="2.35619449"/>
+        <param name="max_ang" type="double" value="2.2"/>
         <param name="use_binary_protocol" type="bool" value="true"/>
         <param name="range_max" type="double" value="100.0"/>
         <param name="intensity" type="bool" value="True"/>
@@ -70,9 +70,9 @@
     <!--odom -> base_footprint -> base_link-->
     <node pkg="tf" type="static_transform_publisher" name="base_footprint_to_base_link" args="0.0 0.0 0.0 0.0 0.0 0.0 /base_footprint /base_link 20" output="screen"/>
     <!--base_link -> lidar_f, lidar_r, lidar_fusion-->
-    <node pkg="tf" type="static_transform_publisher" name="base_link_to_cloud_f" args="0.4046 -0.2314 0.3903 -0.78540 0.0 0 /base_link /cloud_f 20" output="screen"/>
-    <node pkg="tf" type="static_transform_publisher" name="base_link_to_cloud_r" args="-0.4046 0.2314 0.6433 2.35619 0.0 0 /base_link /cloud_r 20" output="screen"/>
-    <node pkg="tf" type="static_transform_publisher" name="base_link_to_lidar_fusion" args="0.0 0.0 0.0833 0.0 0.0 0.0 /base_link /lidar_fusion 20" output="screen" />
+    <node pkg="tf" type="static_transform_publisher" name="base_link_to_cloud_f" args="0.3651 -0.2104 0.220 -0.78540 0.0 3.14159 /base_link /cloud_f 20" output="screen"/>
+    <node pkg="tf" type="static_transform_publisher" name="base_link_to_cloud_r" args="-0.2809 0.210 0.220 2.35619 0.0 0 /base_link /cloud_r 20" output="screen"/>
+    <node pkg="tf" type="static_transform_publisher" name="base_link_to_lidar_fusion" args="0.0 0.0 0.220 0.0 0.0 0.0 /base_link /lidar_fusion 20" output="screen" />
 
 
 </launch>

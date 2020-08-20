@@ -279,7 +279,7 @@ class MoveBaseFilterUpdate(UpdateObject):
                 self.id = 0
             elif status_list and self.id != status_list[-1].status:
                 self.id = status_list[-1].status
-                rospy.loginfo("move_base_status_id : %d", move_base_status_id)
+                rospy.loginfo("move_base_status : %d", status_list[-1].status)
                 if self.id == 1:
                     rospy.set_param(self.publish_param, 'GOING TO POSITION')
                 elif self.id == 4 or self.id == 5:

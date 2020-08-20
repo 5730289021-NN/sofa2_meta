@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- <node pkg="sofa2" type="dynamixel_controller" name="dynamixel_controller" output="screen">
+        <param name="ip_addr" type="str" value="$(arg ip_addr)"/>
+        <param name="port" type="int" value="$(arg port)"/>
+        <param name="enb_index" type="int" value="6"/>
+        <rosparam param="id">[0, 1, 2]</rosparam>
+        <rosparam param="cw_lim">[1536, 2048, 1655]</rosparam>
+        <rosparam param="ccw_lim">[2286, 2450, 2455]</rosparam>
+        <rosparam param="inv">[1, 1, 1]</rosparam>
+        <rosparam param="scale_mul">[0.1, 0.1, 0.02]</rosparam>
+        <!--Consult before changing these parameters-->
+    </node> -->
+</launch>
