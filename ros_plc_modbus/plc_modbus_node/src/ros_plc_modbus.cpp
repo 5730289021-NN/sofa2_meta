@@ -164,18 +164,26 @@ bool plc_modbus_manager::shutdown_callback(std_srvs::SetBool::Request& req, std_
                 std::this_thread::sleep_for(std::chrono::seconds(1));
             }
         }
+        /*Call Android to shutdown*/
+        std::stringstream ss;
+        std::string android_ip;
+        node.param<std::string>("android/ip", android_ip, "192.168.16.19");
+        ss << "adb connect " << android_ip << "; sleep 3; adb shell reboot -p";
+        system(ss.str().c_str());
+        
+        /*Self shutdown*/
         for(int i = 5; i > 0; i--) {
-            ROS_INFO_STREAM("Shutting down in..." << i);
+            ROS_INFO_STREAM("Shutting down(srv) in..." << i);
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
-        system("poweroff");
+        system("shutdown -h now");
     } else {
         /*Restart only Intel NUC*/
         for(int i = 5; i > 0; i--) {
             ROS_INFO_STREAM("Rebooting in..." << i);
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
-        system("reboot");
+        system("shutdown -r now");
     }
 }
 
@@ -293,7 +301,11 @@ void plc_modbus_manager::perform_shutdown() {
         }
     }
     /*Call Android to shutdown*/
-    system("/usr/bin/adb shell reboot -p");
+    std::stringstream ss;
+    std::string android_ip;
+    node.param<std::string>("android/ip", android_ip, "192.168.16.19");
+    ss << "adb connect " << android_ip << "; sleep 3; adb shell reboot -p";
+    system(ss.str().c_str());
 
     /*Write confirm shutdown to PLC*/
     for(int i = 5; i > 0; i--) {
@@ -307,10 +319,10 @@ void plc_modbus_manager::perform_shutdown() {
 
     /*Shutdown self*/
     for(int i = 5; i > 0; i--) {
-        ROS_INFO_STREAM("Shutting down in..." << i);
+        ROS_INFO_STREAM("Shutting down(plc) in..." << i);
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
-    system("poweroff"); /*requires to perform sudo chmod a+s /sbin/shutdown*/
+    system("shutdown -h now"); /*requires to perform sudo chmod a+s /sbin/shutdown*/
 }
 
 void plc_modbus_manager::led_head_callback(const std_msgs::ColorRGBA::ConstPtr &led_head_data) {
