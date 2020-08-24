@@ -6,7 +6,7 @@
         <param name="track_width" type="double" value="0.395"/>
         <param name="cpr" type="int" value="200000"/>
         <param name="gear_ratio" type="int" value="20"/>
-        <param name="invert_mul" type="int" value="-1"/>
+        <param name="invert_mul" type="int" value="1"/>
         <remap from="cmd_vel" to="drive_vel" />
     </node>
 

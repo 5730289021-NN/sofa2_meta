@@ -163,6 +163,7 @@ class SystemCheckerImplementation(object):
                 elif(type(updateObj) == MoveBaseFilterUpdate):
                     self.fault_map["MOVE_BASE"] = "MOVE_BASE_ERROR"
                     self.assign_fault(FaultLevel.WARNING)
+                    pass
 
         # Additional fault from DRIVER and PLC
         
@@ -292,9 +293,9 @@ class MoveBaseFilterUpdate(UpdateObject):
                     rospy.set_param(self.publish_param, 'STOPPED')
                 rospy.loginfo('Setting %s: %d', self.publish_param, self.id)
         elif self.id != -99:
-            rospy.loginfo('Setting %s: %s', self.publish_param, 'BROKEN')
+            rospy.loginfo('Setting %s: %s', self.publish_param, 'ALARM')
             self.id = -99
-            rospy.set_param(self.publish_param, 'BROKEN')
+            rospy.set_param(self.publish_param, 'ALARM')
 
     def getStatus(self):
         return self.id != 4 and self.id != 5 and self.id != -99

@@ -96,6 +96,13 @@ void plc_modbus_manager::initialize_plc() {
         ROS_INFO("Connection to modbus device established");
         node.setParam("/plc/conn_status", "CONNECTED");
     }
+
+    if (modbus_set_error_recovery(plc, MODBUS_ERROR_RECOVERY_LINK) == -1) {
+        ROS_ERROR("Unable to set error recovery link");
+        node.setParam("/plc/recovery_status", "BAD");
+    } else {
+        node.setParam("/plc/recovery_status", "NORMAL");
+    }
 }
 
 bool plc_modbus_manager::modbus_read_value() {
@@ -137,7 +144,7 @@ bool plc_modbus_manager::modbus_read_value() {
         success = false;
     } else {
         for(int i = 0; i < input_reg_size; i++) {
-            modbus_map[input_reg_name[i]] = (int16_t) input_reg_buffer[i];
+            modbus_map[input_reg_name[i]] = input_reg_buffer[i];
         }
     }
 
@@ -200,7 +207,11 @@ plc_modbus_manager::plc_modbus_manager() {
 
     ros::Rate loop_rate(spin_rate);
     while (ros::ok()) {
-        modbus_read_value();
+        if(!modbus_read_value()) {
+            node.param("/plc/read_value", false);
+        } else {
+            node.param("/plc/read_value", true);
+        }
         /*Coil No.4 Check if shutdown switch is pushed*/
         if(modbus_map["shutdown_sw"] == 1) perform_shutdown();
 
