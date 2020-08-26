@@ -1,6 +1,8 @@
 //
 // Created by Brad Bazemore on 10/29/15.
 //
+// To beable to shutdown, sudo chmod u+s /bin/systemctl
+//
 #include <ros/ros.h>
 #include <std_msgs/UInt16MultiArray.h>
 #include <std_msgs/ByteMultiArray.h>
@@ -167,8 +169,13 @@ bool plc_modbus_manager::shutdown_callback(std_srvs::SetBool::Request& req, std_
         /*Call Android to shutdown*/
         std::stringstream ss;
         std::string android_ip;
-        node.param<std::string>("android/ip", android_ip, "192.168.16.19");
+        node.param<std::string>("/android/ip", android_ip, "192.168.16.19");
         ss << "adb connect " << android_ip << "; sleep 3; adb shell reboot -p";
+
+        for(int i = 3; i > 0; i--) {
+            ROS_INFO_STREAM("Turning off android in..." << i << " using " << ss.str().c_str());
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
         system(ss.str().c_str());
         
         /*Self shutdown*/
@@ -176,14 +183,27 @@ bool plc_modbus_manager::shutdown_callback(std_srvs::SetBool::Request& req, std_
             ROS_INFO_STREAM("Shutting down(srv) in..." << i);
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
-        system("shutdown -h now");
+        //system("sudo shutdown -h now");
+        system("systemctl --force --force poweroff");
     } else {
+        /*Call Android to reboot*/
+        std::stringstream ss;
+        std::string android_ip;
+        node.param<std::string>("/android/ip", android_ip, "192.168.16.19");
+        ss << "adb connect " << android_ip << "; sleep 3; adb shell reboot";
+
+        for(int i = 3; i > 0; i--) {
+            ROS_INFO_STREAM("Turning off android in..." << i << " using " << ss.str().c_str());
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+        system(ss.str().c_str());
         /*Restart only Intel NUC*/
         for(int i = 5; i > 0; i--) {
             ROS_INFO_STREAM("Rebooting in..." << i);
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
-        system("shutdown -r now");
+        //system("sudo shutdown -r now");
+        system("systemctl --force --force reboot");
     }
 }
 
@@ -262,9 +282,11 @@ plc_modbus_manager::plc_modbus_manager() {
         
         /*Input Register No. 20 - 23 Battery*/
         battery_message.voltage = 0.001 * modbus_map["voltage"];
-        battery_message.current = 0.001 * modbus_map["current"];
+        battery_message.current = 0.001 * static_cast<int16_t>(modbus_map["current"]);
         battery_message.charge = 0.001 * modbus_map["capacity_rem"];
-        battery_message.design_capacity = 0.001 * (int8_t) modbus_map["capacity_tot"];
+        battery_message.capacity = 0.001 * modbus_map["capacity_tot"];
+        battery_message.percentage = battery_message.charge / battery_message.capacity;
+
         battery_message.header.stamp = ros::Time::now();
         battery_publisher.publish(battery_message);
 
@@ -303,8 +325,13 @@ void plc_modbus_manager::perform_shutdown() {
     /*Call Android to shutdown*/
     std::stringstream ss;
     std::string android_ip;
-    node.param<std::string>("android/ip", android_ip, "192.168.16.19");
+    node.param<std::string>("/android/ip", android_ip, "192.168.16.19");
     ss << "adb connect " << android_ip << "; sleep 3; adb shell reboot -p";
+
+    for(int i = 3; i > 0; i--) {
+        ROS_INFO_STREAM("Turning off android in..." << i << " using " << ss.str().c_str());
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
     system(ss.str().c_str());
 
     /*Write confirm shutdown to PLC*/
@@ -322,7 +349,8 @@ void plc_modbus_manager::perform_shutdown() {
         ROS_INFO_STREAM("Shutting down(plc) in..." << i);
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
-    system("shutdown -h now"); /*requires to perform sudo chmod a+s /sbin/shutdown*/
+    //system("sudo shutdown -h now"); /*requires to perform sudo chmod a+s /sbin/shutdown*/
+    system("systemctl --force --force poweroff");
 }
 
 void plc_modbus_manager::led_head_callback(const std_msgs::ColorRGBA::ConstPtr &led_head_data) {
