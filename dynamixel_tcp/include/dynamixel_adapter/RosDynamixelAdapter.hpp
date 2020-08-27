@@ -30,6 +30,9 @@ namespace dynamixel_tcp
         std::vector<int> id_list;
         std::vector<int> cw_lim_list;
         std::vector<int> ccw_lim_list;
+        std::vector<int> kp_list;
+        std::vector<int> ki_list;
+        std::vector<int> kd_list;
 
         DynamixelAdapter dynamixel_adapter;
     };

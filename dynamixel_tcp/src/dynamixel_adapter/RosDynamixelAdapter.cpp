@@ -16,15 +16,15 @@ namespace dynamixel_tcp
             return;
         }
 
-        target_subscriber = nh.subscribe("/head/desired_position", 3,
+        target_subscriber = nh.subscribe("/head/target_position", 3,
                                                   &RosDynamixelAdapter::latchPositionCallback, this);
 
         current_publisher = nh.advertise<sensor_msgs::JointState>("/head/current_position", 3);
 
-        ros::Rate loop_rate(20); // Should be more than enough
+        ros::Rate loop_rate(10); // Should be enough
 
-        /*Config Kp, Ki, Kd, Enable Torque*/
-        dynamixel_adapter = DynamixelAdapter(ip_addr, port, id_list, cw_lim_list, ccw_lim_list); //RAI (connect + config dynamixel)
+        /*Config Kp, Ki, Kd then Enable Torque*/
+        dynamixel_adapter = DynamixelAdapter(ip_addr, port, id_list, cw_lim_list, ccw_lim_list, kp_list, ki_list, kd_list); //RAI (connect + config dynamixel)
 
         if (!dynamixel_adapter.getErrorMsg().empty())
         {
@@ -37,7 +37,7 @@ namespace dynamixel_tcp
             /*Read Current Position*/
             current_position.position = dynamixel_adapter.readPositions();
             /*Write Desire Position which is latched from latchPositionCallback*/
-            dynamixel_adapter.writePositions(desired_position.position);
+            dynamixel_adapter.writePositions(desired_position.name, desired_position.position);
             /*Publish*/
             current_publisher.publish(current_position);
             /*Checking for message*/
@@ -79,6 +79,21 @@ namespace dynamixel_tcp
         if (!nh.getParam("dynamixel_controller/ccw_lim", ccw_lim_list))
         {
             ROS_ERROR("No Dynamixel Counter-Clockwise Limit Given!");
+            success = false;
+        }
+        if (!nh.getParam("dynamixel_controller/kp", kp_list))
+        {
+            ROS_ERROR("No Dynamixel Kp Given!");
+            success = false;
+        }
+        if (!nh.getParam("dynamixel_controller/ki", ki_list))
+        {
+            ROS_ERROR("No Dynamixel Ki Given!");
+            success = false;
+        }
+        if (!nh.getParam("dynamixel_controller/kd", kd_list))
+        {
+            ROS_ERROR("No Dynamixel Kd Given!");
             success = false;
         }
 

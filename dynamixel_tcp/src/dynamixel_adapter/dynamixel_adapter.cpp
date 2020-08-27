@@ -5,12 +5,15 @@
 
 namespace dynamixel_tcp
 {
-    DynamixelAdapter::DynamixelAdapter(std::string ip_addr, int port, std::vector<int> id_list, std::vector<int> cw_lim_list, std::vector<int> ccw_lim_list) : error_msg("")
+    DynamixelAdapter::DynamixelAdapter(std::string ip_addr, int port, std::vector<int> id_list,
+                                       std::vector<int> cw_lim_list, std::vector<int> ccw_lim_list,
+                                       std::vector<int> kp_list, std::vector<int> ki_list, std::vector<int> kd_list)
+        : error_msg("")
     {
         /*Initialize motors*/
         for (unsigned i = 0; i < id_list.size(); i++)
         {
-            DynamixelMotor *m = new DynamixelMotor(id_list[i], cw_lim_list[i], ccw_lim_list[i]);
+            DynamixelMotor *m = new DynamixelMotor(id_list[i], cw_lim_list[i], ccw_lim_list[i], kp_list[i], ki_list[i], kd_list[i]);
             motors.push_back(m);
         }
         /*Initialize TCP and assign callback*/
@@ -18,14 +21,17 @@ namespace dynamixel_tcp
         tcp_client->register_receive_callback(std::bind(&DynamixelAdapter::tcpCallback, this, std::placeholders::_1, std::placeholders::_2));
         if (!tcp_client->init())
         {
-            ROS_ERROR("DYNAMIXEL_FAILED_TCP_INITIALIZE");
+            setErrorMsg("DYNAMIXEL_FAILED_TCP_INITIALIZE");
             return;
         }
+        /*Config Kp, Ki, Kd*/
+        std::vector<uint8_t> buf_con_pid = getPIDConfigCommand();
+        tcp_client->send_bytes(buf_con_pid.data(), buf_con_pid.size());
+        std::this_thread::sleep_for(std::chrono::seconds(1));
         /*Enable Torque*/
         std::vector<uint8_t> buf_enb_tq = getTorqueEnableCommand();
         tcp_client->send_bytes(buf_enb_tq.data(), buf_enb_tq.size());
         std::this_thread::sleep_for(std::chrono::seconds(1));
-        /*Todo: Config Kp*/
     }
 
     DynamixelAdapter::~DynamixelAdapter()
@@ -42,6 +48,7 @@ namespace dynamixel_tcp
         return error_msg;
     }
 
+    /*Expected copy elision*/
     std::vector<double> DynamixelAdapter::readPositions()
     {
         std::vector<double> positions;
@@ -51,35 +58,36 @@ namespace dynamixel_tcp
             std::vector<uint8_t> buf_read_pos = getReadPositionCommand(motor->getID());
             protocol_state = READY;
             tcp_client->send_bytes(buf_read_pos.data(), buf_read_pos.size());
-            int count = 0;
+            unsigned count = 0;
             while (protocol_state != COMPLETED)
             {
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
                 count++;
                 if (count == TCP_READ_TIMEOUT)
                 {
-                    ROS_ERROR("DYNAMIXEL_TIMEOUT");
+                    setErrorMsg("DYNAMIXEL_TIMEOUT");
                     break;
                 }
             }
+            //When protocol_state is COMPLETE then motor position is automically updated
             positions.push_back(motor->getPosition());
         }
         //2. Return latest Position (if Possible)
         return positions;
     }
 
-    void DynamixelAdapter::writePositions(std::vector<double> positions)
+    void DynamixelAdapter::writePositions(std::vector<std::string> &ids, std::vector<double> &positions)
     {
-        std::vector<uint8_t> buf_write_pos = {0xFF, 0xFF, 0xFE, uint8_t(3 * motors.size() + 4), 0x83, 0x20, 0x02}; // 0xFF, 0xFF, ALL , LEN, INST, MOVING_SPEED, 2 BYTE_WRITE
-        uint8_t chksum = 0xFE + uint8_t(3 * motors.size() + 4) + 0x83 + 0x20 + 0x02;
-        for (unsigned i = 0; i < motors.size(); i++)
+        std::vector<uint8_t> buf_write_pos = {0xFF, 0xFF, 0xFE, uint8_t(3 * ids.size() + 4), 0x83, 0x1E, 0x02}; // 0xFF, 0xFF, ALL , LEN, INST, POSITION, 2 BYTE_WRITE
+        uint8_t chksum = 0xFE + uint8_t(3 * ids.size() + 4) + 0x83 + 0x20 + 0x02;
+        for (unsigned i = 0; i < ids.size(); i++)
         {
-            buf_write_pos.push_back(motors[i]->getID());
-            buf_write_pos.push_back(static_cast<int>(positions[i]) % 256);
-            buf_write_pos.push_back(static_cast<int>(positions[i]) / 256);
+            buf_write_pos.push_back(static_cast<uint8_t>(std::stoi(ids[i])));
+            buf_write_pos.push_back(static_cast<uint8_t>(positions[i]) % 256);
+            buf_write_pos.push_back(static_cast<uint8_t>(positions[i]) / 256);
             chksum += *(buf_write_pos.end() - 1) + *(buf_write_pos.end() - 2) + *(buf_write_pos.end() - 3);
         }
-        chksum = 255 - chksum;
+        chksum = 0xFF - chksum;
         buf_write_pos.push_back(chksum);
 
         tcp_client->send_bytes(buf_write_pos.data(), buf_write_pos.size());
@@ -139,13 +147,13 @@ namespace dynamixel_tcp
                 processMotorMessage(motor_message);
                 break;
             default:
-                ROS_ERROR("DYNAMIXEL_UNEXPECTED_DEFAULT_CASE");
+                setErrorMsg("DYNAMIXEL_UNEXPECTED_DEFAULT_CASE");
                 break;
             }
         }
         if (protocol_state == LOST)
         {
-            ROS_ERROR("DYNAMIXEL_STATE_LOST");
+            setErrorMsg("DYNAMIXEL_STATE_LOST");
         }
     }
 
@@ -155,7 +163,7 @@ namespace dynamixel_tcp
         unsigned int calcalated_sum = 255 - ((motor_message.id + motor_message.len + motor_message.err + motor_message.p1 + motor_message.p2) % 256);
         if (calcalated_sum != motor_message.chksum)
         {
-            ROS_ERROR("DYNAMIXEL_WRONG_CHKSUM");
+            setErrorMsg("DYNAMIXEL_WRONG_CHKSUM");
             return;
         }
 
@@ -167,14 +175,14 @@ namespace dynamixel_tcp
                 int pos = motor_message.p2 * 256 + motor_message.p1;
                 if (!motor->updatePosition(pos))
                 {
-                    ROS_ERROR("DYNAMIXEL_OUT_OF_BOUND");
+                    setErrorMsg("DYNAMIXEL_OUT_OF_BOUND");
                 }
                 protocol_state = COMPLETED;
                 return;
             }
         }
         // UNEXPECTED: When motor->getID() never matches motor_message.id
-        error_msg = "DYNAMIXEL_UNKNOWN_ID";
+        setErrorMsg("DYNAMIXEL_UNKNOWN_ID");
     }
 
     std::vector<uint8_t> DynamixelAdapter::getTorqueEnableCommand() const
@@ -184,10 +192,28 @@ namespace dynamixel_tcp
         for (auto motor : motors)
         {
             buf.push_back(motor->getID());
-            buf.push_back(0x01);
+            buf.push_back(0x01); //Enable: 0x01
             chksum += 0x01 + motor->getID();
         }
-        chksum = 255 - chksum;
+        chksum = 0xFF - chksum;
+        buf.push_back(chksum);
+        return buf;
+    }
+
+    std::vector<uint8_t> DynamixelAdapter::getPIDConfigCommand() const
+    {
+        //0xFF, 0xFF, ALL , LEN((3_data+1_con)*3_motor + 4_con), INST(0x83_bulk_write), D Gain(26), 3_BYTE_WRITE
+        std::vector<uint8_t> buf = {0xFF, 0xFF, 0xFE, uint8_t(4 * motors.size() + 4), 0x83, 0x1A, 0x03};
+        uint8_t chksum = 0xFE + uint8_t(4 * motors.size() + 4) + 0x83 + 0x1A + 0x03;
+        for (auto motor : motors)
+        {
+            buf.push_back(motor->getID());
+            buf.push_back(motor->getKd()); //Kd
+            buf.push_back(motor->getKi()); //Ki
+            buf.push_back(motor->getKp()); //Kp
+            chksum += motor->getIDPIDSum();
+        }
+        chksum = 0xFF - chksum;
         buf.push_back(chksum);
         return buf;
     }
@@ -196,5 +222,10 @@ namespace dynamixel_tcp
     {
         std::vector<uint8_t> buf = {0xFF, 0xFF, id, 0x04, 0x02, 0x24, 0x02, static_cast<uint8_t>(~(0x2C + id))};
         return buf;
+    }
+
+    void DynamixelAdapter::setErrorMsg(std::string error)
+    {
+        error_msg = error;
     }
 } // namespace dynamixel_tcp
