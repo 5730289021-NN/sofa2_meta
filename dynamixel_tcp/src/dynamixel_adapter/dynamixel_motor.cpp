@@ -17,7 +17,7 @@ namespace dynamixel_tcp
     std::string DynamixelMotor::getInfo() const
     {
         std::stringstream ss;
-        ss << "Motor ID:" << id << " CW_LIM:" << cw_lim << " CCW_LIM:" << ccw_lim;
+        ss << "Motor ID:" << id << " Pos:" << cur_pos << " CW_LIM:" << cw_lim << " CCW_LIM:" << ccw_lim;
         return ss.str();
     }
 
@@ -59,7 +59,7 @@ namespace dynamixel_tcp
     bool DynamixelMotor::updatePosition(int pos)
     {
         cur_pos = pos;
-        return pos >= ccw_lim && pos <= cw_lim;
+        return pos >= cw_lim && pos <= ccw_lim;
     }
 
 } // namespace dynamixel_tcp

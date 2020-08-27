@@ -53,9 +53,13 @@ namespace dynamixel_tcp
         std::vector<DynamixelMotor *> motors;
         volatile DynamixelProtocolState protocol_state;
         MotorMessage motor_message;
-        std::string error_msg;
 
-        static int const TCP_READ_TIMEOUT = 25;
+        std::string error_msg;
+        std::string info_msg;
+
+        static int const TCP_READ_TIMEOUT = 50;
+
+        int timeout_stack;
 
         void tcpCallback(const uint8_t *buf, size_t len);
         void processMotorMessage(MotorMessage &motor_message);
@@ -63,7 +67,8 @@ namespace dynamixel_tcp
         std::vector<uint8_t> getPIDConfigCommand() const;
         std::vector<uint8_t> getReadPositionCommand(uint8_t id) const;
     
-        void setErrorMsg(std::string error);
+        inline void setErrorMsg(std::string error);
+        inline void setInfoMsg(std::string info);
     };
 
 } // namespace dynamixel_tcp

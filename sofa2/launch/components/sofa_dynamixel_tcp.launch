@@ -2,13 +2,16 @@
 <launch>
     <arg name="ip_addr" default="192.168.16.23" />
     <arg name="port" default="9002" /> 
-    <node pkg="sofa2" type="dynamixel_controller" name="dynamixel_controller" output="screen">
+    <node pkg="dynamixel_tcp" type="dynamixel_adapter" name="dynamixel_adapter" output="screen">
         <param name="ip_addr" type="str" value="$(arg ip_addr)"/>
         <param name="port" type="int" value="$(arg port)"/>
 
         <rosparam param="id">[0, 1, 2]</rosparam>
         <rosparam param="cw_lim">[600, 1400, 1950]</rosparam>
-        <rosparam param="ccw_lim">[1400, 2700, 2000]</rosparam>
-        
+        <rosparam param="ccw_lim">[1400, 2700, 2022]</rosparam>
+        <rosparam param="kp">[10, 10, 20]</rosparam>
+        <rosparam param="ki">[2, 0, 10]</rosparam>
+        <rosparam param="kd">[1, 8, 5]</rosparam>
+
     </node>
 </launch>

@@ -34,7 +34,9 @@ namespace dynamixel_tcp
         std::vector<int> ki_list;
         std::vector<int> kd_list;
 
-        DynamixelAdapter dynamixel_adapter;
+        bool target_updated;
+
+        DynamixelAdapter* dynamixel_adapter;
     };
 
 } // namespace dynamixel_tcp
