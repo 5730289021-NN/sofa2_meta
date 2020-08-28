@@ -45,7 +45,8 @@ namespace dynamixel_tcp
 
         std::string getErrorMsg() const;
         std::vector<double> readPositions(); //Send a request position command and return the that value
-        void writePositions(std::vector<std::string> &id, std::vector<double> &positions);
+        void writePositions(std::vector<std::string> &ids, std::vector<double> &positions);
+        void writePositionsVelocities(std::vector<std::string> &ids, std::vector<double> &positions, std::vector<double> &velocities);
         void setVelocities(std::vector<int> velocities);
 
     private:

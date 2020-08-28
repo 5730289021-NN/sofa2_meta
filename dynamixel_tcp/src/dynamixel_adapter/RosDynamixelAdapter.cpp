@@ -51,7 +51,19 @@ namespace dynamixel_tcp
             if (target_updated)
             {
                 //ROS_INFO_STREAM("Getting Updated: " << desired_position.name[0] << " " << desired_position.position[0]);
-                dynamixel_adapter->writePositions(desired_position.name, desired_position.position);
+                int id_size = desired_position.name.size();
+                if (id_size == desired_position.position.size() && id_size == desired_position.velocity.size())
+                {
+                    dynamixel_adapter->writePositionsVelocities(desired_position.name, desired_position.position, desired_position.velocity);
+                }
+                else if (id_size == desired_position.position.size())
+                {
+                    dynamixel_adapter->writePositions(desired_position.name, desired_position.position);
+                }
+                else
+                {
+                    ROS_ERROR("Unable to perform input task");
+                }
                 target_updated = false;
             }
             /*Publish*/
@@ -78,7 +90,7 @@ namespace dynamixel_tcp
     bool RosDynamixelAdapter::readParameters()
     {
         nh.param<std::string>("/dynamixel_adapter/ip_addr", ip_addr, "192.168.16.23");
-        nh.param("/dynamixel_adapter/port", port, 5002);
+        nh.param("/dynamixel_adapter/port", port, 9002);
         // nh.param("dynamixel_controller/spin_rate", spin_rate, 5);
         // nh.param("dynamixel_controller/enb_index", enb_index, 6);
 

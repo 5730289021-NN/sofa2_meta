@@ -3,6 +3,8 @@
 #include <ros/console.h>
 #include <vector>
 #include <string>
+#include <thread>
+#include <chrono>
 
 #define SHOW_INFO
 
@@ -99,6 +101,31 @@ namespace dynamixel_tcp
             buf_write_pos.push_back(static_cast<uint8_t>(positions[i]) % 256);
             buf_write_pos.push_back(static_cast<uint8_t>(positions[i] / 256));
             chksum += *(buf_write_pos.end() - 1) + *(buf_write_pos.end() - 2) + *(buf_write_pos.end() - 3);
+        }
+        chksum = 0xFF - chksum;
+        buf_write_pos.push_back(chksum);
+        std::stringstream ss;
+        ss << std::hex << std::setfill(' ');
+        for(int i = 0; i < buf_write_pos.size(); i++) {
+            ss << std::setw(3) << static_cast<unsigned>(buf_write_pos[i]);
+        }
+        setInfoMsg(ss.str());
+
+        tcp_client->send_bytes(buf_write_pos.data(), buf_write_pos.size());
+    }
+
+    void DynamixelAdapter::writePositionsVelocities(std::vector<std::string> &ids, std::vector<double> &positions, std::vector<double> &velocities)
+    {
+        std::vector<uint8_t> buf_write_pos = {0xFF, 0xFF, 0xFE, uint8_t(5 * ids.size() + 4), 0x83, 0x1E, 0x04}; // 0xFF, 0xFF, ALL , LEN, INST, POSITION, 4 BYTE_WRITE
+        uint8_t chksum = 0xFE + uint8_t(5 * ids.size() + 4) + 0x83 + 0x1E + 0x04;
+        for (unsigned i = 0; i < ids.size(); i++)
+        {
+            buf_write_pos.push_back(static_cast<uint8_t>(std::stoi(ids[i])));
+            buf_write_pos.push_back(static_cast<uint8_t>(positions[i]) % 256);
+            buf_write_pos.push_back(static_cast<uint8_t>(positions[i] / 256));
+            buf_write_pos.push_back(static_cast<uint8_t>(velocities[i]) % 256);
+            buf_write_pos.push_back(static_cast<uint8_t>(velocities[i] / 256));
+            chksum += *(buf_write_pos.end() - 1) + *(buf_write_pos.end() - 2) + *(buf_write_pos.end() - 3) + *(buf_write_pos.end() - 4) + *(buf_write_pos.end() - 5);
         }
         chksum = 0xFF - chksum;
         buf_write_pos.push_back(chksum);
