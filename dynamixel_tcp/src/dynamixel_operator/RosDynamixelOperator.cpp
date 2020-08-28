@@ -1,33 +1,24 @@
 #include <dynamixel_operator/RosDynamixelOperator.hpp>
 #include <ros/ros.h>
 #include <vector>
+#include <string>
 
 namespace dynamixel_tcp
 {
     RosDynamixelOperator::RosDynamixelOperator(ros::NodeHandle &nodeHandle)
-        : nh(nodeHandle), head_shaking(false)
+        : nh(nodeHandle)
     {
-        if (!readParameters())
+        if (!initializeServices())
         {
-            ROS_ERROR("ROS Initialization Failed");
+            ROS_ERROR("Dynamixel Operator Service Initialization Failed");
             return;
         }
+        ROS_ERROR("Dynamixel Operator Started");
 
-        shakehead_srv = nh.advertiseService("/head/operator/shakehead",
-                                            &RosDynamixelOperator::shakeHeadServiceCallback, this);
-
-        target_publisher = nh.advertise<sensor_msgs::JointState>("/head/target_position", 3);
-        current_subscriber = nh.subscribe("/head/current_position", 3,
-                                          &RosDynamixelAdapter::latchPositionCallback, this);
-
-        ros::Rate loop_rate(10);
+        ros::Rate loop_rate(5);
         /*Finite State Machine Here*/
         while (ros::ok())
         {
-            if (head_shaking && isTargetPositionArrived())
-            {
-                changeTargetShakeHeadPosition();
-            }
             ros::spinOnce();
             loop_rate.sleep();
         }
@@ -40,47 +31,102 @@ namespace dynamixel_tcp
                 current_state.position[1] > desired_state.position[1] - TOLERANCE)
     }
 
-    bool RosDynamixelOperator::shakeHeadServiceCallback(std_srvs::Trigger::Request &request,
-                                                        std_srvs::Trigger::Response &response)
+    bool RosDynamixelOperator::initializeServices()
     {
-        if (request.data)
-        {
-            head_shaking = true;
-            response.success = true;
-            response.message = "The head is shaking";
-        }
-        else
-        {
-            head_shaking = false;
-            moveToHome();
-            response.success = true;
-            response.message = "The head is going back to home";
-        }
-        return true;
-    }
+        bool success = true;
 
-    void RosDynamixelOperator::changeTargetShakeHeadPosition()
-    {
-        double goal_position;
-        if (shake_head_state == LEFT)
+        if (!nh.getParam("/dynamixel_operator/operator_names", operator_names))
         {
-            shake_head_state = RIGHT;
-            goal_position = shake_head_ccw_lim;
+            ROS_ERROR("No Dynamixel Operator Name Given!");
+            success = false;
         }
-        else
-        {
-            shake_head_state = LEFT;
-            goal_position = shake_head_cw_lim;
-        }
-        std::vector<std::string> names{"1"};
-        std::vector<double> positions{goal_position};
-        target_state.name = names;
-        target_state.position = positions;
-        target_publisher.publish(target_state);
-    }
 
-    void RosDynamixelOperator::moveToHome()
-    {
-        target_publisher.publish(home_state);
+        if (!nh.getParam("/dynamixel_operator/operator_types", operator_types))
+        {
+            ROS_ERROR("No Dynamixel Operator Type Given!");
+            success = false;
+        }
+        int operator_size = operator_name.size();
+
+        if (operator_size != operator_types.size())
+        {
+            ROS_ERROR("Dynamixel Operator Size Mismatched");
+        }
+
+        for (int i = 0; i < operator_size; i++)
+        {
+            if (operator_types[i].compare("goal") == 0)
+            {
+                std::vector<std::string> id_list;
+                if (!nh.getParam("/dynamixel_operator/" + operator_names[i] + "/id", id_list))
+                {
+                    ROS_ERROR("No id list for" << operator_name[i]);
+                    success = false;
+                }
+                std::vector<double> goal_list;
+                if (!nh.getParam("/dynamixel_operator/" + operator_names[i] + "/goal", goal_list))
+                {
+                    ROS_ERROR("No goal list for" << operator_name[i]);
+                    success = false;
+                }
+                std::vector<double> moving_speed;
+                if (!nh.getParam("/dynamixel_operator/" + operator_names[i] + "/moving_speed", moving_speed))
+                {
+                    ROS_ERROR("No moving_speed list for" << operator_name[i]);
+                    success = false;
+                }
+                /*Create New Operator and add into operators*/
+                if(success){
+                    ToGoalOperator* to_goal_op = new ToGoalOperator(id_list, goal_list, moving_speed);
+                    operator_map[operator_names[i]] = to_goal_op;
+                    nh.advertiseService("/head/operator/" + operator_name[i], &ToGoalOperator::serviceCallback, to_goal_op);
+                }
+            }
+            else if (operator_type[i].compare("single") == 0)
+            {
+                std::string id;
+                if (!nh.getParam("/dynamixel_operator/" + operator_names[i] + "/id", id))
+                {
+                    ROS_ERROR("No id for" << operator_name[i]);
+                    success = false;
+                }
+                double cw_lim_value;
+                if (!nh.getParam("/dynamixel_operator/" + operator_names[i] + "/cw_lim_value", cw_lim_value))
+                {
+                    ROS_ERROR("No cw_lim_value for" << operator_name[i]);
+                    success = false;
+                }
+                double ccw_lim_value;
+                if (!nh.getParam("/dynamixel_operator/" + operator_names[i] + "/ccw_lim_value", ccw_lim_value))
+                {
+                    ROS_ERROR("No ccw_lim_value for" << operator_name[i]);
+                    success = false;
+                }
+                int sleep_time_millis;
+                if (!nh.getParam("/dynamixel_operator/" + operator_names[i] + "/sleep_time_millis", sleep_time_millis))
+                {
+                    ROS_ERROR("No sleep_time_millis for" << operator_name[i]);
+                    success = false;
+                }
+                double moving_speed;
+                if (!nh.getParam("/dynamixel_operator/" + operator_names[i] + "/moving_speed", moving_speed))
+                {
+                    ROS_ERROR("No moving_speed for" << operator_name[i]);
+                    success = false;
+                }
+                if(success){
+                    SingleJointOperator* single_joint_op  = new SingleJointOperator(id_list, goal_list, moving_speed);
+                    operator_map[operator_names[i]] = single_joint_op;
+                    nh.advertiseService("/head/operator/" + operator_name[i], &SingleJointOperator::serviceCallback, single_joint_op);
+                }
+            }
+            else
+            {
+                ROS_ERROR_STREAM("Unknown Operator Name " << operator_type[i]);
+                success = false;
+            }
+        }
+
+        return success;
     }
 } // namespace dynamixel_tcp
