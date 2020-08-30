@@ -3,7 +3,8 @@
 
 namespace dynamixel_tcp
 {
-    ToGoalOperator::ToGoalOperator(std::vector<std::string> &ids, std::vector<double> &goals, std::vector<double> &moving_speeds)
+    ToGoalOperator::ToGoalOperator(ros::Publisher &target_publisher, std::vector<std::string> &ids, std::vector<double> &goals, std::vector<double> &moving_speeds)
+    : Operator(target_publisher)
     {
         for(int i = 0; i < ids.size(); i++)
         {
@@ -15,7 +16,7 @@ namespace dynamixel_tcp
     ToGoalOperator::~ToGoalOperator()
     {
     }
-    void operate(ros::Publisher& target_publisher)
+    void ToGoalOperator::operate()
     {
         target_publisher.publish(target_state_msg);
     }

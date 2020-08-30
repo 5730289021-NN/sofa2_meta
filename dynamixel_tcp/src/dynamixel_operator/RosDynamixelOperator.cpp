@@ -8,7 +8,8 @@ namespace dynamixel_tcp
     RosDynamixelOperator::RosDynamixelOperator(ros::NodeHandle &nodeHandle)
         : nh(nodeHandle)
     {
-        if (!initializeServices())
+        target_state_publisher = nh.advertise<sensor_msgs::JointState>("/head/target_position", 1);
+        if (!initializeServices(target_state_publisher))
         {
             ROS_ERROR("Dynamixel Operator Service Initialization Failed");
             return;
@@ -24,14 +25,11 @@ namespace dynamixel_tcp
         }
     }
 
-    bool RosDynamixelOperator::isTargetPositionArrived() const
+    RosDynamixelOperator::~RosDynamixelOperator()
     {
-        /*The yaw of head must be at index 1*/
-        return (current_state.position[1] < desired_state.position[1] + TOLERANCE &&
-                current_state.position[1] > desired_state.position[1] - TOLERANCE)
     }
 
-    bool RosDynamixelOperator::initializeServices()
+    bool RosDynamixelOperator::initializeServices(ros::Publisher& target_state_publisher)
     {
         bool success = true;
 
@@ -46,7 +44,7 @@ namespace dynamixel_tcp
             ROS_ERROR("No Dynamixel Operator Type Given!");
             success = false;
         }
-        int operator_size = operator_name.size();
+        int operator_size = operator_names.size();
 
         if (operator_size != operator_types.size())
         {
@@ -60,69 +58,69 @@ namespace dynamixel_tcp
                 std::vector<std::string> id_list;
                 if (!nh.getParam("/dynamixel_operator/" + operator_names[i] + "/id", id_list))
                 {
-                    ROS_ERROR("No id list for" << operator_name[i]);
+                    ROS_ERROR_STREAM("No id list for" << operator_names[i]);
                     success = false;
                 }
                 std::vector<double> goal_list;
                 if (!nh.getParam("/dynamixel_operator/" + operator_names[i] + "/goal", goal_list))
                 {
-                    ROS_ERROR("No goal list for" << operator_name[i]);
+                    ROS_ERROR_STREAM("No goal list for" << operator_names[i]);
                     success = false;
                 }
                 std::vector<double> moving_speed;
                 if (!nh.getParam("/dynamixel_operator/" + operator_names[i] + "/moving_speed", moving_speed))
                 {
-                    ROS_ERROR("No moving_speed list for" << operator_name[i]);
+                    ROS_ERROR_STREAM("No moving_speed list for" << operator_names[i]);
                     success = false;
                 }
                 /*Create New Operator and add into operators*/
                 if(success){
-                    ToGoalOperator* to_goal_op = new ToGoalOperator(id_list, goal_list, moving_speed);
+                    Operator* to_goal_op = new ToGoalOperator(target_state_publisher, id_list, goal_list, moving_speed);
                     operator_map[operator_names[i]] = to_goal_op;
-                    nh.advertiseService("/head/operator/" + operator_name[i], &ToGoalOperator::serviceCallback, to_goal_op);
+                    nh.advertiseService("/head/operator/" + operator_names[i], &Operator::serviceCallback, to_goal_op);
                 }
             }
-            else if (operator_type[i].compare("single") == 0)
+            else if (operator_types[i].compare("single") == 0)
             {
                 std::string id;
                 if (!nh.getParam("/dynamixel_operator/" + operator_names[i] + "/id", id))
                 {
-                    ROS_ERROR("No id for" << operator_name[i]);
+                    ROS_ERROR_STREAM("No id for" << operator_names[i]);
                     success = false;
                 }
                 double cw_lim_value;
                 if (!nh.getParam("/dynamixel_operator/" + operator_names[i] + "/cw_lim_value", cw_lim_value))
                 {
-                    ROS_ERROR("No cw_lim_value for" << operator_name[i]);
+                    ROS_ERROR_STREAM("No cw_lim_value for" << operator_names[i]);
                     success = false;
                 }
                 double ccw_lim_value;
                 if (!nh.getParam("/dynamixel_operator/" + operator_names[i] + "/ccw_lim_value", ccw_lim_value))
                 {
-                    ROS_ERROR("No ccw_lim_value for" << operator_name[i]);
+                    ROS_ERROR_STREAM("No ccw_lim_value for" << operator_names[i]);
                     success = false;
                 }
                 int sleep_time_millis;
                 if (!nh.getParam("/dynamixel_operator/" + operator_names[i] + "/sleep_time_millis", sleep_time_millis))
                 {
-                    ROS_ERROR("No sleep_time_millis for" << operator_name[i]);
+                    ROS_ERROR_STREAM("No sleep_time_millis for" << operator_names[i]);
                     success = false;
                 }
                 double moving_speed;
                 if (!nh.getParam("/dynamixel_operator/" + operator_names[i] + "/moving_speed", moving_speed))
                 {
-                    ROS_ERROR("No moving_speed for" << operator_name[i]);
+                    ROS_ERROR_STREAM("No moving_speed for" << operator_names[i]);
                     success = false;
                 }
                 if(success){
-                    SingleJointOperator* single_joint_op  = new SingleJointOperator(id_list, goal_list, moving_speed);
+                    Operator* single_joint_op  = new SingleJointOperator(target_state_publisher, id, cw_lim_value, ccw_lim_value, sleep_time_millis, moving_speed);
                     operator_map[operator_names[i]] = single_joint_op;
-                    nh.advertiseService("/head/operator/" + operator_name[i], &SingleJointOperator::serviceCallback, single_joint_op);
+                    nh.advertiseService("/head/operator/" + operator_names[i], &Operator::serviceCallback, single_joint_op);
                 }
             }
             else
             {
-                ROS_ERROR_STREAM("Unknown Operator Name " << operator_type[i]);
+                ROS_ERROR_STREAM("Unknown Operator Name " << operator_types[i]);
                 success = false;
             }
         }

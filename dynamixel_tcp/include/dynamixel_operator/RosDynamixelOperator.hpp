@@ -14,10 +14,15 @@ namespace dynamixel_tcp
         RosDynamixelOperator(ros::NodeHandle &nodeHandle);
         virtual ~RosDynamixelOperator();
     private:
+        ros::NodeHandle &nh;
+        ros::Publisher target_state_publisher;
+
         bool readParameters();
-        std::vector<string> operator_names;
-        std::vector<string> operator_types;
-        std::map<std::string, Operator*> operator_map; 
+        std::vector<std::string> operator_names;
+        std::vector<std::string> operator_types;
+        std::map<std::string, Operator*> operator_map;
+
+        bool initializeServices(ros::Publisher& target_state_publisher);
 
     // private:
     //     bool isTargetPositionArrived() const;

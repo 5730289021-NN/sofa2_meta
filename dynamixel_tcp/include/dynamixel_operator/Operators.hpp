@@ -11,7 +11,7 @@ namespace dynamixel_tcp
     class Operator
     {
     public:
-        Operator() : isRunning(false) {}
+        Operator(ros::Publisher &target_publisher) : isRunning(false), target_publisher(target_publisher) {}
         virtual ~Operator() {}
         virtual void operate() = 0;
         virtual void cancel(){};
@@ -22,11 +22,12 @@ namespace dynamixel_tcp
                 if (!isRunning)
                 {
                     isRunning = true;
-                    std::thread caller(operate);
+                    std::thread caller(&Operator::operate, this);
                     res.success = true;
                     res.message = "Successfully start thread";
                 }
-                else{
+                else
+                {
                     res.success = false;
                     res.message = "This operator is still running";
                 }
@@ -40,9 +41,11 @@ namespace dynamixel_tcp
             }
         }
 
+    protected:
+        ros::Publisher &target_publisher;
+        sensor_msgs::JointState target_state_msg;
+
     private:
-        ros::Publisher &target_publisher
-            sensor_msgs::JointState target_state_msg;
         std::thread caller;
         bool isRunning;
     };
@@ -50,13 +53,13 @@ namespace dynamixel_tcp
     class SingleJointOperator : public Operator
     {
     public:
-        SingleJointOperator(ros::Publisher &target_publisher, int id, int cw_lim_value, int ccw_lim_value, int sleep_time_millis, int moving_speed);
-        ~SingleJointOperator();
-        void operate();
-        void cancel();
+        SingleJointOperator(ros::Publisher &target_publisher, std::string id, int cw_lim_value, int ccw_lim_value, int sleep_time_millis, int moving_speed);
+        ~SingleJointOperator() override;
+        void operate() override;
+        void cancel() override;
 
     private:
-        int id;
+        std::string id;
         int cw_lim_value;
         int ccw_lim_value;
         int sleep_time_millis;
@@ -66,14 +69,15 @@ namespace dynamixel_tcp
         {
             X,
             Y
-        } JointStatus joint_status;
+        };
+        JointStatus joint_status;
     };
 
     class ToGoalOperator : public Operator
     {
     public:
         ToGoalOperator(ros::Publisher &target_publisher, std::vector<std::string> &ids, std::vector<double> &goals, std::vector<double> &moving_speeds);
-        ~ToGoalOperator();
-        void operate();
+        ~ToGoalOperator() override;
+        void operate() override;
     };
 } // namespace dynamixel_tcp
