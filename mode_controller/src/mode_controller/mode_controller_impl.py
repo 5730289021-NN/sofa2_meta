@@ -136,6 +136,7 @@ class ModeControllerImplementation(object):
         self.autonomous_mode = self.follow_me_mode or self.navigation_mode
 
         if data.in_joy_updated and not self.joy_init:
+            #if there ever been a button hit before
             self.joy_init = True
         else:
             pass
