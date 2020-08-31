@@ -248,8 +248,8 @@ namespace dynamixel_tcp
                 int pos = motor_message.p2 * 256 + motor_message.p1;
                 if (!motor->updatePosition(pos))
                 {
-                    setErrorMsg("DYNAMIXEL_OUT_OF_BOUND");
-                    setInfoMsg(motor->getInfo());
+                    setWarningMsg("DYNAMIXEL_OUT_OF_BOUND");
+                    setWarningMsg(motor->getInfo());
                 }
                 protocol_state = COMPLETED;
                 return;
@@ -303,6 +303,12 @@ namespace dynamixel_tcp
         error_msg = error;
         ROS_ERROR_STREAM(error_msg);
     }
+
+    inline void DynamixelAdapter::setWarningMsg(std::string warning)
+    {
+        //ROS_WARN_STREAM(warning);
+    }
+
 
     inline void DynamixelAdapter::setInfoMsg(std::string info)
     {

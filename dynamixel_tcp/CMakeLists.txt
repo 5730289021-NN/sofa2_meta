@@ -1,15 +1,20 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.10)
 project(dynamixel_tcp)
 
 ## Use C++14
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+set(THREADS_PREFER_PTHREAD_FLAG TRUE)
+
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS roscpp std_msgs sensor_msgs)
 find_package(async_comm REQUIRED)
+find_package(Threads REQUIRED)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -140,6 +145,7 @@ add_executable(dynamixel_adapter
 add_executable(dynamixel_operator 
   src/dynamixel_operator/dynamixel_operator_node.cpp
   src/dynamixel_operator/RosDynamixelOperator.cpp
+  src/dynamixel_operator/Operator.cpp
   src/dynamixel_operator/SingleJointOperator.cpp
   src/dynamixel_operator/ToGoalOperator.cpp
   )
@@ -151,7 +157,7 @@ add_executable(dynamixel_operator
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(dynamixel_adapter ${catkin_LIBRARIES} ${async_comm_LIBRARIES})
-target_link_libraries(dynamixel_operator ${catkin_LIBRARIES})
+target_link_libraries(dynamixel_operator Threads::Threads ${catkin_LIBRARIES})
 # target_link_libraries(dynamixel_twist_joy ${catkin_LIBRARIES})
 
 #############

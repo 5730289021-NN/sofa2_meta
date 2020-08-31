@@ -69,6 +69,7 @@ namespace dynamixel_tcp
         std::vector<uint8_t> getReadPositionCommand(uint8_t id) const;
     
         inline void setErrorMsg(std::string error);
+        inline void setWarningMsg(std::string warning);
         inline void setInfoMsg(std::string info);
     };
 

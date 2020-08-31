@@ -16,6 +16,7 @@ namespace dynamixel_tcp
     private:
         ros::NodeHandle &nh;
         ros::Publisher target_state_publisher;
+        std::vector<ros::ServiceServer> services;
 
         bool readParameters();
         std::vector<std::string> operator_names;

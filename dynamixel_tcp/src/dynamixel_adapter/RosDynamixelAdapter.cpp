@@ -34,7 +34,7 @@ namespace dynamixel_tcp
         }
         current_position.name = id_names;
 
-        ROS_INFO_STREAM("Checking Dynamixel Error Message");
+        ROS_INFO_STREAM("Checking Dynamixel Error Message...");
         if (!dynamixel_adapter->getErrorMsg().empty())
         {
             /*TODO: Set Fault Flag*/

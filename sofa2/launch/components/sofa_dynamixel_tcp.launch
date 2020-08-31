@@ -17,10 +17,10 @@
 
     <node pkg="dynamixel_tcp" type="dynamixel_operator" name="dynamixel_operator" output="screen">
         <rosparam param="operator_names">["head_home", "camera_home", "yes", "no"]</rosparam>
-        <rosparam param="opearator_types">["goal", "goal", "single", "single"]</rosparam>
-        <rosparam param="head_home">{id: ["1", "2"], goal: [2050, 1940], moving_speed:[10, 10]}</rosparam>
-        <rosparam param="camera_home">{id: ["0"], goal: [1000], moving_speed:[10]}</rosparam>
-        <rosparam param="yes">{id: "2", cw_lim_value: 1950, ccw_lim_value: 2020, sleep_time_millis: 500, moving_speed: 10}</rosparam>
-        <rosparam param="no">{id: "1", cw_lim_value: 1400, ccw_lim_value: 2700, sleep_time_millis: 500, moving_speed: 10}</rosparam>
+        <rosparam param="operator_types">["goal", "goal", "single", "single"]</rosparam>
+        <rosparam param="head_home">{id: ["1", "2"], goal: [2050, 1940], moving_speed:[100, 10], timeout: 1000}</rosparam>
+        <rosparam param="camera_home">{id: ["0"], goal: [1000], moving_speed:[30], timeout: 1000}</rosparam>
+        <rosparam param="yes">{id: "2", cw_lim_value: 1950, ccw_lim_value: 2020, sleep_time_millis: 500, moving_speed: 20}</rosparam>
+        <rosparam param="no">{id: "1", cw_lim_value: 1400, ccw_lim_value: 2700, sleep_time_millis: 1000, moving_speed: 200}</rosparam>
     </node>
 </launch>
