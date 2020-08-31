@@ -31,8 +31,8 @@ namespace dynamixel_tcp
         return true;
     }
 
-    sensor_msgs::JointState& getMessage() const {
-        return target_publisher;
+    sensor_msgs::JointState& ToGoalOperator::getMessage() {
+        return target_state_msg;
     }
 
     void ToGoalOperator::operate()
@@ -41,7 +41,7 @@ namespace dynamixel_tcp
         target_publisher.publish(target_state_msg);
     }
 
-    int getTimeout() const
+    int ToGoalOperator::getTimeout() const
     {
         return timeout;
     }

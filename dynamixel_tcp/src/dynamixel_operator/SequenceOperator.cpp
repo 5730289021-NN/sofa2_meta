@@ -3,17 +3,10 @@
 
 namespace dynamixel_tcp
 {
-
-/*  SequenceOperator(ros::NodeHandle &nh, ros::Publisher &target_publisher, std::vector<ToGoalOperator> to_goal_operators);
-        ~SequenceOperator() override;
-        void operate() override;
-        bool serviceCallback(std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &res) override;
-        void timerCallback(const ros::TimerEvent&);*/
-
     SequenceOperator::SequenceOperator(ros::NodeHandle &nh, ros::Publisher &target_publisher, std::vector<ToGoalOperator*> to_goal_operators)
-    : Operator(target_publisher), nh(nh), to_goal_operators(to_goal_operators), current_operator_index(0);
+    : Operator(target_publisher), nh(nh), to_goal_operators(to_goal_operators), current_operator_index(0)
     {
-        timer = nh.createTimer(ros::Duration(sleep_time_millis / 1000.0), &SingleJointOperator::timerCallback, this, false, false);
+        timer = nh.createTimer(ros::Duration(1.0), &SequenceOperator::timerCallback, this, false, false);
     }
 
     SequenceOperator::~SequenceOperator()
@@ -39,7 +32,7 @@ namespace dynamixel_tcp
                 res.message = "Sequence Operator started";
                 current_operator_index = 0;
                 operate(); //run immediately
-                timer.setPeriod(to_goal_operators[0]->getTimeout())
+                timer.setPeriod(ros::Duration(to_goal_operators[0]->getTimeout() / 1000.0));
                 timer.start();
             }
         }
@@ -63,7 +56,7 @@ namespace dynamixel_tcp
     void SequenceOperator::timerCallback(const ros::TimerEvent &time_event)
     {
         current_operator_index += 1;
-        timer.setPeriod(to_goal_operators[current_operator_index]->getTimeout());
+        timer.setPeriod(ros::Duration(to_goal_operators[current_operator_index]->getTimeout() / 1000.0));
         operate();
     }
 

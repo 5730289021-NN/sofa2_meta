@@ -148,6 +148,7 @@ add_executable(dynamixel_operator
   src/dynamixel_operator/Operator.cpp
   src/dynamixel_operator/SingleJointOperator.cpp
   src/dynamixel_operator/ToGoalOperator.cpp
+  src/dynamixel_operator/SequenceOperator.cpp
   )
 # add_executable(dynamixel_joy_twist src/dynamixel_joy_twist.cpp)
 

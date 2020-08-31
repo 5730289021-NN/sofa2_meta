@@ -55,12 +55,12 @@ namespace dynamixel_tcp
     class ToGoalOperator : public Operator
     {
     public:
-        ToGoalOperator(ros::Publisher &target_publisher, std::vector<std::string> &ids, std::vector<double> &goals, std::vector<double> &moving_speeds);
+        ToGoalOperator(ros::Publisher &target_publisher, std::vector<std::string> &ids, std::vector<double> &goals, std::vector<double> &moving_speeds, int timeout);
         ~ToGoalOperator() override;
         bool serviceCallback(std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &res) override;
         void operate() override;
         int getTimeout() const;
-        sensor_msgs::JointState& getMessage() const;
+        sensor_msgs::JointState& getMessage();
     private:
         int timeout;
     };
@@ -68,7 +68,7 @@ namespace dynamixel_tcp
     class SequenceOperator : public Operator
     {
     public:
-        SequenceOperator(ros::NodeHandle &nh, ros::Publisher &target_publisher, std::vector<ToGoalOperator> to_goal_operators);
+        SequenceOperator(ros::NodeHandle &nh, ros::Publisher &target_publisher, std::vector<ToGoalOperator*> to_goal_operators);
         ~SequenceOperator() override;
         void operate() override;
         bool serviceCallback(std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &res) override;

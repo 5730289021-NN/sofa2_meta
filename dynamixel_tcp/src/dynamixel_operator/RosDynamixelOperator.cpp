@@ -71,7 +71,7 @@ namespace dynamixel_tcp
                     success = false;
                 }
                 
-                int timeout
+                int timeout;
                 if (!nh.getParam("/dynamixel_operator/" + operator_names[i] + "/timeout", timeout))
                 {
                     ROS_ERROR_STREAM("No timeout for" << operator_names[i]);
@@ -80,7 +80,7 @@ namespace dynamixel_tcp
 
                 /*Create New Operator and add into operators*/
                 if(success){
-                    Operator* to_goal_op = new ToGoalOperator(target_state_publisher, id_list, goal_list, moving_speed);
+                    Operator* to_goal_op = new ToGoalOperator(target_state_publisher, id_list, goal_list, moving_speed, timeout);
                     operator_map[operator_names[i]] = to_goal_op;
                     services.push_back(nh.advertiseService("/head/operator/" + operator_names[i], &Operator::serviceCallback, to_goal_op));
                     ROS_INFO_STREAM("/head/operator/" << operator_names[i] << " service initiated");
@@ -127,42 +127,23 @@ namespace dynamixel_tcp
             }
             else if (operator_types[i].compare("sequence") == 0)
             {
-                // std::string id;
-                // if (!nh.getParam("/dynamixel_operator/" + operator_names[i] + "/id", id))
-                // {
-                //     ROS_ERROR_STREAM("No id for" << operator_names[i]);
-                //     success = false;
-                // }
-                // double cw_lim_value;
-                // if (!nh.getParam("/dynamixel_operator/" + operator_names[i] + "/cw_lim_value", cw_lim_value))
-                // {
-                //     ROS_ERROR_STREAM("No cw_lim_value for" << operator_names[i]);
-                //     success = false;
-                // }
-                // double ccw_lim_value;
-                // if (!nh.getParam("/dynamixel_operator/" + operator_names[i] + "/ccw_lim_value", ccw_lim_value))
-                // {
-                //     ROS_ERROR_STREAM("No ccw_lim_value for" << operator_names[i]);
-                //     success = false;
-                // }
-                // int sleep_time_millis;
-                // if (!nh.getParam("/dynamixel_operator/" + operator_names[i] + "/sleep_time_millis", sleep_time_millis))
-                // {
-                //     ROS_ERROR_STREAM("No sleep_time_millis for" << operator_names[i]);
-                //     success = false;
-                // }
-                // double moving_speed;
-                // if (!nh.getParam("/dynamixel_operator/" + operator_names[i] + "/moving_speed", moving_speed))
-                // {
-                //     ROS_ERROR_STREAM("No moving_speed for" << operator_names[i]);
-                //     success = false;
-                // }
-                // if(success){
-                //     Operator* single_joint_op  = new SingleJointOperator(nh, target_state_publisher, id, cw_lim_value, ccw_lim_value, sleep_time_millis, moving_speed);
-                //     operator_map[operator_names[i]] = single_joint_op;
-                //     services.push_back(nh.advertiseService("/head/operator/" + operator_names[i], &Operator::serviceCallback, single_joint_op));
-                //     ROS_INFO_STREAM("/head/operator/" << operator_names[i] << " service initiated");
-                // }
+                std::vector<std::string> pattern;
+                if (!nh.getParam("/dynamixel_operator/" + operator_names[i] + "/pattern", pattern))
+                {
+                    ROS_ERROR_STREAM("No Pattern for" << operator_names[i]);
+                    success = false;
+                }
+                std::vector<ToGoalOperator*> to_goal_operators;
+                for(auto operator_name: pattern){
+                    to_goal_operators.push_back(static_cast<ToGoalOperator*>(operator_map[operator_name]));
+                }
+
+                if(success){
+                    Operator* sequence_op  = new SequenceOperator(nh, target_state_publisher, to_goal_operators);
+                    operator_map[operator_names[i]] = sequence_op;
+                    services.push_back(nh.advertiseService("/head/operator/" + operator_names[i], &Operator::serviceCallback, sequence_op));
+                    ROS_INFO_STREAM("/head/operator/" << operator_names[i] << " service initiated");
+                }
             }
             else
             {

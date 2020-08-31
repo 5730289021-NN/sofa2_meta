@@ -5,12 +5,10 @@
 
 namespace dynamixel_tcp
 {
-    Operator::Operator() {};
     Operator::Operator(ros::Publisher &target_publisher) : isRunning(false), target_publisher(target_publisher) {}
-
     Operator::~Operator() {}
     bool Operator::serviceCallback(std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &res)
-    {
+    {/*Actually not used because of runtime error*/
         if (req.data)
         {
             ROS_INFO_STREAM("Service Called with req.data: true");
@@ -33,7 +31,7 @@ namespace dynamixel_tcp
         {
             ROS_INFO_STREAM("Service Called with req.data: false");
             isRunning = false;
-            cancel();
+            //cancel();
             res.success = true;
             res.message = "Successfully stop thread";
         }
