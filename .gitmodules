@@ -1,0 +1,3 @@
+[submodule "gradient_based_navigation"]
+	path = gradient_based_navigation
+	url = https://github.com/Imperoli/gradient_based_navigation
