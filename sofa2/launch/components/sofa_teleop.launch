@@ -19,11 +19,11 @@
     <rosparam file="$(find sofa2)/config/twist_mux_config/twist_mux_topics.yaml" command="load"/>
   </node>
 
-  <node pkg="costmap_based_vel_filter" name="costmap_based_vel_filter" type="costmap_based_vel_filter" output="screen">
+  <!-- <node pkg="costmap_based_vel_filter" name="costmap_based_vel_filter" type="costmap_based_vel_filter" output="screen">
       <remap from="costmap" to="/move_base/local_costmap/costmap"/>
       <remap from="vel_in" to="mux_vel"/>
       <remap from="vel_out" to="acc_lim_vel"/>
-  </node>
+  </node> -->
 
   <node pkg="acc_lim_vel_filter" name="acc_lim_vel_filter" type="acc_lim_vel_filter" output="screen">
       <remap from="vel_in" to="mux_vel"/>

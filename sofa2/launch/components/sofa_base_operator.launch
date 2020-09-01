@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<launch>
+    <node pkg="base_operator" type="base_operator" name="base_operator" output="screen">
+        <!--MUST Declare goal operator before sequence operator-->
+        <rosparam param="operator_names">
+            ["left", "right", "mini_dance", "single_round_left", "single_round_right"]
+        </rosparam>
+        <rosparam param="operator_types">
+            ["action", "action", "sequence", "sequence", sequence]
+        </rosparam>
+        <rosparam param="left">
+            {
+                vx: 0,
+                wz: 0.5
+            }
+        </rosparam>
+        <rosparam param="right">
+            {
+                vx: 0,
+                wz: -0.5
+            }
+        </rosparam>
+        <rosparam param="mini_dance">
+            {
+                sequence: ["left", "right"],
+                time: [1.0, 1.0]
+                repetition: 5
+            }
+        </rosparam>
+        <rosparam param="single_round_left">
+            {
+                sequence: ["left"],
+                time: [6.2]
+                repetition: 0
+            }
+        </rosparam>
+        <rosparam param="single_round_right">
+            {
+                sequence: ["right"],
+                time: [6.2]
+                repetition: 0
+            }
+        </rosparam>
+    </node>
+</launch>

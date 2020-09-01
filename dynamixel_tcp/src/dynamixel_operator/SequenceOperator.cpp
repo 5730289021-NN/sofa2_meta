@@ -56,6 +56,9 @@ namespace dynamixel_tcp
     void SequenceOperator::timerCallback(const ros::TimerEvent &time_event)
     {
         current_operator_index += 1;
+        if(current_operator_index == to_goal_operators.size()){
+            timer.stop();
+        }
         timer.setPeriod(ros::Duration(to_goal_operators[current_operator_index]->getTimeout() / 1000.0));
         operate();
     }
