@@ -33,7 +33,7 @@
             {id: "2", cw_lim_value: 1950, ccw_lim_value: 2020, sleep_time_millis: 500, moving_speed: 20}
         </rosparam>
         <rosparam param="no">
-            {id: "1", cw_lim_value: 1400, ccw_lim_value: 2700, sleep_time_millis: 1000, moving_speed: 200}
+            {id: "1", cw_lim_value: 1400, ccw_lim_value: 2700, sleep_time_millis: 1500, moving_speed: 200}
         </rosparam>
         <rosparam param="head_left">
             {id: ["1"], goal: [2700], moving_speed:[100], timeout: 1000}
@@ -60,4 +60,5 @@
             }
         </rosparam>
     </node>
+    <node pkg="dynamixel_tcp" type="dynamixel_twist_joy" name="dynamixel_twist_joy" output="screen"/>
 </launch>
