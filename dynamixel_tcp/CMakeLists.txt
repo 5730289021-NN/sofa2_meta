@@ -150,6 +150,10 @@ add_executable(dynamixel_operator
   src/dynamixel_operator/ToGoalOperator.cpp
   src/dynamixel_operator/SequenceOperator.cpp
   )
+
+add_executable(dynamixel_twist_joy
+  src/dynamixel_twist_joy/dynamixel_twist_joy.cpp
+  )
 # add_executable(dynamixel_joy_twist src/dynamixel_joy_twist.cpp)
 
 ## Add cmake target dependencies of the executable
@@ -159,6 +163,7 @@ add_executable(dynamixel_operator
 ## Specify libraries to link a library or executable target against
 target_link_libraries(dynamixel_adapter ${catkin_LIBRARIES} ${async_comm_LIBRARIES})
 target_link_libraries(dynamixel_operator Threads::Threads ${catkin_LIBRARIES})
+target_link_libraries(dynamixel_twist_joy ${catkin_LIBRARIES})
 # target_link_libraries(dynamixel_twist_joy ${catkin_LIBRARIES})
 
 #############
