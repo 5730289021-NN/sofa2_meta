@@ -13,6 +13,8 @@ namespace dynamixel_tcp
             ros::NodeHandle nodeHandle("~");
             ros::Publisher target_publisher = nodeHandle.advertise<sensor_msgs::JointState>("/head/target_position", 5);
             ros::Subscriber target_subscriber = nodeHandle.subscribe("/joy", 3, &DynamixelTwistJoy::latchJoyCallback, this);
+
+            ros::Subscriber current_subscriber = nodeHandle.subscribe("/head/current_position", 1, &DynamixelTwistJoy::latchJointStateCallback, this);
             ros::Rate loop_rate(15);
             target_state = getZeroVelocityMessage();
 
@@ -20,6 +22,7 @@ namespace dynamixel_tcp
             {
                 if (joy_updated)
                 {
+                    joy_updated = false;
                     if (joy_msg.axes.size() == 8 && joy_msg.buttons.size() == 11)
                     {
                         /*
@@ -45,10 +48,10 @@ namespace dynamixel_tcp
                             Calculate Value for Joint 1   
                             Joy Axes 3: Robot Head-No Axis
                             */
-                            target_state.velocity[1] = abs(joy_msg.axes[3]) * 200;
+                            target_state.velocity[1] = abs(joy_msg.axes[3]) * 100;
                             if (joy_msg.axes[3] > 0)
                             {
-                                target_state.position[1] = 600;
+                                target_state.position[1] = 2700;
                             }
                             else
                             {
@@ -58,7 +61,7 @@ namespace dynamixel_tcp
                             Calculate Value for Joint 2
                             Joy Axes 4: Robot Head-Yes Axis
                             */
-                            target_state.velocity[2] = abs(joy_msg.axes[4]) * 10;
+                            target_state.velocity[2] = abs(joy_msg.axes[4]) * 30;
                             if (joy_msg.axes[4] > 0)
                             {
                                 target_state.position[2] = 1950;
@@ -98,6 +101,12 @@ namespace dynamixel_tcp
             joy_msg = joy_in_msg;
         }
 
+        void latchJointStateCallback(const sensor_msgs::JointState &joint_in_msg)
+        {
+            /*Latch Current Position*/
+            current_state = joint_in_msg;
+        }
+
         sensor_msgs::JointState getZeroVelocityMessage()
         {
             sensor_msgs::JointState zero_vel_msg;
@@ -117,18 +126,18 @@ namespace dynamixel_tcp
 
         sensor_msgs::Joy joy_msg;
         sensor_msgs::JointState target_state;
+        sensor_msgs::JointState current_state;
         bool joy_updated;
     };
 } // namespace dynamixel_tcp
 
 int main(int argc, char **argv)
 {
-	if (ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug))
+    if (ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug))
     {
         ros::console::notifyLoggerLevelsChanged();
     }
-	ros::init(argc, argv, "dynamixel_twist_joy");
-	dynamixel_tcp::DynamixelTwistJoy dtj;
-	return 0;
+    ros::init(argc, argv, "dynamixel_twist_joy");
+    dynamixel_tcp::DynamixelTwistJoy dtj;
+    return 0;
 }
-

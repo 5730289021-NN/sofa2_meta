@@ -81,7 +81,8 @@ namespace dynamixel_tcp
                     break;
                 }
             }
-            if(count != TCP_READ_TIMEOUT) {
+            if (count != TCP_READ_TIMEOUT)
+            {
                 timeout_stack = 0;
             }
             //When protocol_state is COMPLETE then motor position is automically updated
@@ -106,7 +107,8 @@ namespace dynamixel_tcp
         buf_write_pos.push_back(chksum);
         std::stringstream ss;
         ss << std::hex << std::setfill(' ');
-        for(int i = 0; i < buf_write_pos.size(); i++) {
+        for (int i = 0; i < buf_write_pos.size(); i++)
+        {
             ss << std::setw(3) << static_cast<unsigned>(buf_write_pos[i]);
         }
         setInfoMsg(ss.str());
@@ -118,11 +120,38 @@ namespace dynamixel_tcp
     {
         std::vector<uint8_t> buf_write_pos = {0xFF, 0xFF, 0xFE, uint8_t(5 * ids.size() + 4), 0x83, 0x1E, 0x04}; // 0xFF, 0xFF, ALL , LEN, INST, POSITION, 4 BYTE_WRITE
         uint8_t chksum = 0xFE + uint8_t(5 * ids.size() + 4) + 0x83 + 0x1E + 0x04;
+        /*
+        */
         for (unsigned i = 0; i < ids.size(); i++)
         {
             buf_write_pos.push_back(static_cast<uint8_t>(std::stoi(ids[i])));
-            buf_write_pos.push_back(static_cast<uint8_t>(positions[i]) % 256);
-            buf_write_pos.push_back(static_cast<uint8_t>(positions[i] / 256));
+            if (static_cast<uint16_t>(velocities[i]) == 0)
+            {
+                /*Override Behavior: When writing zero velocity, just send the current position with any velocity */
+                bool motor_found = false;
+                for (auto motor : motors)
+                {
+                    if (motor->getStringID() == ids[i])
+                    {
+                        setInfoMsg("Sending current Position Instead");
+                        setInfoMsg(motor->getInfo());
+                        buf_write_pos.push_back(static_cast<uint8_t>(motor->getPosition()) % 256);
+                        buf_write_pos.push_back(static_cast<uint8_t>(motor->getPosition() / 256));
+                        motor_found = true;
+                    }
+                }
+                if (!motor_found)
+                {
+                    setErrorMsg("Motor not registered: ID" + ids[i]);
+                    buf_write_pos.push_back(static_cast<uint8_t>(positions[i]) % 256);
+                    buf_write_pos.push_back(static_cast<uint8_t>(positions[i] / 256));
+                }
+            }
+            else
+            {
+                buf_write_pos.push_back(static_cast<uint8_t>(positions[i]) % 256);
+                buf_write_pos.push_back(static_cast<uint8_t>(positions[i] / 256));
+            }
             buf_write_pos.push_back(static_cast<uint8_t>(velocities[i]) % 256);
             buf_write_pos.push_back(static_cast<uint8_t>(velocities[i] / 256));
             chksum += *(buf_write_pos.end() - 1) + *(buf_write_pos.end() - 2) + *(buf_write_pos.end() - 3) + *(buf_write_pos.end() - 4) + *(buf_write_pos.end() - 5);
@@ -131,11 +160,11 @@ namespace dynamixel_tcp
         buf_write_pos.push_back(chksum);
         std::stringstream ss;
         ss << std::hex << std::setfill(' ');
-        for(int i = 0; i < buf_write_pos.size(); i++) {
+        for (int i = 0; i < buf_write_pos.size(); i++)
+        {
             ss << std::setw(3) << static_cast<unsigned>(buf_write_pos[i]);
         }
         setInfoMsg(ss.str());
-
         tcp_client->send_bytes(buf_write_pos.data(), buf_write_pos.size());
     }
 
@@ -216,10 +245,11 @@ namespace dynamixel_tcp
             }
             case LOST:
                 setErrorMsg("DYNAMIXEL_STATE_LOST");
-                for(int j = 0; j < len; j++) {
-                    std::cout << std::hex << (int) buf[j];
+                for (int j = 0; j < len; j++)
+                {
+                    std::cout << std::hex << (int)buf[j];
                     std::cout << " ";
-			    }
+                }
                 protocol_state = COMPLETED;
                 return;
             default:
@@ -308,7 +338,6 @@ namespace dynamixel_tcp
     {
         //ROS_WARN_STREAM(warning);
     }
-
 
     inline void DynamixelAdapter::setInfoMsg(std::string info)
     {
