@@ -10,7 +10,7 @@
     </node>
 
     <!--Front LIDAR-->
-    <node name="sick_tim_781s" pkg="sick_scan" ns="front_lidar" type="sick_generic_caller" respawn="true" output="screen">
+    <node name="sick_tim_781s" pkg="sick_scan" type="sick_generic_caller" respawn="true" output="screen">
         <!--<param name="robot_description" command="$(find xacro)/xacro.py '$(find sick_scan)/urdf/example.urdf.xacro'" />-->
         <param name="scanner_type" type="string" value="sick_tim_7xxS"/>
         <!-- -135° -->
@@ -47,7 +47,7 @@
         <param name="scale_angular" type="double" value="0.5"/>
     </node>
 
-    <node pkg="gmapping" type="slam_gmapping" name="sofa_gmapping">
+    <node pkg="gmapping" type="slam_gmapping" name="gmapping">
         <param name="throttle_scans" type="int" value="1" />
         <param name="lstep" type="double" value="0.025" />
         <param name="astep" type="double" value="0.025" />

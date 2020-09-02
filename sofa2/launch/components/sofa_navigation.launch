@@ -1,8 +1,14 @@
 <launch>
+    <!-- <arg name="map_address" default="$(find sofa2)/map/fibo-6.yaml" />
+    <arg name="costmap_address" default="$(find sofa2)/map/fibo-6.yaml"/> -->
+
+    <arg name="map_address" default="$(find sofa2)/map/lx_landscape.yaml" />
+    <arg name="costmap_address" default="$(find sofa2)/map/lx_landscape_cost.yaml"/> 
+
     <group>
         <remap from="map" to="map_amcl" />
         <remap from="map_metadata" to="map_metadata_amcl" />
-        <node pkg="map_server" type="map_server" name="map_amcl" args="$(find sofa2)/map/fibo-6.yaml" />
+        <node pkg="map_server" type="map_server" name="map_amcl" args="$(arg map_address)" />
 
         <node pkg="amcl" type="amcl" name="sofa2_amcl">
             <remap from="scan" to="scan_fusion"/>
@@ -22,12 +28,12 @@
         </node>
     </group>
 
-    <node pkg="map_server" type="map_server" name="map_global" args="$(find sofa2)/map/fibo-6.yaml">
+    <node pkg="map_server" type="map_server" name="map_global" args="$(arg costmap_address)">
         <remap from="map" to="map_global" />
         <remap from="map_metadata" to="map_metadata_global" />
     </node>
     
-    <node pkg="map_server" type="map_server" name="map_local" args="$(find sofa2)/map/fibo-6.yaml">
+    <node pkg="map_server" type="map_server" name="map_local" args="$(arg costmap_address)">
         <remap from="map" to="map_local" />
         <remap from="map_metadata" to="map_metadata_local" />
     </node>
