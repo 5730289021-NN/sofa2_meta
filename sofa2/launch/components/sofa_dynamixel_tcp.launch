@@ -27,7 +27,7 @@
             {id: ["1", "2"], goal: [2050, 1940], moving_speed:[100, 10], timeout: 1000}
         </rosparam>
         <rosparam param="camera_home">
-            {id: ["0"], goal: [1000], moving_speed:[30], timeout: 1000}
+            {id: ["0"], goal: [654], moving_speed:[30], timeout: 1000}
         </rosparam>
         <rosparam param="yes">
             {id: "2", cw_lim_value: 1950, ccw_lim_value: 2020, sleep_time_millis: 500, moving_speed: 20}
