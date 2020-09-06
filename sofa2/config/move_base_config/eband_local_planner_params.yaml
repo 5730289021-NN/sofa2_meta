@@ -7,9 +7,9 @@ EBandPlannerROS:
 
   costmap_weight: 5 #7
 
-  max_vel_lin: 0.30
+  max_vel_lin: 0.50 # 0.3
   min_vel_lin: 0.02
-  max_vel_th: 0.30
+  max_vel_th: 0.40 # 0.3
   min_vel_th: 0.02
 
   max_translational_acceleration: 0.1
