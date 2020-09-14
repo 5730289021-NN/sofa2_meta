@@ -1,9 +1,9 @@
 <launch>
-    <!-- <arg name="map_address" default="$(find sofa2)/map/fibo-6.yaml" />
-    <arg name="costmap_address" default="$(find sofa2)/map/fibo-6.yaml"/> -->
+    <arg name="map_address" default="$(find sofa2)/map/fibo-6.yaml" />
+    <arg name="costmap_address" default="$(find sofa2)/map/fibo-6.yaml"/>
 
-    <arg name="map_address" default="$(find sofa2)/map/lx_landscape.yaml" />
-    <arg name="costmap_address" default="$(find sofa2)/map/lx_landscape_cost.yaml"/> 
+    <!-- <arg name="map_address" default="$(find sofa2)/map/lx_landscape.yaml" />
+    <arg name="costmap_address" default="$(find sofa2)/map/lx_landscape_cost.yaml"/>  -->
 
     <group>
         <remap from="map" to="map_amcl" />
@@ -18,13 +18,13 @@
             <param name="resample_interval" type="int" value="1" />
             <param name="laser_max_beams" type="int" value="100" />
 
-            <param name="initial_pose_x" type="double" value="3.6" />
+            <!-- <param name="initial_pose_x" type="double" value="3.6" />
             <param name="initial_pose_y" type="double" value="1.7" />
-            <param name="initial_pose_a" type="double" value="1.19" />
+            <param name="initial_pose_a" type="double" value="1.19" /> -->
             
-            <!-- <param name="initial_pose_x" type="double" value="6.6" />
+            <param name="initial_pose_x" type="double" value="6.6" />
             <param name="initial_pose_y" type="double" value="12.4" />
-            <param name="initial_pose_a" type="double" value="1.57" /> -->
+            <param name="initial_pose_a" type="double" value="1.57" />
             <param name="odom_model_type" type="string" value="diff-corrected"/>
             <param name="odom_alpha1" type="double" value="0.1"/>
             <param name="odom_alpha2" type="double" value="0.1"/>
