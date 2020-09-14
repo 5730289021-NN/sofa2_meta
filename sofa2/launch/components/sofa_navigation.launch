@@ -1,9 +1,15 @@
 <launch>
-    <arg name="map_address" default="$(find sofa2)/map/fibo-6.yaml" />
-    <arg name="costmap_address" default="$(find sofa2)/map/fibo-6.yaml"/>
-
+    <!--<arg name="map_address" default="$(find sofa2)/map/fibo-6.yaml" />
+    <arg name="costmap_address" default="$(find sofa2)/map/fibo-6.yaml"/> -->
+  
     <!-- <arg name="map_address" default="$(find sofa2)/map/lx_landscape.yaml" />
-    <arg name="costmap_address" default="$(find sofa2)/map/lx_landscape_cost.yaml"/>  -->
+    <arg name="costmap_address" default="$(find sofa2)/map/lx_landscape_cost.yaml"/> -->
+  
+    <!-- <arg name="map_address" default="$(find sofa2)/map/depa_2fl.yaml" />
+    <arg name="costmap_address" default="$(find sofa2)/map/depa_2fl.yaml"/> -->
+
+    <arg name="map_address" default="$(find sofa2)/map/depa_7fl.yaml" />
+    <arg name="costmap_address" default="$(find sofa2)/map/depa_7fl_costmap.yaml"/>
 
     <group>
         <remap from="map" to="map_amcl" />
