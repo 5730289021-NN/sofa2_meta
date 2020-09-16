@@ -15,6 +15,7 @@ from actionlib_msgs.msg import GoalStatusArray
 from sensor_msgs.msg import Joy
 from actionlib_msgs.msg import GoalID
 from std_msgs.msg import Bool
+from geometry_msgs.msg import Twist
 
 # protected region user include package begin #
 # protected region user include package end #
@@ -84,6 +85,9 @@ class ModeControllerPassthrough(object):
         """
         self.pub_move_base_cancel = None
         self.pub_follow_me_enable = None
+        self.pub_joy_vel = None
+        self.sub_joy_raw_vel = None
+        self.sub_joy_filtered_vel = None
         pass
 
 
@@ -168,6 +172,24 @@ class ModeControllerImplementation(object):
         # protected region user terminate end #
 
 
+    def direct_topic_callback_joy_raw_vel(self, msg):
+        """
+        Direct callback at reception of message on topic joy_raw_vel
+        """
+        # protected region user implementation of direct subscriber callback for joy_raw_vel begin #
+        if msg.buttons[config.force_btn]:
+            self.passthrough.pub_joy_vel(msg)
+        # protected region user implementation of direct subscriber callback for joy_raw_vel end #
+        pass
+    def direct_topic_callback_joy_filtered_vel(self, msg):
+        """
+        Direct callback at reception of message on topic joy_filtered_vel
+        """
+        # protected region user implementation of direct subscriber callback for joy_filtered_vel begin #
+        if msg.buttons[config.manual_btn]:
+            self.passthrough.pub_joy_vel(msg)
+        # protected region user implementation of direct subscriber callback for joy_filtered_vel end #
+        pass
     # protected region user additional functions begin #
     def getCurrentMode(self):
         if self.force_mode and self.autonomous_mode:

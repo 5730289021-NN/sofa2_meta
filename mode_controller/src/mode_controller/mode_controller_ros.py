@@ -18,6 +18,7 @@ from actionlib_msgs.msg import GoalStatusArray
 from sensor_msgs.msg import Joy
 from actionlib_msgs.msg import GoalID
 from std_msgs.msg import Bool
+from geometry_msgs.msg import Twist
 
 # other includes
 from mode_controller import mode_controller_impl
@@ -48,6 +49,14 @@ class ModeControllerROS(object):
         # Handling direct publisher
         self.component_implementation_.passthrough.pub_move_base_cancel = rospy.Publisher('move_base_cancel', GoalID, queue_size=1)
         self.component_implementation_.passthrough.pub_follow_me_enable = rospy.Publisher('follow_me_enable', Bool, queue_size=1)
+        self.component_implementation_.passthrough.pub_joy_vel = rospy.Publisher('joy_vel', Twist, queue_size=1)
+        # Handling direct subscriber
+        self.component_implementation_.passthrough.sub_joy_raw_vel = rospy.Subscriber('joy_raw_vel',
+                                                                                 Twist,
+                                                                                 self.component_implementation_.direct_topic_callback_joy_raw_vel)
+        self.component_implementation_.passthrough.sub_joy_filtered_vel = rospy.Subscriber('joy_filtered_vel',
+                                                                                 Twist,
+                                                                                 self.component_implementation_.direct_topic_callback_joy_filtered_vel)
 
     def topic_callback_move_base_status(self, msg):
         """

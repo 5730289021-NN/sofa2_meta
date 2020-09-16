@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   actionlib_msgs
   sensor_msgs
+  geometry_msgs
 )
 
 # protected region additional user defined REQUIREMENTS begin #
@@ -35,6 +36,7 @@ catkin_package(
     std_msgs
     actionlib_msgs
     sensor_msgs
+    geometry_msgs
 )
 
 ###########

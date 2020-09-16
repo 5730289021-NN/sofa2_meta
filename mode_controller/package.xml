@@ -14,6 +14,7 @@
   <depend>std_msgs</depend>
   <depend>actionlib_msgs</depend>
   <depend>sensor_msgs</depend>
+  <depend>geometry_msgs</depend>
   <test_depend>rostest</test_depend>
 
   <!-- protected region additional package statements begin -->

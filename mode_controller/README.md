@@ -84,6 +84,24 @@ move_base Cancel
 <!--- protected region direct publisher follow_me_enable begin -->
 follow_me Enable
 <!--- protected region direct publisher follow_me_enable end -->
+`joy_vel` *(geometry_msgs::Twist)*
+<!--- protected region direct publisher joy_vel begin -->
+Output Joy Velocity
+<!--- protected region direct publisher joy_vel end -->
+
+### Direct Subscribers
+
+These subscribers are not handled through the update loop.
+The subscription handler is triggered as soon as a message arrives.
+
+`joy_raw_vel` *(geometry_msgs::Twist)*
+<!--- protected region direct subscriber joy_raw_vel begin -->
+Input Raw Joy Velocity
+<!--- protected region direct subscriber joy_raw_vel end -->
+`joy_filtered_vel` *(geometry_msgs::Twist)*
+<!--- protected region direct subscriber joy_filtered_vel begin -->
+Input Filtered Joy Velocity
+<!--- protected region direct subscriber joy_filtered_vel end -->
 
 ---
 
