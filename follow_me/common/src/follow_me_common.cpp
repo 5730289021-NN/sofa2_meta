@@ -24,6 +24,7 @@
 /* protected region user include files begin */
 #include <string>
 #include <cmath>
+#include <utility>
 /* protected region user include files end */
 
 /**
@@ -137,10 +138,10 @@ public:
         if (data.in_detected_people.objects_vector.size() > 0 && following)
         {
             double selected_depth = 65535;
-            pair<double, double> selected_center;
+            std::pair<double, double> selected_center;
             for (auto m : data.in_detected_people.objects_vector)
             {
-                pair<double, double> detected_center; /*x, y*/
+                std::pair<double, double> detected_center; /*x, y*/
                 detected_center.first = data.in_detected_people.objects_vector[0].roi.x_offset + data.in_detected_people.objects_vector[0].roi.width / 2;
                 detected_center.second = data.in_detected_people.objects_vector[0].roi.y_offset + data.in_detected_people.objects_vector[0].roi.height / 2;
 
@@ -150,14 +151,14 @@ public:
                     return;
                 }
 
-                if (data.in_depth_image.is_bigendiant != 0)
+                if (data.in_depth_image.is_bigendian != 0)
                 {
-                    ROS_ERROR("Encoing not supported, support only Little Endiant");
+                    ROS_ERROR("Encoing not supported, support only Little Endian");
                     return;
                 }
 
-                uint8_t depth_l = in_depth_image.data[detected_center.first + detected_center.second * in_depth_image.data.step];
-                uint8_t depth_h = in_depth_image.data[detected_center.first + detected_center.second * in_depth_image.data.step + 1];
+                uint8_t depth_l = data.in_depth_image.data[detected_center.first + detected_center.second * data.in_depth_image.step];
+                uint8_t depth_h = data.in_depth_image.data[detected_center.first + detected_center.second * data.in_depth_image.step + 1];
                 double detected_depth = static_cast<double>(depth_h * 255 + depth_l) / 1000;
                 
                 if(detected_depth < selected_depth) {
@@ -169,14 +170,14 @@ public:
             /*When human within range*/
             if(selected_depth >= config.min_dist_fol && selected_depth <= config.max_dist_fol){
                 /*Control in theta-direction*/
-                double control_z = config.Kp_a * (detected_center.width / 2 - selected_center.first);
+                double control_z = config.Kp_a * (data.in_depth_image.width / 2 - selected_center.first);
                 if(std::abs(control_z) > config.wz_max){
                     control_z = control_z / std::abs(control_z) * config.wz_max;
                 }
                 data.out_cmd_vel.angular.z = control_z;
 
                 /*Control in x-direction*/
-                double control_x = config.Kp_x * -(control.min_dist_fol - selected_depth);            
+                double control_x = config.Kp_x * -(config.min_dist_fol - selected_depth);            
                 if(control_x > 0){
                     if(control_x > config.vx_max){
                         control_x = config.vx_max;
@@ -190,7 +191,7 @@ public:
                 data.out_cmd_vel.linear.x = 0;
                 data.out_cmd_vel.angular.z = 0;
             }
-
+            data.out_cmd_vel_active = true;
         }
         else
         {
@@ -199,12 +200,12 @@ public:
             {
                 data.out_cmd_vel.linear.x = 0;
                 data.out_cmd_vel.angular.z = 0;
-                config.out_cmd_vel_active = true;
+                data.out_cmd_vel_active = true;
                 stopped = true;
             }
             else
             {
-                config.out_cmd_vel_active = false;
+                data.out_cmd_vel_active = false;
             }
         }
         /* protected region user update end */

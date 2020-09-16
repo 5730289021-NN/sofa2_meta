@@ -141,8 +141,12 @@ class DriverImplementation(object):
                 time.sleep(5.0)
         self.set_error('')
         self.sock.settimeout(0.1)
+        #self.socket_transceive('?CR', config, description="Encoder Query")
+        self.socket_transceive(self, '!D1 1', config, buff_size=64, description="Set High DIO 1")
+        self.socket_transceive(self, '!D1 2', config, buff_size=64, description="Set High DIO 2 ")
         # self.sock.setblocking(0)
         rospy.loginfo('Roboteq Driver successfully connected using blocking mode')
+
         self.isConnected = True
         return True
         # protected region user configure end #

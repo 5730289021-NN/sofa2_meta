@@ -84,7 +84,6 @@ namespace base_operator
             {
                 std::vector<std::string> names_;
                 if (!nh.getParam("/base_operator/" + operator_names[i] + "/sequence", names_))
-                    ;
                 {
                     ROS_ERROR("Base Operator sequence doen't given");
                     success = false;
@@ -92,7 +91,6 @@ namespace base_operator
 
                 std::vector<double> times_;
                 if (!nh.getParam("/base_operator/" + operator_names[i] + "/time", times_))
-                    ;
                 {
                     ROS_ERROR("Base Operator time doen't given");
                     success = false;
@@ -100,7 +98,6 @@ namespace base_operator
 
                 int rep_;
                 if (!nh.getParam("/base_operator/" + operator_names[i] + "/repetition", rep_))
-                    ;
                 {
                     ROS_ERROR("Base Operator repetition doen't given");
                     success = false;
