@@ -1,9 +1,12 @@
 [submodule "ira_laser_tools"]
 	path = ira_laser_tools
 	url = https://github.com/iralabdisco/ira_laser_tools
-[submodule "safety_control"]
-	path = safety_control
-	url = https://github.com/shinselrobots/safety_control/
 [submodule "object_msgs"]
 	path = object_msgs
 	url = https://github.com/intel/object_msgs
+[submodule "ros_openvino_toolkit"]
+	path = ros_openvino_toolkit
+	url = https://github.com/intel/ros_openvino_toolkit
+[submodule "navigation_2d"]
+	path = navigation_2d
+	url = https://github.com/skasperski/navigation_2d
