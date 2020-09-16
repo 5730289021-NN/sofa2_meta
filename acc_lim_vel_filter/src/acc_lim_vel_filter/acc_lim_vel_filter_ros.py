@@ -37,6 +37,9 @@ class AccLimVelFilterROS(object):
 
         # handling parameters from the parameter server
         self.component_config_.acc_lin_lim = rospy.get_param("~acc_lin_lim", 0.6)
+        self.component_config_.dec_lin_lim = rospy.get_param("~dec_lin_lim", 0.6)
+        self.component_config_.acc_ang_lim = rospy.get_param("~acc_ang_lim", 0.6)
+        self.component_config_.dec_ang_lim = rospy.get_param("~dec_ang_lim", 0.6)
         self.component_config_.goal_dist_thres = rospy.get_param("~goal_dist_thres", 1.5)
         self.component_config_.auto_min_vel = rospy.get_param("~auto_min_vel", 0.1)
         self.component_config_.Kp = rospy.get_param("~Kp", 0.1)

@@ -28,6 +28,18 @@ rosrun acc_lim_vel_filter acc_lim_vel_filter [param_name]:=[new_value]
 <!--- protected region param acc_lin_lim begin -->
 Limit Linear Acceleration
 <!--- protected region param acc_lin_lim end -->
+`dec_lin_lim` *(double, default: 0.6)*
+<!--- protected region param dec_lin_lim begin -->
+Limit Linear Deceleration
+<!--- protected region param dec_lin_lim end -->
+`acc_ang_lim` *(double, default: 0.6)*
+<!--- protected region param acc_ang_lim begin -->
+Limit Angular Acceleration
+<!--- protected region param acc_ang_lim end -->
+`dec_ang_lim` *(double, default: 0.6)*
+<!--- protected region param dec_ang_lim begin -->
+Limit Angular Deceleration
+<!--- protected region param dec_ang_lim end -->
 `goal_dist_thres` *(double, default: 1.5)*
 <!--- protected region param goal_dist_thres begin -->
 Goal Distance Threshold

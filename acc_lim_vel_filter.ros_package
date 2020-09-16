@@ -7,7 +7,9 @@
     <subscriber description="move_base Goal Pose" name="move_base_goal" type="move_base_msgs::MoveBaseActionGoal"/>
     <subscriber description="Control Mode" name="control_mode" type="std_msgs::String"/>
     <parameter description="Limit Linear Acceleration" name="acc_lin_lim" type="double" value="0.6"/>
-    <!-- <parameter description="Limit Angular Acceleration" name="acc_ang_lim" type="double" value="0.6"/> -->
+    <parameter description="Limit Linear Deceleration" name="dec_lin_lim" type="double" value="0.6"/>
+    <parameter description="Limit Angular Acceleration" name="acc_ang_lim" type="double" value="0.6"/>
+    <parameter description="Limit Angular Deceleration" name="dec_ang_lim" type="double" value="0.6"/>
     <parameter description="Goal Distance Threshold" name="goal_dist_thres" type="double" value="1.5"/>
     <parameter description="Autonomous Minimum Velocity" name="auto_min_vel" type="double" value="0.1"/>
     <parameter description="Displacement Gain which product of Kp * goal_dist_thres should less than 1" name="Kp" type="double" value="0.1"/>

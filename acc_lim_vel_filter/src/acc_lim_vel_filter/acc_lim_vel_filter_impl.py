@@ -29,6 +29,9 @@ class AccLimVelFilterConfig(object):
     def __init__(self):
         # parameters handled through the parameter server
         self.acc_lin_lim = 0.6
+        self.dec_lin_lim = 0.6
+        self.acc_ang_lim = 0.6
+        self.dec_ang_lim = 0.6
         self.goal_dist_thres = 1.5
         self.auto_min_vel = 0.1
         self.Kp = 0.1
@@ -37,6 +40,9 @@ class AccLimVelFilterConfig(object):
     def __str__(self):
         msg = "Instance of AccLimVelFilterConfig class: {"
         msg += "acc_lin_lim: {} ".format(self.acc_lin_lim)
+        msg += "dec_lin_lim: {} ".format(self.dec_lin_lim)
+        msg += "acc_ang_lim: {} ".format(self.acc_ang_lim)
+        msg += "dec_ang_lim: {} ".format(self.dec_ang_lim)
         msg += "goal_dist_thres: {} ".format(self.goal_dist_thres)
         msg += "auto_min_vel: {} ".format(self.auto_min_vel)
         msg += "Kp: {} ".format(self.Kp)
@@ -165,9 +171,19 @@ class AccLimVelFilterImplementation(object):
         if acc_lin > config.acc_lin_lim:
             rospy.logdebug('Filter + %f, %f', acc_lin, config.acc_lin_lim)
             data.out_vel_out.linear.x = self.vel_prev.linear.x + config.acc_lin_lim * 0.05
-        elif acc_lin < -config.acc_lin_lim:
-            rospy.logdebug('Filter - %f, %f', acc_lin, config.acc_lin_lim)
-            data.out_vel_out.linear.x = self.vel_prev.linear.x - config.acc_lin_lim * 0.05
+        elif acc_lin < -config.dec_lin_lim:
+            rospy.logdebug('Filter - %f, %f', acc_lin, config.dec_lin_lim)
+            data.out_vel_out.linear.x = self.vel_prev.linear.x - config.dec_lin_lim * 0.05
+
+        # Find request angular acceleration
+        acc_ang = (data.out_vel_out.angular.z  - self.vel_prev.angular.z) / 0.05
+        # Filter Angular Velocity
+        if acc_ang > config.acc_ang_lim:
+            rospy.logdebug('Filter + %f, %f', acc_ang, config.acc_ang_lim)
+            data.out_vel_out.angular.z = self.vel_prev.angular.z + config.acc_ang_lim * 0.05
+        elif acc_ang < -config.dec_ang_lim:
+            rospy.logdebug('Filter - %f, %f', acc_ang, config.dec_ang_lim)
+            data.out_vel_out.angular.z = self.vel_prev.angular.z - config.dec_ang_lim * 0.05
             
         self.vel_prev = data.out_vel_out
         # protected region user update end #
