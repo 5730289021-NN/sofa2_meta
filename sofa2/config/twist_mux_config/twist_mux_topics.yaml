@@ -7,8 +7,8 @@
 
 topics:
 -
-  name    : manual
-  topic   : manual_vel
+  name    : joy
+  topic   : joy_vel
   timeout : 3.0
   priority: 80
 -

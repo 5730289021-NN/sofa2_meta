@@ -4,6 +4,11 @@
     <publisher description="Current Control Mode" name="control_mode" type="std_msgs::String"/>
     <directPublisher description="move_base Cancel" name="move_base_cancel" type="actionlib_msgs::GoalID"/>
     <directPublisher description="follow_me Enable" name="follow_me_enable" type="std_msgs::Bool"/>
+
+    <directSubscriber description="Input Raw Joy Velocity" name="joy_raw_vel" type="geometry_msgs::Twist"/>
+    <directSubscriber description="Input Filtered Joy Velocity" name="joy_filtered_vel" type="geometry_msgs::Twist"/>
+    <directPublisher description="Output Joy Velocity" name="joy_vel" type="geometry_msgs::Twist"/>
+
     <subscriber description="move_base Status" name="move_base_status" type="actionlib_msgs::GoalStatusArray"/>
     <subscriber description="Joy" name="joy" type="sensor_msgs::Joy"/>
     <parameter description="follow_me Status Parameter" name="follow_me_status_param" type="string" value="/follow_me_status_param"/>
