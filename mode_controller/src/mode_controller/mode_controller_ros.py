@@ -19,6 +19,8 @@ from sensor_msgs.msg import Joy
 from actionlib_msgs.msg import GoalID
 from std_msgs.msg import Bool
 from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Twist
 
 # other includes
 from mode_controller import mode_controller_impl

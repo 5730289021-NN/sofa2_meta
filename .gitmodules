@@ -7,6 +7,3 @@
 [submodule "ros_openvino_toolkit"]
 	path = ros_openvino_toolkit
 	url = https://github.com/intel/ros_openvino_toolkit
-[submodule "navigation_2d"]
-	path = navigation_2d
-	url = https://github.com/skasperski/navigation_2d
