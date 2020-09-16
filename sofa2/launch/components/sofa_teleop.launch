@@ -12,6 +12,12 @@
       <remap from="cmd_vel" to="joy_vel"/>
   </node>
 
+  <node name="cmd_vel_filer" pkg="nav2d_operator" type="operator" >
+		<remap from="scan" to="scan_fusion"/>
+		<rosparam file="$(find sofa2)/config/nav2d_operator_config/operator.yaml"/>
+		<rosparam file="$(find sofa2)/config/nav2d_operator_config/costmap.yaml" ns="local_map" />
+	</node>
+
   <node pkg="twist_mux" type="twist_mux" name="twist_mux" output="screen">
     <remap from="cmd_vel_out" to="mux_vel"/>
     <rosparam file="$(find sofa2)/config/twist_mux_config/twist_mux_locks.yaml"  command="load"/>
