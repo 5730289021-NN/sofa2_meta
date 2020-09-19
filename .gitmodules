@@ -7,3 +7,6 @@
 [submodule "ros_openvino_toolkit"]
 	path = ros_openvino_toolkit
 	url = https://github.com/intel/ros_openvino_toolkit
+[submodule "sick_scan"]
+	path = sick_scan
+	url = https://github.com/SICKAG/sick_scan
