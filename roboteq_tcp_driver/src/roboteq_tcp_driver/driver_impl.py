@@ -136,7 +136,7 @@ class DriverImplementation(object):
                 if 'Errno 113' in str(msg):
                     self.set_error('DRIVER_CONNECTING')
                 else:
-                    self.set_error('DRIVER_' + msg)
+                    self.set_error('DRIVER_' + str(msg))
                 rospy.loginfo('Trying to reconnecting in 5 Seconds...')
                 time.sleep(5.0)
         self.set_error('')
