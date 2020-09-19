@@ -1,7 +1,7 @@
 <launch>
     <!--<arg name="_ip" value="$(env ROS_HOSTNAME)"/>-->
     <!--export COMPONENT_IP_PREFIX=192.168.1X. -->
-    <arg name="_prefix" value="$(eval arg(COMPONENT_IP_PREFIX))"/>
+    <arg name="_prefix" value="$(env COMPONENT_IP_PREFIX)"/>
 
     <node name="driver" pkg="roboteq_tcp_driver" type="driver" respawn="true" output="screen">
         <param name="ip_addr" type="string" value="$(eval arg('_prefix') + '.23')"/>
