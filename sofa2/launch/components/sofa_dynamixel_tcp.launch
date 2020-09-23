@@ -16,7 +16,7 @@
     <arg name="pos_2_ccw" value="$(env DYNAMIXEL_ID2_POS_CCW)" />
 
     <node pkg="dynamixel_tcp" type="dynamixel_adapter" name="dynamixel_adapter" output="screen">
-        <param name="ip_addr" value="$(eval arg(_prefix) + '.22')"/>
+        <param name="ip_addr" value="$(eval arg('_prefix') + '.22')"/>
         <param name="port" type="int" value="$(arg port)"/>
 
         <rosparam param="id">[0, 1, 2]</rosparam>
