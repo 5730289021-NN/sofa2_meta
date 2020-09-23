@@ -18,6 +18,57 @@ namespace dynamixel_tcp
             ros::Rate loop_rate(15);
             target_state = getZeroVelocityMessage();
 
+            bool success = true;
+            if (!nodeHandle.getParam("/dynamixel_twist_joy/pos_0_cw", pos_0_cw))
+            {
+                ROS_ERROR("No Position 0 Limit given");
+                success = false;
+            }
+            if (!nodeHandle.getParam("/dynamixel_twist_joy/pos_0_mid", pos_0_mid))
+            {
+                ROS_ERROR("No Position 0 Limit given");
+                success = false;
+            }
+            if (!nodeHandle.getParam("/dynamixel_twist_joy/pos_0_ccw", pos_0_ccw))
+            {
+                ROS_ERROR("No Position 0 Limit given");
+                success = false;
+            }
+            if (!nodeHandle.getParam("/dynamixel_twist_joy/pos_1_cw", pos_1_cw))
+            {
+                ROS_ERROR("No Position 1 Limit given");
+                success = false;
+            }
+            if (!nodeHandle.getParam("/dynamixel_twist_joy/pos_1_mid", pos_1_mid))
+            {
+                ROS_ERROR("No Position 1 Limit given");
+                success = false;
+            }
+            if (!nodeHandle.getParam("/dynamixel_twist_joy/pos_1_ccw", pos_1_ccw))
+            {
+                ROS_ERROR("No Position 1 Limit given");
+                success = false;
+            }
+            if (!nodeHandle.getParam("/dynamixel_twist_joy/pos_2_cw", pos_2_cw))
+            {
+                ROS_ERROR("No Position 2 Limit given");
+                success = false;
+            }
+            if (!nodeHandle.getParam("/dynamixel_twist_joy/pos_2_mid", pos_2_mid))
+            {
+                ROS_ERROR("No Position 2 Limit given");
+                success = false;
+            }
+            if (!nodeHandle.getParam("/dynamixel_twist_joy/pos_2_ccw", pos_2_ccw))
+            {
+                ROS_ERROR("No Position 2 Limit given");
+                success = false;
+            }
+            if(!success) {
+                ROS_ERROR("There's uninitialized variable, dynamixel twist joy won't start");
+                return;
+            }
+            
             while (ros::ok())
             {
                 if (joy_updated)
@@ -38,11 +89,11 @@ namespace dynamixel_tcp
                             target_state.velocity[0] = abs(joy_msg.axes[2] - joy_msg.axes[5]) * 100;
                             if (joy_msg.axes[2] - joy_msg.axes[5] > 0)
                             {
-                                target_state.position[0] = 600;
+                                target_state.position[0] = pos_0_cw;
                             }
                             else
                             {
-                                target_state.position[0] = 1400;
+                                target_state.position[0] = pos_0_ccw;
                             }
                             /*
                             Calculate Value for Joint 1   
@@ -51,11 +102,11 @@ namespace dynamixel_tcp
                             target_state.velocity[1] = abs(joy_msg.axes[3]) * 100;
                             if (joy_msg.axes[3] > 0)
                             {
-                                target_state.position[1] = 2700;
+                                target_state.position[1] = pos_1_ccw;
                             }
                             else
                             {
-                                target_state.position[1] = 1400;
+                                target_state.position[1] = pos_1_cw;
                             }
                             /*
                             Calculate Value for Joint 2
@@ -64,11 +115,11 @@ namespace dynamixel_tcp
                             target_state.velocity[2] = abs(joy_msg.axes[4]) * 30;
                             if (joy_msg.axes[4] > 0)
                             {
-                                target_state.position[2] = 1950;
+                                target_state.position[2] = pos_2_cw;
                             }
                             else
                             {
-                                target_state.position[2] = 2020;
+                                target_state.position[2] = pos_2_cw;
                             }
                             target_publisher.publish(target_state);
                         }
@@ -114,15 +165,18 @@ namespace dynamixel_tcp
             zero_vel_msg.name.push_back("1");
             zero_vel_msg.name.push_back("2");
 
-            zero_vel_msg.position.push_back(1000);
-            zero_vel_msg.position.push_back(2050);
-            zero_vel_msg.position.push_back(2000);
+            zero_vel_msg.position.push_back(pos_0_mid);
+            zero_vel_msg.position.push_back(pos_1_mid);
+            zero_vel_msg.position.push_back(pos_2_mid);
 
             zero_vel_msg.velocity.push_back(0);
             zero_vel_msg.velocity.push_back(0);
             zero_vel_msg.velocity.push_back(0);
             return zero_vel_msg;
         }
+        int pos_0_ccw, pos_1_ccw, pos_2_ccw;
+        int pos_0_mid, pos_1_mid, pos_2_mid;
+        int pos_0_cw, pos_1_cw, pos_2_cw;
 
         sensor_msgs::Joy joy_msg;
         sensor_msgs::JointState target_state;
