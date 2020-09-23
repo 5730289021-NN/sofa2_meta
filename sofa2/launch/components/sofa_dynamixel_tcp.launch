@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <launch>
     <arg name="_prefix" value="$(env COMPONENT_IP_PREFIX)"/>
-    <arg name="ip_addr" default="$(eval _prefix) + '.23'" />
     <arg name="port" default="9002" />
     
     <arg name="pos_0_cw" value="600" />
@@ -17,7 +16,7 @@
     <arg name="pos_2_ccw" value="2020" />
 
     <node pkg="dynamixel_tcp" type="dynamixel_adapter" name="dynamixel_adapter" output="screen">
-        <param name="ip_addr" type="str" value="$(arg ip_addr)"/>
+        <param name="ip_addr" value="$(eval arg(_prefix) + '.22"/>
         <param name="port" type="int" value="$(arg port)"/>
 
         <rosparam param="id">[0, 1, 2]</rosparam>
