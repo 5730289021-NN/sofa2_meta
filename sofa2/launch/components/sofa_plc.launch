@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="ip" default="192.168.15.22" /> 
+    <arg name="_prefix" value="$(env COMPONENT_IP_PREFIX)"/>
+    <arg name="ip" default="$(eval _prefix) + '.22'" /> 
     <node pkg="plc_modbus_node" type="ros_plc_modbus" name="plc_modbus_node" output="screen">
         <param name="ip" value="$(arg ip)"/>
         <!-- <rosparam param="coil_addr">[4, 5, 6, 7, 8, 31, 32]</rosparam>

@@ -1,6 +1,8 @@
 <launch>
+    <arg name="_prefix" value="$(env COMPONENT_IP_PREFIX)"/>
+
     <node name="driver" pkg="roboteq_tcp_driver" type="driver" respawn="true" output="screen">
-        <param name="ip_addr" type="string" value="192.168.15.23"/>
+        <param name="ip_addr" type="string" value="$(eval arg('_prefix') + '.23')"/>
         <param name="port_num" type="int" value="9001"/>
         <param name="wheel_circ" type="double" value="0.47124"/>
         <param name="track_width" type="double" value="0.395"/>
@@ -20,7 +22,7 @@
         <param name="use_binary_protocol" type="bool" value="true"/>
         <param name="range_max" type="double" value="100.0"/>
         <param name="intensity" type="bool" value="True"/>
-        <param name="hostname" type="string" value="192.168.15.24"/>
+        <param name="hostname" type="string" value="$(eval arg('_prefix') + '.24')"/>
         <param name="cloud_topic" type="string" value="cloud"/>
         <param name="frame_id" type="str" value="cloud_f"/>
         <param name="port" type="string" value="2112"/>
