@@ -36,34 +36,34 @@
         <rosparam param="operator_types">
             ["goal", "goal", "single", "single", "goal", "goal", "goal", "goal", "goal", "goal", "sequence"]
         </rosparam>
-        <rosparam param="head_home">
+        <rosparam param="head_home" subst_value="true">
             {id: ["1", "2"], goal: [$(arg pos_1_mid), $(arg pos_2_mid)], moving_speed:[100, 10], timeout: 1000}
         </rosparam>
-        <rosparam param="camera_home">
+        <rosparam param="camera_home" subst_value="true">
             {id: ["0"], goal: [$(arg pos_0_mid)], moving_speed:[30], timeout: 1000}
         </rosparam>
-        <rosparam param="yes">
+        <rosparam param="yes" subst_value="true">
             {id: "2", cw_lim_value: $(arg pos_2_cw), ccw_lim_value: $(arg pos_2_ccw), sleep_time_millis: 500, moving_speed: 20}
         </rosparam>
-        <rosparam param="no">
+        <rosparam param="no" subst_value="true">
             {id: "1", cw_lim_value: $(arg pos_1_cw), ccw_lim_value: $(arg pos_1_ccw), sleep_time_millis: 1500, moving_speed: 200}
         </rosparam>
-        <rosparam param="head_left">
+        <rosparam param="head_left" subst_value="true">
             {id: ["1"], goal: [$(arg pos_1_ccw)], moving_speed:[100], timeout: 1000}
         </rosparam>
-        <rosparam param="head_right">
+        <rosparam param="head_right" subst_value="true">
             {id: ["1"], goal: [$(arg pos_1_cw)], moving_speed:[100], timeout: 1000}
         </rosparam>
-        <rosparam param="head_up">
+        <rosparam param="head_up" subst_value="true">
             {id: ["2"], goal: [$(arg pos_2_cw)], moving_speed:[100, 10], timeout: 1000}
         </rosparam>
-        <rosparam param="head_down">
+        <rosparam param="head_down" subst_value="true">
             {id: ["2"], goal: [$(arg pos_2_ccw)], moving_speed:[100, 10], timeout: 1000}
         </rosparam>
-        <rosparam param="camera_up">
+        <rosparam param="camera_up" subst_value="true">
             {id: ["0"], goal: [$(arg pos_0_cw)], moving_speed:[100, 10], timeout: 1000}
         </rosparam>
-        <rosparam param="camera_down">
+        <rosparam param="camera_down" subst_value="true">
             {id: ["0"], goal: [$(arg pos_0_ccw)], moving_speed:[100, 10], timeout: 1000}
         </rosparam>
         <rosparam param="sing">
