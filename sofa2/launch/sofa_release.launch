@@ -3,7 +3,7 @@
     <include file="$(find sofa2)/launch/components/sofa_teleop.launch"/>
     <include file="$(find sofa2)/launch/components/sofa_navigation.launch"/>
     <include file="$(find sofa2)/launch/components/sofa_plc.launch"/>
-    <!-- <include file="$(find sofa2)/launch/components/sofa_dynamixel_tcp.launch"/> -->
+    <include file="$(find sofa2)/launch/components/sofa_dynamixel_tcp.launch"/>
 
     <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
     
