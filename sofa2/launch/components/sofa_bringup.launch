@@ -5,6 +5,7 @@
 
     <node name="driver" pkg="roboteq_tcp_driver" type="driver" respawn="true" output="screen">
         <param name="ip_addr" type="string" value="$(eval arg('_prefix') + '.23')"/>
+        <!--<param name="ip_addr" type="string" value="192.168.15.23"/>-->
         <param name="port_num" type="int" value="9001"/>
         <param name="wheel_circ" type="double" value="0.47124"/>
         <param name="track_width" type="double" value="0.395"/>
