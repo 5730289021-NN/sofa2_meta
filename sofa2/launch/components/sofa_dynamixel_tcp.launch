@@ -3,17 +3,17 @@
     <arg name="_prefix" value="$(env COMPONENT_IP_PREFIX)"/>
     <arg name="port" default="9002" />
     
-    <arg name="pos_0_cw" value="600" />
-    <arg name="pos_0_mid" value="1000" />
-    <arg name="pos_0_ccw" value="1400" />
+    <arg name="pos_0_cw" value="$(env DYNAMIXEL_ID0_POS_CW)" />
+    <arg name="pos_0_mid" value="$(env DYNAMIXEL_ID0_POS_MID)" />
+    <arg name="pos_0_ccw" value="$(env DYNAMIXEL_ID0_POS_CCW)" />
 
-    <arg name="pos_1_cw" value="1400" />
-    <arg name="pos_1_mid" value="2050" />
-    <arg name="pos_1_ccw" value="2700" />
+    <arg name="pos_1_cw" value="$(env DYNAMIXEL_ID1_POS_CW)" />
+    <arg name="pos_1_mid" value="$(env DYNAMIXEL_ID1_POS_MID)" />
+    <arg name="pos_1_ccw" value="$(env DYNAMIXEL_ID1_POS_CCW)" />
 
-    <arg name="pos_2_cw" value="1950" />
-    <arg name="pos_2_mid" value="2000" />
-    <arg name="pos_2_ccw" value="2020" />
+    <arg name="pos_2_cw" value="$(env DYNAMIXEL_ID2_POS_CW)" />
+    <arg name="pos_2_mid" value="$(env DYNAMIXEL_ID2_POS_MID)" />
+    <arg name="pos_2_ccw" value="$(env DYNAMIXEL_ID2_POS_CCW)" />
 
     <node pkg="dynamixel_tcp" type="dynamixel_adapter" name="dynamixel_adapter" output="screen">
         <param name="ip_addr" value="$(eval arg(_prefix) + '.22"/>
