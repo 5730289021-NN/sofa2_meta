@@ -20,9 +20,9 @@
         <!--<param name="robot_description" command="$(find xacro)/xacro.py '$(find sick_scan)/urdf/example.urdf.xacro'" />-->
         <param name="scanner_type" type="string" value="sick_tim_7xxS"/>
         <!-- -135° -->
-        <param name="min_ang" type="double" value="-2.2"/>
+        <param name="min_ang" type="double" value="-2.0"/>
         <!-- 135° -->
-        <param name="max_ang" type="double" value="2.2"/>
+        <param name="max_ang" type="double" value="2.0"/>
         <param name="use_binary_protocol" type="bool" value="true"/>
         <param name="range_max" type="double" value="100.0"/>
         <param name="intensity" type="bool" value="True"/>
@@ -38,9 +38,9 @@
         <!--<param name="robot_description" command="$(find xacro)/xacro.py '$(find sick_scan)/urdf/example.urdf.xacro'" />-->
         <param name="scanner_type" type="string" value="sick_tim_7xxS"/>
         <!-- -135° -->
-        <param name="min_ang" type="double" value="-2.2"/>
+        <param name="min_ang" type="double" value="-2.0"/>
         <!-- 135° -->
-        <param name="max_ang" type="double" value="2.2"/>
+        <param name="max_ang" type="double" value="2.0"/>
         <param name="use_binary_protocol" type="bool" value="true"/>
         <param name="range_max" type="double" value="100.0"/>
         <param name="intensity" type="bool" value="True"/>
