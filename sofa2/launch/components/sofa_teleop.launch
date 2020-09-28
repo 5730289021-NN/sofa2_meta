@@ -21,19 +21,19 @@
 	</node> -->
 
   <node pkg="twist_mux" type="twist_mux" name="twist_mux" output="screen">
-    <remap from="cmd_vel_out" to="mux_vel"/>
+    <remap from="mux_vel" to="drive_vel"/>
     <rosparam file="$(find sofa2)/config/twist_mux_config/twist_mux_locks.yaml"  command="load"/>
     <rosparam file="$(find sofa2)/config/twist_mux_config/twist_mux_topics.yaml" command="load"/>
   </node>
 
-  <node pkg="acc_lim_vel_filter" name="acc_lim_vel_filter" type="acc_lim_vel_filter" output="screen">
+  <!-- <node pkg="acc_lim_vel_filter" name="acc_lim_vel_filter" type="acc_lim_vel_filter" output="screen">
       <remap from="vel_in" to="mux_vel"/>
       <remap from="vel_out" to="drive_vel"/>
       <param name="acc_lin_lim" type="double" value="0.3"/>
       <param name="dec_lin_lim" type="double" value="0.4"/>
       <param name="acc_ang_lim" type="double" value="0.5"/>
       <param name="dec_ang_lim" type="double" value="0.9"/>
-  </node>
+  </node> -->
 
   <node pkg="mode_controller" name="mode_controller" type="mode_controller" output="screen">
       <remap from="move_base_status" to="move_base/status"/>
