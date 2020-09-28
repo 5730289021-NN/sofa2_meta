@@ -21,7 +21,7 @@
 	</node> -->
 
   <node pkg="twist_mux" type="twist_mux" name="twist_mux" output="screen">
-    <remap from="mux_vel" to="drive_vel"/>
+    <remap from="cmd_vel_out" to="drive_vel"/>
     <rosparam file="$(find sofa2)/config/twist_mux_config/twist_mux_locks.yaml"  command="load"/>
     <rosparam file="$(find sofa2)/config/twist_mux_config/twist_mux_topics.yaml" command="load"/>
   </node>
