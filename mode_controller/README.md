@@ -28,18 +28,18 @@ rosrun mode_controller mode_controller [param_name]:=[new_value]
 <!--- protected region param follow_me_status_param begin -->
 follow_me Status Parameter
 <!--- protected region param follow_me_status_param end -->
-`manual_btn` *(int, default: 0)*
-<!--- protected region param manual_btn begin -->
-Manual/Override Control Button
-<!--- protected region param manual_btn end -->
+`safe_btn` *(int, default: 0)*
+<!--- protected region param safe_btn begin -->
+Manual/Override(Safe) Control Button
+<!--- protected region param safe_btn end -->
 `cancel_btn` *(int, default: 3)*
 <!--- protected region param cancel_btn begin -->
 Cancel Control Button
 <!--- protected region param cancel_btn end -->
-`force_btn` *(int, default: 1)*
-<!--- protected region param force_btn begin -->
-Force/Force_Override Control Button
-<!--- protected region param force_btn end -->
+`raw_btn` *(int, default: 1)*
+<!--- protected region param raw_btn begin -->
+Force/Force_Override(Raw) Control Button
+<!--- protected region param raw_btn end -->
 
 ### Published Topics
 
@@ -84,10 +84,10 @@ move_base Cancel
 <!--- protected region direct publisher follow_me_enable begin -->
 follow_me Enable
 <!--- protected region direct publisher follow_me_enable end -->
-`joy_vel` *(geometry_msgs::Twist)*
-<!--- protected region direct publisher joy_vel begin -->
-Output Joy Velocity
-<!--- protected region direct publisher joy_vel end -->
+`joy_final_vel` *(geometry_msgs::Twist)*
+<!--- protected region direct publisher joy_final_vel begin -->
+Output Final Joy Velocity
+<!--- protected region direct publisher joy_final_vel end -->
 
 ### Direct Subscribers
 
@@ -98,10 +98,10 @@ The subscription handler is triggered as soon as a message arrives.
 <!--- protected region direct subscriber joy_raw_vel begin -->
 Input Raw Joy Velocity
 <!--- protected region direct subscriber joy_raw_vel end -->
-`joy_filtered_vel` *(geometry_msgs::Twist)*
-<!--- protected region direct subscriber joy_filtered_vel begin -->
-Input Filtered Joy Velocity
-<!--- protected region direct subscriber joy_filtered_vel end -->
+`joy_safe_vel` *(geometry_msgs::Twist)*
+<!--- protected region direct subscriber joy_safe_vel begin -->
+Input Safe Joy Velocity
+<!--- protected region direct subscriber joy_safe_vel end -->
 
 ---
 

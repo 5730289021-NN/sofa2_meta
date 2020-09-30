@@ -40,9 +40,9 @@ class ModeControllerROS(object):
 
         # handling parameters from the parameter server
         self.component_config_.follow_me_status_param = rospy.get_param("~follow_me_status_param", "/follow_me_status_param")
-        self.component_config_.manual_btn = rospy.get_param("~manual_btn", 0)
+        self.component_config_.safe_btn = rospy.get_param("~safe_btn", 0)
         self.component_config_.cancel_btn = rospy.get_param("~cancel_btn", 3)
-        self.component_config_.force_btn = rospy.get_param("~force_btn", 1)
+        self.component_config_.raw_btn = rospy.get_param("~raw_btn", 1)
         # handling publishers
         self.control_mode_ = rospy.Publisher('control_mode', String, queue_size=1)
         # handling subscribers
@@ -51,14 +51,14 @@ class ModeControllerROS(object):
         # Handling direct publisher
         self.component_implementation_.passthrough.pub_move_base_cancel = rospy.Publisher('move_base_cancel', GoalID, queue_size=1)
         self.component_implementation_.passthrough.pub_follow_me_enable = rospy.Publisher('follow_me_enable', Bool, queue_size=1)
-        self.component_implementation_.passthrough.pub_joy_vel = rospy.Publisher('joy_vel', Twist, queue_size=1)
+        self.component_implementation_.passthrough.pub_joy_final_vel = rospy.Publisher('joy_final_vel', Twist, queue_size=1)
         # Handling direct subscriber
         self.component_implementation_.passthrough.sub_joy_raw_vel = rospy.Subscriber('joy_raw_vel',
                                                                                  Twist,
                                                                                  self.component_implementation_.direct_topic_callback_joy_raw_vel)
-        self.component_implementation_.passthrough.sub_joy_filtered_vel = rospy.Subscriber('joy_filtered_vel',
+        self.component_implementation_.passthrough.sub_joy_safe_vel = rospy.Subscriber('joy_safe_vel',
                                                                                  Twist,
-                                                                                 self.component_implementation_.direct_topic_callback_joy_filtered_vel)
+                                                                                 self.component_implementation_.direct_topic_callback_joy_safe_vel)
 
     def topic_callback_move_base_status(self, msg):
         """

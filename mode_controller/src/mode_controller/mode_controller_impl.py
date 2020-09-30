@@ -31,17 +31,17 @@ class ModeControllerConfig(object):
     def __init__(self):
         # parameters handled through the parameter server
         self.follow_me_status_param = "/follow_me_status_param"
-        self.manual_btn = 0
+        self.safe_btn = 0
         self.cancel_btn = 3
-        self.force_btn = 1
+        self.raw_btn = 1
         pass
 
     def __str__(self):
         msg = "Instance of ModeControllerConfig class: {"
         msg += "follow_me_status_param: {} ".format(self.follow_me_status_param)
-        msg += "manual_btn: {} ".format(self.manual_btn)
+        msg += "safe_btn: {} ".format(self.safe_btn)
         msg += "cancel_btn: {} ".format(self.cancel_btn)
-        msg += "force_btn: {} ".format(self.force_btn)
+        msg += "raw_btn: {} ".format(self.raw_btn)
         msg += "}"
         return msg
 
@@ -87,9 +87,9 @@ class ModeControllerPassthrough(object):
         """
         self.pub_move_base_cancel = None
         self.pub_follow_me_enable = None
-        self.pub_joy_vel = None
+        self.pub_joy_final_vel = None
         self.sub_joy_raw_vel = None
-        self.sub_joy_filtered_vel = None
+        self.sub_joy_safe_vel = None
         pass
 
 
@@ -148,8 +148,8 @@ class ModeControllerImplementation(object):
             pass
 
         if self.joy_init:
-            self.force_mode = bool(data.in_joy.buttons[config.force_btn])
-            self.manual_mode = bool(data.in_joy.buttons[config.manual_btn])
+            self.force_mode = bool(data.in_joy.buttons[config.raw_btn])
+            self.manual_mode = bool(data.in_joy.buttons[config.safe_btn])
             if bool(data.in_joy.buttons[config.cancel_btn]):
                 rospy.loginfo('Cancel Button Triggered')
                 if self.navigation_mode:
@@ -179,18 +179,18 @@ class ModeControllerImplementation(object):
         Direct callback at reception of message on topic joy_raw_vel
         """
         # protected region user implementation of direct subscriber callback for joy_raw_vel begin #
-        if msg.buttons[config.force_btn]:
-            self.passthrough.pub_joy_vel(msg)
+        if self.force_mode:
+            self.passthrough.pub_joy_final_vel.publish(msg)
         # protected region user implementation of direct subscriber callback for joy_raw_vel end #
         pass
-    def direct_topic_callback_joy_filtered_vel(self, msg):
+    def direct_topic_callback_joy_safe_vel(self, msg):
         """
-        Direct callback at reception of message on topic joy_filtered_vel
+        Direct callback at reception of message on topic joy_safe_vel
         """
-        # protected region user implementation of direct subscriber callback for joy_filtered_vel begin #
-        if msg.buttons[config.manual_btn]:
-            self.passthrough.pub_joy_vel(msg)
-        # protected region user implementation of direct subscriber callback for joy_filtered_vel end #
+        # protected region user implementation of direct subscriber callback for joy_safe_vel begin #
+        if self.manual_mode:
+            self.passthrough.pub_joy_final_vel.publish(msg)
+        # protected region user implementation of direct subscriber callback for joy_safe_vel end #
         pass
     # protected region user additional functions begin #
     def getCurrentMode(self):

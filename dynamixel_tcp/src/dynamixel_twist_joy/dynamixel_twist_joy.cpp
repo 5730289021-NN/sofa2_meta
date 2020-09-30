@@ -121,13 +121,15 @@ namespace dynamixel_tcp
                             {
                                 target_state.position[2] = pos_2_cw;
                             }
+                            zero_vel_sent = false;
                             target_publisher.publish(target_state);
                         }
-                        else
+                        else if(!zero_vel_sent)
                         {
                             sensor_msgs::JointState zero_vel_msg;
                             zero_vel_msg = getZeroVelocityMessage();
                             target_publisher.publish(zero_vel_msg);
+                            zero_vel_sent = true;
                         }
                     }
                     else
@@ -182,6 +184,7 @@ namespace dynamixel_tcp
         sensor_msgs::JointState target_state;
         sensor_msgs::JointState current_state;
         bool joy_updated;
+        bool zero_vel_sent;
     };
 } // namespace dynamixel_tcp
 
