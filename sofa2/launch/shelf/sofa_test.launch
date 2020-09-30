@@ -1,6 +1,0 @@
-<launch>
-    <node pkg="map_server" type="map_server" ns="map" name="map_global" args="$(find sofa2)/map/fibo-6.yaml">
-        <remap from="map" to="map_global" />
-        <remap from="map_metadata" to="map_metadata_global" />
-    </node>
-</launch>
