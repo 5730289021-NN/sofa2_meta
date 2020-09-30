@@ -13,7 +13,7 @@ namespace dynamixel_tcp
     DynamixelAdapter::DynamixelAdapter(std::string ip_addr, int port, std::vector<int> id_list,
                                        std::vector<int> cw_lim_list, std::vector<int> ccw_lim_list,
                                        std::vector<int> kp_list, std::vector<int> ki_list, std::vector<int> kd_list)
-        : error_msg(""), info_msg(""), protocol_state(READY)
+        : error_msg(""), info_msg(""), protocol_state(READY), ip_addr(ip_addr), port(port)
     {
         /*Initialize motors*/
         for (unsigned i = 0; i < id_list.size(); i++)
@@ -326,6 +326,30 @@ namespace dynamixel_tcp
     {
         std::vector<uint8_t> buf = {0xFF, 0xFF, id, 0x04, 0x02, 0x24, 0x02, static_cast<uint8_t>(~(0x2C + id))};
         return buf;
+    }
+
+    bool DynamixelAdapter::tryReconnect()
+    {
+        setInfoMsg("Closing for 3 seconds");
+        tcp_client->close();
+        std::this_thread::sleep_for(std::chrono::seconds(3));
+        setInfoMsg("Reconnecting...");
+        //delete tcp_client;
+        tcp_client = new async_comm::TCPClient(ip_addr, port);
+        if (!tcp_client->init())
+        {
+            setErrorMsg("DYNAMIXEL_FAILED_TCP_RECONNECT");
+            return false;
+        }
+        tcp_client->register_receive_callback(std::bind(&DynamixelAdapter::tcpCallback, this, std::placeholders::_1, std::placeholders::_2));
+        //Assume Successfully Connect
+        timeout_stack = 0;
+        return true;
+    }
+
+    bool DynamixelAdapter::getStatus() const
+    {
+        return (timeout_stack < TCP_STACK_RESET);
     }
 
     inline void DynamixelAdapter::setErrorMsg(std::string error)

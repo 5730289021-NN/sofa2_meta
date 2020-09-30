@@ -2,6 +2,8 @@
 #include <sensor_msgs/JointState.h>
 #include <vector>
 #include <string>
+#include <thread>
+#include <chrono>
 #include "dynamixel_adapter/dynamixel_adapter.hpp"
 
 #include "dynamixel_adapter/RosDynamixelAdapter.hpp"
@@ -45,27 +47,34 @@ namespace dynamixel_tcp
 
         while (ros::ok())
         {
-            /*Read Current Position*/
-            current_position.position = dynamixel_adapter->readPositions();
-            /*Write Desire Position which is latched from latchPositionCallback*/
-            if (target_updated)
-            {
-                //ROS_INFO_STREAM("Getting Updated: " << desired_position.name[0] << " " << desired_position.position[0]);
-                int id_size = desired_position.name.size();
-                if (id_size == desired_position.position.size() && id_size == desired_position.velocity.size())
+            if(dynamixel_adapter->getStatus()){
+                /*Read Current Position*/
+                current_position.position = dynamixel_adapter->readPositions();
+                /*Write Desire Position which is latched from latchPositionCallback*/
+                if (target_updated)
                 {
-                    dynamixel_adapter->writePositionsVelocities(desired_position.name, desired_position.position, desired_position.velocity);
+                    //ROS_INFO_STREAM("Getting Updated: " << desired_position.name[0] << " " << desired_position.position[0]);
+                    int id_size = desired_position.name.size();
+                    if (id_size == desired_position.position.size() && id_size == desired_position.velocity.size())
+                    {
+                        dynamixel_adapter->writePositionsVelocities(desired_position.name, desired_position.position, desired_position.velocity);
+                    }
+                    else if (id_size == desired_position.position.size())
+                    {
+                        dynamixel_adapter->writePositions(desired_position.name, desired_position.position);
+                    }
+                    else
+                    {
+                        ROS_ERROR("Unable to perform input task");
+                    }
+                    target_updated = false;
                 }
-                else if (id_size == desired_position.position.size())
-                {
-                    dynamixel_adapter->writePositions(desired_position.name, desired_position.position);
-                }
-                else
-                {
-                    ROS_ERROR("Unable to perform input task");
-                }
-                target_updated = false;
+            } else {
+                dynamixel_adapter->tryReconnect();
+                std::this_thread::sleep_for(std::chrono::seconds(1));
             }
+
+
             /*Publish*/
             current_publisher.publish(current_position);
             /*Checking for message*/

@@ -162,11 +162,20 @@ class DriverImplementation(object):
         @return nothing
         """
         # protected region user update begin #
+        # Obtain time and relative time from last update
+        time_cur = rospy.Time.now()
+        quat_past = (0, 0, data.out_odom.pose.pose.orientation.z, data.out_odom.pose.pose.orientation.w)
+        pos_past = (data.out_odom.pose.pose.position.x, data.out_odom.pose.pose.position.y, 0)
+        
+        if rospy.get_param('/fault/driver', '') != '':
+            rospy.logwarn('Sending Current Odom Representative')
+            self.passthrough.odom_to_base_footprint.sendTransform(pos_past, quat_past, time_cur, "base_footprint", "odom")
+
         if not self.isConnected:
             return
         # Retrieve Encoder Data
         self.socket_transceive('?CR', config, description="Encoder Query")
-        if self.data_sock == '':
+        if self.data_sock == '': #Tranceive and get nothing
             return
         # Wheel Odometry(http://docs.ros.org/melodic/api/nav_msgs/html/msg/Odometry.html)
         # Extract Data

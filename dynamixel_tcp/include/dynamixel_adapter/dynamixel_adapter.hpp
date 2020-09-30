@@ -48,6 +48,8 @@ namespace dynamixel_tcp
         void writePositions(std::vector<std::string> &ids, std::vector<double> &positions);
         void writePositionsVelocities(std::vector<std::string> &ids, std::vector<double> &positions, std::vector<double> &velocities);
         void setVelocities(std::vector<int> velocities);
+        bool tryReconnect();
+        bool getStatus() const;
 
     private:
         async_comm::TCPClient *tcp_client;
@@ -58,7 +60,11 @@ namespace dynamixel_tcp
         std::string error_msg;
         std::string info_msg;
 
+        std::string ip_addr;
+        int port;
+
         static int const TCP_READ_TIMEOUT = 50;
+        static int const TCP_STACK_RESET = 10;
 
         int timeout_stack;
 

@@ -38,10 +38,10 @@
             <param name="initial_pose_y" type="double" value="12.4" />
             <param name="initial_pose_a" type="double" value="1.57" />
             <param name="odom_model_type" type="string" value="diff-corrected"/>
-            <param name="odom_alpha1" type="double" value="0.05"/>
-            <param name="odom_alpha2" type="double" value="0.005"/>
-            <param name="odom_alpha3" type="double" value="0.01"/>
-            <param name="odom_alpha4" type="double" value="0.02"/>
+            <param name="odom_alpha1" type="double" value="0.1"/>
+            <param name="odom_alpha2" type="double" value="0.1"/>
+            <param name="odom_alpha3" type="double" value="0.1"/>
+            <param name="odom_alpha4" type="double" value="0.1"/>
         </node>
     </group>
 
@@ -58,8 +58,8 @@
     <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
         <remap from="cmd_vel" to="nav_vel" />
         <param name="base_global_planner" value="navfn/NavfnROS" />
-        <param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" />
-        <!-- <param name="base_local_planner" value="eband_local_planner/EBandPlannerROS" /> -->
+        <!-- <param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" /> -->
+        <param name="base_local_planner" value="eband_local_planner/EBandPlannerROS" />
         <param name="planner_patience" type="double" value="2.0" />
         <param name="conservative_reset_dist" type="double" value="30"/>
         <param name="controller_frequency" type="double" value="10"/>
@@ -67,8 +67,8 @@
 
         <rosparam file="$(find sofa2)/config/move_base_config/costmap_common_params.yaml" command="load" ns="global_costmap" />
         <rosparam file="$(find sofa2)/config/move_base_config/costmap_common_params.yaml" command="load" ns="local_costmap" />
-        <rosparam file="$(find sofa2)/config/move_base_config/teb_local_planner_params.yaml" command="load" />
-        <!-- <rosparam file="$(find sofa2)/config/move_base_config/eband_local_planner_params.yaml" command="load" /> -->
+        <!-- <rosparam file="$(find sofa2)/config/move_base_config/teb_local_planner_params.yaml" command="load" /> -->
+        <rosparam file="$(find sofa2)/config/move_base_config/eband_local_planner_params.yaml" command="load" />
         <rosparam file="$(find sofa2)/config/move_base_config/local_costmap_params.yaml" command="load" />
         <rosparam file="$(find sofa2)/config/move_base_config/global_costmap_params.yaml" command="load" /> 
     </node>
