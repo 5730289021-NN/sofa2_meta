@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+    <include file="$(find sofa2)/launch/components/sofa_bringup.launch"/>
+    <include file="$(find sofa2)/launch/components/sofa_teleop.launch"/>
+    <include file="$(find sofa2)/launch/mapping/cartographer/sofa_cartographer.launch"/>
+</launch>

@@ -14,14 +14,14 @@
       <remap from="cmd_vel" to="joy_raw_vel"/>
   </node>
 
-  <node name="cmd_vel_safe" pkg="nav2d_operator" type="operator" >
+  <!-- <node name="cmd_vel_safe" pkg="nav2d_operator" type="operator" >
     <param name="robot_frame" value="base_link"/>
     <param name="odometry_frame" value="odom"/>
 		<remap from="scan" to="scan_fusion"/>
-    <remap from="cmd_vel" to="joy_raw_vel"/>
+    <remap from="cmd_vel" to="joy_safe_vel"/>
 		<rosparam file="$(find sofa2)/config/nav2d_operator_config/operator.yaml"/>
 		<rosparam file="$(find sofa2)/config/nav2d_operator_config/costmap.yaml" ns="local_map" />
-	</node>
+	</node> -->
 
   <node pkg="twist_mux" type="twist_mux" name="twist_mux" output="screen">
     <remap from="joy_vel" to="joy_final_vel"/>
