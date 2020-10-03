@@ -2,5 +2,5 @@
 <launch>
     <include file="$(find sofa2)/launch/components/sofa_bringup.launch"/>
     <include file="$(find sofa2)/launch/components/sofa_teleop.launch"/>
-    <include file="$(find sofa2)/launch/mapping/cartographer/sofa_cartographer.launch"/>
+    <include file="$(find sofa2)/launch/mapping/cartographer/sofa_online_slam.launch"/>
 </launch>

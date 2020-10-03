@@ -72,6 +72,10 @@
         <param name="range_max" value="25.0"/>
     </node>
 
+    <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+        <arg name="filters" value="pointcloud"/>
+    </include>
+
 
     <!--odom -> base_footprint -> base_link-->
     <node pkg="tf" type="static_transform_publisher" name="base_footprint_to_base_link" args="0.0 0.0 0.0 0.0 0.0 0.0 /base_footprint /base_link 20" output="screen"/>
