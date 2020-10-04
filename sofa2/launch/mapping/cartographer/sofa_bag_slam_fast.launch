@@ -16,7 +16,7 @@
 
 <launch>
   <arg name="no_rviz" default="false"/>
-  <!-- <arg name="slip" default="_slip"/> -->
+  <arg name="bag_filename" default="/home/faco/2020-10-03-11-47-02.bag" />
 
   <param name="/use_sim_time" value="true" />
 
@@ -33,7 +33,7 @@
       type="cartographer_offline_node" args="
           -configuration_directory $(find sofa2)/config/cartographer_config
           -configuration_basenames sofa2.lua
-          -bag_filenames $(arg bag_filenames)"
+          -bag_filenames $(arg bag_filename)"
       output="screen">
     <remap from="echoes" to="horizontal_laser_2d" />
   </node>

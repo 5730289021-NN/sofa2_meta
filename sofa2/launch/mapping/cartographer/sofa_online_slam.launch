@@ -18,10 +18,12 @@
   <node name="cartographer_node" pkg="cartographer_ros"
       type="cartographer_node" args="
           -configuration_directory $(find sofa2)/config/cartographer_config
-          -configuration_basename sofa2_slip.lua"
+          -configuration_basename sofa2.lua"
       output="screen">
     <!-- <remap from="echoes" to="horizontal_laser_2d" /> -->
     <remap from="points2" to="front_lidar/cloud" />
+    <remap from="scan" to="front_lidar/scan" />
+    <remap from="imu" to="camera/imu" />
     <!-- <remap from="points2_1" to="front_lidar/cloud" />
     <remap from="points2_2" to="rear_lidar/cloud" /> -->
   </node>

@@ -15,12 +15,23 @@
 -->
 
 <launch>
+  <arg name="bag_filename" default="/home/faco/2020-10-03-11-47-02.bag" />
+
   <param name="/use_sim_time" value="true" />
 
-  <include file="$(find sofa2)/launch/mapping/sofa_online_slam.launch" />
+
+  <include file="$(find sofa2)/launch/mapping/cartographer/sofa_online_slam.launch" />
+
+  <!-- <node pkg="tf" type="tf_remap" name="tf_remapper" output="screen">
+    <rosparam param="mappings">
+      [{old: odom, new: /odom_alt}, 
+      {old: base_link, new: /base_link_alt}]
+    </rosparam>
+  </node> -->
 
   <node name="rviz" pkg="rviz" type="rviz" required="true"
       args="-d $(find cartographer_ros)/configuration_files/demo_2d.rviz" />
-  <node name="playbag" pkg="rosbag" type="play"
-      args="--clock $(arg bag_filename)" />
+  <node name="playbag" pkg="rosbag" type="play" args="--clock $(arg bag_filename)">
+
+  </node>
 </launch>

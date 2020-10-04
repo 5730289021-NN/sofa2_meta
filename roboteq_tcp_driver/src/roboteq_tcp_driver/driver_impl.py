@@ -137,8 +137,8 @@ class DriverImplementation(object):
                     self.set_error('DRIVER_CONNECTING')
                 else:
                     self.set_error('DRIVER_' + str(msg))
-                rospy.loginfo('Trying to reconnecting in 5 Seconds...')
-                time.sleep(5.0)
+                rospy.loginfo('Trying to reconnecting in 1 Seconds...')
+                time.sleep(1.0)
         self.set_error('')
         self.sock.settimeout(0.1)
         #self.socket_transceive('?CR', config, description="Encoder Query")
@@ -254,14 +254,14 @@ class DriverImplementation(object):
         self.isConnected = False
         while True:
             try:
-                rospy.loginfo('Performing Reconnecting Procedure...in 1.5 Seconds')
-                time.sleep(1.5)
+                rospy.loginfo('Performing Reconnecting Procedure...in 0.5 Seconds')
+                time.sleep(0.5)
                 # rospy.loginfo('Shut down Socket')
-                # self.sock.shutdown(socket.SHUT_RDWR)
+                self.sock.shutdown(socket.SHUT_RDWR)
                 rospy.loginfo('Close Socket')
                 self.sock.close()
-                rospy.loginfo('Reconnecting Socket...in 1 Seconds')
-                time.sleep(1.0)
+                rospy.loginfo('Reconnecting Socket...in 0.5 Seconds')
+                time.sleep(0.5)
                 self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self.sock.connect((config.ip_addr, config.port_num))
                 rospy.loginfo('Socket is able to get reconnected')
@@ -295,7 +295,7 @@ class DriverImplementation(object):
                 raise Exception('TRANSACTION_STACKED %d' % self.transaction_stack_cnt)
         except Exception as msg:
             rospy.logerr('Socket Error(%s): %s', description, msg)
-            if 'Errno 104' in str(msg) or 'Errno 9' in str(msg) or self.transaction_stack_cnt >= 5:
+            if 'Errno 104' in str(msg) or 'Errno 9' in str(msg) or self.transaction_stack_cnt >= 2:
                 #[Errno 104] Connection reset by peer
                 #[Errno 9] Bad file descriptor
                 self.set_error('DRIVER_' + str(msg))
