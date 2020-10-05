@@ -20,7 +20,7 @@ EBandPlannerROS:
 
   num_iterations_eband_optimization: 6
 
-  bubble_velocity_multiplier: 2.0 #3
+  bubble_velocity_multiplier: 3.0 #3
   eband_min_relative_overlap: 0.5
 
   k_prop: 2.0
