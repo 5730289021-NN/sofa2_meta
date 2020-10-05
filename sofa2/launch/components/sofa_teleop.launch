@@ -45,7 +45,7 @@
       <remap from="follow_me_enable" to="follow_me/enable"/>
       <remap from="follow_me_status" to="follow_me/status"/>
   </node>
-
+<!-- 
   <node name="cmd_vel_safe" pkg="nav2d_operator" type="operator">
         <param name="robot_frame" value="base_link"/>
         <param name="odometry_frame" value="odom"/>
@@ -54,7 +54,7 @@
         <remap from="cmd" to="nav2d_cmd"/>
         <rosparam file="$(find sofa2)/config/nav2d_operator_config/operator.yaml"/>
         <rosparam file="$(find sofa2)/config/nav2d_operator_config/costmap.yaml" ns="local_map" />
-    </node>
+    </node> -->
 
     <node name="raw_joy_to_nav2d_cmd" pkg="topic_tools" type="transform"
       args="/joy_raw_vel /nav2d_cmd nav2d_operator/cmd 'nav2d_operator.msg.cmd(Velocity=2*m.linear.x,Turn=2*m.angular.z,Mode=0)' --import nav2d_operator"

@@ -25,6 +25,6 @@
         <param name="width" type="int" value="1280"/>
         <param name="height" type="int" value="960"/>
         <param name="quality" type="int" value="50"/>
-    </node>
+    </`node>
 
 </launch>

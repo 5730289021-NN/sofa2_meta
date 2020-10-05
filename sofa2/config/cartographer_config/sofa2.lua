@@ -27,10 +27,10 @@ options = {
   use_odometry = true,
   use_nav_sat = false,
   use_landmarks = false,
-  num_laser_scans = 0,
+  num_laser_scans = 1,
   num_multi_echo_laser_scans = 0,
   num_subdivisions_per_laser_scan = 10,
-  num_point_clouds = 1,
+  num_point_clouds = 0,
   lookup_transform_timeout_sec = 0.2,
   submap_publish_period_sec = 0.3,
   pose_publish_period_sec = 5e-3,
@@ -42,7 +42,7 @@ options = {
   landmarks_sampling_ratio = 1.,
 }
 
-POSE_GRAPH.optimize_every_n_nodes = 0
+POSE_GRAPH.optimize_every_n_nodes = 5
 
 MAP_BUILDER.use_trajectory_builder_2d = true
 MAP_BUILDER.num_background_threads = 6
