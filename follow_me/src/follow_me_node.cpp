@@ -1,5 +1,5 @@
-#include <inference_engine.hpp>
 #include <ros/ros.h>
+#include <inference_engine.hpp>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/Image.h>
 #include <geometry_msgs/Twist.h>
@@ -9,7 +9,8 @@
 #include <string>
 #include <cmath>
 
-static InferenceEngine::Blob::Ptr wrapMat2Blob(const cv::Mat &mat) {
+static InferenceEngine::Blob::Ptr wrapMat2Blob(const cv::Mat &mat)
+{
     size_t channels = mat.channels();
     size_t height = mat.size().height;
     size_t width = mat.size().width;
@@ -18,11 +19,12 @@ static InferenceEngine::Blob::Ptr wrapMat2Blob(const cv::Mat &mat) {
     size_t strideW = mat.step.buf[1];
 
     bool is_dense =
-            strideW == channels &&
-            strideH == channels * width;
+        strideW == channels &&
+        strideH == channels * width;
 
-    if (!is_dense) THROW_IE_EXCEPTION
-                << "Doesn't support conversion from not dense cv::Mat";
+    if (!is_dense)
+        THROW_IE_EXCEPTION
+            << "Doesn't support conversion from not dense cv::Mat";
 
     InferenceEngine::TensorDesc tDesc(InferenceEngine::Precision::U8,
                                       {1, channels, height, width},
@@ -95,40 +97,60 @@ namespace follow_me
             {
                 ROS_INFO("Parameter is corrected, Preparing OPENVINO...");
             }
-
+            // // --------------------------- 1. Load inference engine instance -------------------------------------
             InferenceEngine::Core core;
-            InferenceEngine::CNNNetwork network = core.ReadNetwork(people_model);
-            network.setBatchSize(1);
-            InferenceEngine::InputInfo::Ptr input_info = network.getInputsInfo().begin()->second;
-            std::string input_name = network.getInputsInfo().begin()->first;
+            // // 2. Read a model in OpenVINO Intermediate Representation (.xml and .bin files) or ONNX (.onnx file) format
+            // InferenceEngine::CNNNetwork network = core.ReadNetwork(people_model);
+            // network.setBatchSize(1);
+            // // --------------------------- 3. Configure input & output ---------------------------------------------
+            // // --------------------------- Prepare input blobs -----------------------------------------------------
+            // InferenceEngine::InputInfo::Ptr input_info = network.getInputsInfo().begin()->second;
+            // std::string input_name = network.getInputsInfo().begin()->first;
 
-            ROS_INFO_STREAM("Input Network " << input_name << " initialized...");
+            // ROS_INFO_STREAM("Input Network " << input_name << " initialized...");
 
-            input_info->getPreProcess().setResizeAlgorithm(InferenceEngine::RESIZE_BILINEAR);
-            input_info->setLayout(InferenceEngine::Layout::NHWC);
-            input_info->setPrecision(InferenceEngine::Precision::U8);
+            // input_info->getPreProcess().setResizeAlgorithm(InferenceEngine::RESIZE_BILINEAR);
+            // input_info->setLayout(InferenceEngine::Layout::NHWC);
+            // input_info->setPrecision(InferenceEngine::Precision::U8);
 
-            InferenceEngine::DataPtr output_info = network.getOutputsInfo().begin()->second;
-            std::string output_name = network.getOutputsInfo().begin()->first;
-            output_info->setPrecision(InferenceEngine::Precision::FP32);
-            ROS_INFO_STREAM("Output Network " << output_name << " initialized...");
+            // // --------------------------- Prepare output blobs ----------------------------------------------------
+            // InferenceEngine::DataPtr output_info = network.getOutputsInfo().begin()->second;
+            // std::string output_name = network.getOutputsInfo().begin()->first;
+            // output_info->setPrecision(InferenceEngine::Precision::FP32);
+            // ROS_INFO_STREAM("Output Network " << output_name << " initialized...");
 
-            InferenceEngine::ExecutableNetwork executable_network = core.LoadNetwork(network, "GPU");
-            InferenceEngine::InferRequest infer_request = executable_network.CreateInferRequest();
-            ROS_INFO_STREAM("Network has been loaded into GPU...");
+            // // --------------------------- 4. Loading model to the device ------------------------------------------
+            // InferenceEngine::ExecutableNetwork executable_network = core.LoadNetwork(network, "GPU");
+            // InferRequest infer_request = executable_network.CreateInferRequest();
+
+            // // --------------------------- 5. Create infer request -------------------------------------------------
+            // InferenceEngine::InferRequest infer_request = executable_network.CreateInferRequest();
+            // ROS_INFO_STREAM("Network has been loaded into GPU...");
+
+            // // --------------------------- 6. Prepare input --------------------------------------------------------
+            // /* Read input image to a blob and set it to an infer request without resize and layout conversions. */
+            // InferenceEngine::Blob::Ptr imgBlob = wrapMat2Blob(cv_ptr->image);
+            // infer_request.SetBlob(input_name, imgBlob);
+
+            std::unique_ptr<AsyncDetection<DetectedAction>> action_detector;
+                // Load action detector
+            ActionDetectorConfig action_config(ad_model_path);
+            action_config.deviceName = "GPU";
+            action_config.ie = core;
+            action_config.is_async = true;
+            action_config.detection_confidence_threshold = 0.3;
+            action_config.action_confidence_threshold = 0.75;
+            action_config.num_action_classes = actions_map.size();
+            action_detector.reset(new ActionDetection(action_config));
 
             while (ros::ok())
             {
-                InferenceEngine::Blob::Ptr imgBlob = wrapMat2Blob(cv_ptr->image);
-                infer_request.SetBlob(input_name, imgBlob);
-                infer_request.Infer();
-                InferenceEngine::Blob::Ptr output = infer_request.GetBlob(output_name);
-                
-                /*Do something with output Blob*/
-                auto const memLocker = output->cbuffer(); // use const memory locker
-                // output_buffer is valid as long as the lifetime of memLocker
-                const float *output_buffer = memLocker.as<const float *>();
-                
+                // infer_request.Infer();
+                // InferenceEngine::Blob::Ptr output = infer_request.GetBlob(output_name);
+                // /*Do something with output Blob*/
+                // auto const memLocker = output->cbuffer(); // use const memory locker
+                // // output_buffer is valid as long as the lifetime of memLocker
+                // const float *output_buffer = memLocker.as<const float *>();
 
                 cv::imshow(OPENCV_WINDOW, cv_ptr->image);
                 //cv::waitKey(3);

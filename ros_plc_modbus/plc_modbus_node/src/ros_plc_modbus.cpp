@@ -57,6 +57,7 @@ private:
     modbus_t *plc;
     
     std::string ip_address;
+    std::string plc_type;
     int port;
     int spin_rate;
 
@@ -64,6 +65,7 @@ private:
     bool modbus_read_value();
     void perform_shutdown();
 
+    uint16_t get_plc_address(uint16_t rockwell_address, uint8_t no_bit);
     void led_head_callback(const std_msgs::ColorRGBA::ConstPtr &led_head_data);
     void led_tray1_callback(const std_msgs::ColorRGBA::ConstPtr &led_tray1_data);
     bool display_lift_callback(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res);
@@ -109,7 +111,7 @@ void plc_modbus_manager::initialize_plc() {
 
 bool plc_modbus_manager::modbus_read_value() {
     bool success = true;
-    if(modbus_read_bits(plc, 4, coil_size, coil_buffer) == -1) {
+    if(modbus_read_bits(plc, get_plc_address(4, 1), coil_size, coil_buffer) == -1) {
         ROS_ERROR("Error while reading coil_1");
         ROS_ERROR("%s", modbus_strerror(errno));
         success = false;
@@ -120,7 +122,7 @@ bool plc_modbus_manager::modbus_read_value() {
         }
     }
 
-    if(modbus_read_bits(plc, 31, coil_2_size, coil_2_buffer) == -1) {
+    if(modbus_read_bits(plc, get_plc_address(31, 1), coil_2_size, coil_2_buffer) == -1) {
         ROS_ERROR("Error while reading coil_1");
         ROS_ERROR("%s", modbus_strerror(errno));
         success = false;
@@ -130,7 +132,7 @@ bool plc_modbus_manager::modbus_read_value() {
         }
     }
 
-    if(modbus_read_registers(plc, 0, 10, holding_reg_buffer) == -1) {
+    if(modbus_read_registers(plc, get_plc_address(0, 8), 10, holding_reg_buffer) == -1) {
         ROS_ERROR("Error while reading holding register");
         ROS_ERROR("%s", modbus_strerror(errno));
         success = false;
@@ -140,7 +142,7 @@ bool plc_modbus_manager::modbus_read_value() {
         }
     }
 
-    if(modbus_read_input_registers(plc, 20, 4, input_reg_buffer) == -1) {
+    if(modbus_read_input_registers(plc, get_plc_address(20, 8), 4, input_reg_buffer) == -1) {
         ROS_ERROR("Error while reading input register");
         ROS_ERROR("%s", modbus_strerror(errno));
         success = false;
@@ -152,6 +154,30 @@ bool plc_modbus_manager::modbus_read_value() {
 
     return success;
 }
+/*
+rockwell_address is the default address value therefore, we may return input instantly if plc_type is rockwell
+
+no_bit has 2 possible state 1, 8
+It's 1 when consider Input Status or Coil
+It's 8 when consider Holding Register or Input Register
+*/
+uint16_t plc_modbus_manager::get_plc_address(uint16_t rockwell_address, uint8_t no_bit) {
+    if(plc_type.compare("ROCKWELL") == 0){
+        return rockwell_address;
+    } else if(plc_type.compare("MITSUBISHI") == 0){
+        switch(no_bit){
+            case 1:
+                return 8192 + rockwell_address;
+            case 8:
+                return 20480 + rockwell_address;
+            default:
+                ROS_ERROR("Incorrect no_bit value, the no_bit value can be only 1 or 8");
+                return 
+        }
+    } else {
+        ROS_ERROR_STREAM("Unknown PLC_TYPE %s", plc_type);
+    }
+}
 
 bool plc_modbus_manager::shutdown_callback(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res) {
     /*req: true -> shutdown*/
@@ -159,7 +185,7 @@ bool plc_modbus_manager::shutdown_callback(std_srvs::SetBool::Request& req, std_
     if(req.data == true) {
         /*Shutdown whole system*/
         for(int i = 5; i > 0; i--) {
-            if(modbus_write_bit(plc, 5, 1) != -1) {
+            if(modbus_write_bit(plc, get_plc_address(5, 1), 1) != -1) {
                 break;
             } else {
                 ROS_ERROR_STREAM("Unable to call PLC shutdown command" << i);
@@ -228,6 +254,7 @@ plc_modbus_manager::plc_modbus_manager() {
     shutdown_service = node.advertiseService("system/shutdown", &plc_modbus_manager::shutdown_callback, this);
 
     node.param<std::string>("plc_modbus_node/ip", ip_address, "192.168.16.22");
+    node.param<std::string>("plc_modbus_node/plc_type", plc_type, "ROCKWELL");
     node.param("plc_modbus_node/port", port, 502);
     node.param("plc_modbus_node/spin_rate", spin_rate, 2);
 
@@ -248,7 +275,7 @@ plc_modbus_manager::plc_modbus_manager() {
 
         /*Coil No. 6 Heartbeat*/
         if(modbus_map["heartbeat"] == 0) {
-            if(modbus_write_bit(plc, 6, 1) == -1) {
+            if(modbus_write_bit(plc, get_plc_address(6, 1), 1) == -1) {
                 ROS_WARN_STREAM("Unable to Write Heartbeat");
             } else {
                 node.setParam("/plc/heartbeat", "NORMAL");
@@ -302,7 +329,7 @@ plc_modbus_manager::plc_modbus_manager() {
 void plc_modbus_manager::perform_shutdown() {
     /*Write back to PLC on Shutdown Acknowledge*/
     for(int i = 5; i > 0; i--) {
-        if(modbus_write_bit(plc, 4, 0) != -1) {
+        if(modbus_write_bit(plc, get_plc_address(4, 1), 0) != -1) {
             break;
         } else {
             ROS_ERROR_STREAM("Unable to call write shutdown back..." << i);
@@ -336,7 +363,7 @@ void plc_modbus_manager::perform_shutdown() {
 
     /*Write confirm shutdown to PLC*/
     for(int i = 5; i > 0; i--) {
-        if(modbus_write_bit(plc, 5, 1) != -1) {
+        if(modbus_write_bit(plc, get_plc_address(5, 1), 1) != -1) {
             break;
         } else {
             ROS_ERROR_STREAM("Unable to call write confirm shutdown..." << i);
@@ -357,14 +384,14 @@ void plc_modbus_manager::led_head_callback(const std_msgs::ColorRGBA::ConstPtr &
 
     int color_code = get_color_code(led_head_data);
     
-    if (modbus_write_register(plc, 0, color_code) == -1) {
+    if (modbus_write_register(plc, get_plc_address(0, 8), color_code) == -1) {
         ROS_ERROR("Modbus holding reg write failed at addr:%d with value:%u", 0, color_code);
         ROS_ERROR("%s", modbus_strerror(errno));
     } else {
         ROS_INFO("Modbus holding reg write at addr:%d with value:%u", 0, color_code);
     }
 
-    if (modbus_write_register(plc, 1, led_head_data->a) == -1) {
+    if (modbus_write_register(plc, get_plc_address(1, 8), led_head_data->a) == -1) {
         ROS_ERROR("Modbus holding reg write failed at addr:%d with value:%u", 0, color_code);
         ROS_ERROR("%s", modbus_strerror(errno));
     } else {
@@ -377,14 +404,14 @@ void plc_modbus_manager::led_tray1_callback(const std_msgs::ColorRGBA::ConstPtr 
 
     int color_code = get_color_code(led_tray1_data);
     
-    if (modbus_write_register(plc, 2, color_code) == -1) {
+    if (modbus_write_register(plc, get_plc_address(2, 8), color_code) == -1) {
         ROS_ERROR("Modbus holding reg write failed at addr:%d with value:%u", 0, color_code);
         ROS_ERROR("%s", modbus_strerror(errno));
     } else {
         ROS_INFO("Modbus holding reg write at addr:%d with value:%u", 0, color_code);
     }
 
-    if (modbus_write_register(plc, 3, led_tray1_data->a) == -1) {
+    if (modbus_write_register(plc, get_plc_address(3, 8), led_tray1_data->a) == -1) {
         ROS_ERROR("Modbus holding reg write failed at addr:%d with value:%u", 0, color_code);
         ROS_ERROR("%s", modbus_strerror(errno));
     } else {
@@ -405,7 +432,7 @@ bool plc_modbus_manager::display_lift_callback(std_srvs::SetBool::Request& req, 
         res.message = "Unlifted";
         ROS_INFO("Display Unlifted");
     }
-    if(modbus_write_bits(plc, 31, 2, plc_tray) == -1) {
+    if(modbus_write_bits(plc, get_plc_address(31, 1), 2, plc_tray) == -1) {
         ROS_ERROR("Modbus holding reg write failed at lifting tray");
         ROS_ERROR("%s", modbus_strerror(errno));
         res.success = false;
@@ -418,7 +445,7 @@ bool plc_modbus_manager::display_lift_callback(std_srvs::SetBool::Request& req, 
 }
 
 bool plc_modbus_manager::camera_callback(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res){
-    if(modbus_write_bit(plc, 7, req.data) == -1) {
+    if(modbus_write_bit(plc, get_plc_address(7, 1), req.data) == -1) {
         ROS_ERROR("Modbus holding reg write failed at enable/disable camera");
         ROS_ERROR("%s", modbus_strerror(errno));
         res.success = false;
