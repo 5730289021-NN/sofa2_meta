@@ -1,6 +1,6 @@
 <launch>
-    <arg name="map_address" default="$(find sofa2)/map/kanchana_3fl.yaml" />
-    <arg name="costmap_address" default="$(find sofa2)/map/kanchana_3fl_costmap.yaml"/>
+    <!-- <arg name="map_address" default="$(find sofa2)/map/kanchana_3fl.yaml" />
+    <arg name="costmap_address" default="$(find sofa2)/map/kanchana_3fl_costmap.yaml"/> -->
   
     <!-- <arg name="map_address" default="$(find sofa2)/map/lx_landscape.yaml" />
     <arg name="costmap_address" default="$(find sofa2)/map/lx_landscape_cost.yaml"/> -->
@@ -16,6 +16,9 @@
 
     <!-- <arg name="map_address" default="$(find sofa2)/map/pgh_8fl.yaml" />
     <arg name="costmap_address" default="$(find sofa2)/map/pgh_8fl.yaml"/> -->
+
+    <arg name="map_address" default="$(find sofa2)/map/fibo-6.yaml" />
+    <arg name="costmap_address" default="$(find sofa2)/map/fibo-6.yaml"/>
 
     <group>
         <remap from="map" to="map_amcl" />
