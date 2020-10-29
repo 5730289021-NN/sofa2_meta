@@ -172,10 +172,10 @@ uint16_t plc_modbus_manager::get_plc_address(uint16_t rockwell_address, uint8_t 
                 return 20480 + rockwell_address;
             default:
                 ROS_ERROR("Incorrect no_bit value, the no_bit value can be only 1 or 8");
-                return 
+                return rockwell_address;
         }
     } else {
-        ROS_ERROR_STREAM("Unknown PLC_TYPE %s", plc_type);
+        ROS_ERROR_STREAM("Unknown PLC_TYPE " << plc_type);
     }
 }
 
