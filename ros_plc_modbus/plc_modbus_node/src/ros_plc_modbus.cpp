@@ -16,7 +16,8 @@
 #include <chrono>
 #include <thread>
 
-class plc_modbus_manager {
+class plc_modbus_manager
+{
 public:
     plc_modbus_manager();
 
@@ -52,10 +53,10 @@ private:
 
     int heartbeat_count;
 
-    std::map<std::string, int> modbus_map; 
+    std::map<std::string, int> modbus_map;
 
     modbus_t *plc;
-    
+
     std::string ip_address;
     std::string plc_type;
     int port;
@@ -68,90 +69,135 @@ private:
     uint16_t get_plc_address(uint16_t rockwell_address, uint8_t no_bit);
     void led_head_callback(const std_msgs::ColorRGBA::ConstPtr &led_head_data);
     void led_tray1_callback(const std_msgs::ColorRGBA::ConstPtr &led_tray1_data);
-    bool display_lift_callback(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res);
-    bool camera_callback(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res);
-    bool shutdown_callback(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res);
+    bool display_lift_callback(std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &res);
+    bool camera_callback(std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &res);
+    bool shutdown_callback(std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &res);
 
     int get_color_code(const std_msgs::ColorRGBA::ConstPtr &color_data);
-
 };
 
 const std::string plc_modbus_manager::coil_name[coil_size] = {"shutdown_sw", "com_shutdown", "heartbeat", "camera_onoff", "enb_charging"};
 const std::string plc_modbus_manager::coil_2_name[coil_2_size] = {"display_up", "display_down"};
-const std::string plc_modbus_manager::holding_reg_name[holding_reg_size] = {"head_rgb", "head_time", "tray1_rgb", "tray1_time", "tray2_rgb", "tray2_time", 
-                                                    "tray3_rgb", "tray3_time", "sw_bumper", "plc_status"};
+const std::string plc_modbus_manager::holding_reg_name[holding_reg_size] = {"head_rgb", "head_time", "tray1_rgb", "tray1_time", "tray2_rgb", "tray2_time",
+                                                                            "tray3_rgb", "tray3_time", "sw_bumper", "plc_status"};
 const std::string plc_modbus_manager::input_reg_name[input_reg_size] = {"current", "voltage", "capacity_rem", "capacity_tot"};
 
-void plc_modbus_manager::initialize_plc() {
+void plc_modbus_manager::initialize_plc()
+{
     ROS_INFO("Connecting to modbus device on %s/%d", ip_address.c_str(), port);
     plc = modbus_new_tcp(ip_address.c_str(), port);
-    if (plc == NULL) {
+    if (plc == NULL)
+    {
         ROS_ERROR("Unable to allocate libmodbus context\n");
         node.setParam("/plc/conn_status", "UNALLOCATED");
         return;
     }
-    if (modbus_connect(plc) == -1) {
+    if (modbus_connect(plc) == -1)
+    {
         ROS_ERROR("Failed to connect to modbus device!!!");
         ROS_ERROR("%s", modbus_strerror(errno));
         node.setParam("/plc/conn_status", "DISCONNECTED");
         modbus_free(plc);
         return;
-    } else {
+    }
+    else
+    {
         ROS_INFO("Connection to modbus device established");
         node.setParam("/plc/conn_status", "CONNECTED");
     }
 
-    if (modbus_set_error_recovery(plc, MODBUS_ERROR_RECOVERY_LINK) == -1) {
+    if (modbus_set_error_recovery(plc, MODBUS_ERROR_RECOVERY_LINK) == -1)
+    {
         ROS_ERROR("Unable to set error recovery link");
         node.setParam("/plc/recovery_status", "BAD");
-    } else {
+    }
+    else
+    {
         node.setParam("/plc/recovery_status", "NORMAL");
     }
 }
 
-bool plc_modbus_manager::modbus_read_value() {
+bool plc_modbus_manager::modbus_read_value()
+{
     bool success = true;
-    if(modbus_read_bits(plc, get_plc_address(4, 1), coil_size, coil_buffer) == -1) {
+    if (modbus_read_bits(plc, get_plc_address(4, 1), coil_size, coil_buffer) == -1)
+    {
         ROS_ERROR("Error while reading coil_1");
         ROS_ERROR("%s", modbus_strerror(errno));
         success = false;
-    } else {
-        for(int i = 0; i < coil_size; i++) {
+    }
+    else
+    {
+        for (int i = 0; i < coil_size; i++)
+        {
             modbus_map[coil_name[i]] = coil_buffer[i];
             //ROS_INFO_STREAM("Coil Name " << coil_name[i] << " Value : " << (int) coil_buffer[i]);
         }
     }
 
-    if(modbus_read_bits(plc, get_plc_address(31, 1), coil_2_size, coil_2_buffer) == -1) {
+    if (modbus_read_bits(plc, get_plc_address(31, 1), coil_2_size, coil_2_buffer) == -1)
+    {
         ROS_ERROR("Error while reading coil_1");
         ROS_ERROR("%s", modbus_strerror(errno));
         success = false;
-    } else {
-        for(int i = 0; i < coil_2_size; i++) {
+    }
+    else
+    {
+        for (int i = 0; i < coil_2_size; i++)
+        {
             modbus_map[coil_2_name[i]] = coil_2_buffer[i];
         }
     }
 
-    if(modbus_read_registers(plc, get_plc_address(0, 8), 10, holding_reg_buffer) == -1) {
+    if (modbus_read_registers(plc, get_plc_address(0, 8), 10, holding_reg_buffer) == -1)
+    {
         ROS_ERROR("Error while reading holding register");
         ROS_ERROR("%s", modbus_strerror(errno));
         success = false;
-    } else {
-        for(int i = 0; i < holding_reg_size; i++) {
+    }
+    else
+    {
+        for (int i = 0; i < holding_reg_size; i++)
+        {
             modbus_map[holding_reg_name[i]] = holding_reg_buffer[i];
         }
     }
 
-    if(modbus_read_input_registers(plc, get_plc_address(20, 8), 4, input_reg_buffer) == -1) {
-        ROS_ERROR("Error while reading input register: %d + %d", get_plc_address(20, 8), 4);
-        ROS_ERROR("%s", modbus_strerror(errno));
-        success = false;
-    } else {
-        for(int i = 0; i < input_reg_size; i++) {
-            modbus_map[input_reg_name[i]] = input_reg_buffer[i];
+    /*ROCKWELL has input register while MITSUBISHI hasn't*/
+    if(plc_type.compare("ROCKWELL") == 0)
+    {
+        if (modbus_read_input_registers(plc, get_plc_address(20, 8), 4, input_reg_buffer) == -1)
+        {
+            ROS_ERROR("Error while reading input register: %d + %d", get_plc_address(20, 8), 4);
+            ROS_ERROR("%s", modbus_strerror(errno));
+            success = false;
         }
+        else
+        {
+            for (int i = 0; i < input_reg_size; i++)
+            {
+                modbus_map[input_reg_name[i]] = input_reg_buffer[i];
+            }
+        }
+        break;
     }
-
+    else if(plc_type.compare("MITSUBISHI") == 0)
+    {
+        if (modbus_read_registers(plc, get_plc_address(20, 8), 4, input_reg_buffer) == -1)
+        {
+            ROS_ERROR("Error while reading input register: %d + %d", get_plc_address(20, 8), 4);
+            ROS_ERROR("%s", modbus_strerror(errno));
+            success = false;
+        }
+        else
+        {
+            for (int i = 0; i < input_reg_size; i++)
+            {
+                modbus_map[input_reg_name[i]] = input_reg_buffer[i];
+            }
+        }
+        break;
+    }
     return success;
 }
 /*
@@ -161,33 +207,46 @@ no_bit has 2 possible state 1, 8
 It's 1 when consider Input Status or Coil
 It's 8 when consider Holding Register or Input Register
 */
-uint16_t plc_modbus_manager::get_plc_address(uint16_t rockwell_address, uint8_t no_bit) {
-    if(plc_type.compare("ROCKWELL") == 0){
+uint16_t plc_modbus_manager::get_plc_address(uint16_t rockwell_address, uint8_t no_bit)
+{
+    if (plc_type.compare("ROCKWELL") == 0)
+    {
         return rockwell_address;
-    } else if(plc_type.compare("MITSUBISHI") == 0){
-        switch(no_bit){
-            case 1:
-                return 8192 + rockwell_address;
-            case 8:
-                return 50 + rockwell_address;
-            default:
-                ROS_ERROR("Incorrect no_bit value, the no_bit value can be only 1 or 8");
-                return rockwell_address;
+    }
+    else if (plc_type.compare("MITSUBISHI") == 0)
+    {
+        switch (no_bit)
+        {
+        case 1:
+            return 8192 + rockwell_address;
+        case 8:
+            return 50 + rockwell_address;
+        default:
+            ROS_ERROR("Incorrect no_bit value, the no_bit value can be only 1 or 8");
+            return rockwell_address;
         }
-    } else {
+    }
+    else
+    {
         ROS_ERROR_STREAM("Unknown PLC_TYPE " << plc_type);
     }
 }
 
-bool plc_modbus_manager::shutdown_callback(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res) {
+bool plc_modbus_manager::shutdown_callback(std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &res)
+{
     /*req: true -> shutdown*/
     /*req: false -> restart*/
-    if(req.data == true) {
+    if (req.data == true)
+    {
         /*Shutdown whole system*/
-        for(int i = 5; i > 0; i--) {
-            if(modbus_write_bit(plc, get_plc_address(5, 1), 1) != -1) {
+        for (int i = 5; i > 0; i--)
+        {
+            if (modbus_write_bit(plc, get_plc_address(5, 1), 1) != -1)
+            {
                 break;
-            } else {
+            }
+            else
+            {
                 ROS_ERROR_STREAM("Unable to call PLC shutdown command" << i);
                 std::this_thread::sleep_for(std::chrono::seconds(1));
             }
@@ -198,33 +257,39 @@ bool plc_modbus_manager::shutdown_callback(std_srvs::SetBool::Request& req, std_
         node.param<std::string>("/android/ip", android_ip, "192.168.16.19");
         ss << "adb connect " << android_ip << "; sleep 3; adb shell reboot -p";
 
-        for(int i = 3; i > 0; i--) {
+        for (int i = 3; i > 0; i--)
+        {
             ROS_INFO_STREAM("Turning off android in..." << i << " using " << ss.str().c_str());
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
         system(ss.str().c_str());
-        
+
         /*Self shutdown*/
-        for(int i = 5; i > 0; i--) {
+        for (int i = 5; i > 0; i--)
+        {
             ROS_INFO_STREAM("Shutting down(srv) in..." << i);
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
         //system("sudo shutdown -h now");
         system("systemctl --force --force poweroff");
-    } else {
+    }
+    else
+    {
         /*Call Android to reboot*/
         std::stringstream ss;
         std::string android_ip;
         node.param<std::string>("/android/ip", android_ip, "192.168.16.19");
         ss << "adb connect " << android_ip << "; sleep 3; adb shell reboot";
 
-        for(int i = 3; i > 0; i--) {
+        for (int i = 3; i > 0; i--)
+        {
             ROS_INFO_STREAM("Turning off android in..." << i << " using " << ss.str().c_str());
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
         system(ss.str().c_str());
         /*Restart only Intel NUC*/
-        for(int i = 5; i > 0; i--) {
+        for (int i = 5; i > 0; i--)
+        {
             ROS_INFO_STREAM("Rebooting in..." << i);
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
@@ -233,7 +298,8 @@ bool plc_modbus_manager::shutdown_callback(std_srvs::SetBool::Request& req, std_
     }
 }
 
-plc_modbus_manager::plc_modbus_manager() {
+plc_modbus_manager::plc_modbus_manager()
+{
     ROS_INFO("PLC Modbus Started");
 
     heartbeat_count = 0;
@@ -261,29 +327,41 @@ plc_modbus_manager::plc_modbus_manager() {
     initialize_plc();
 
     ros::Rate loop_rate(spin_rate);
-    while (ros::ok()) {
-        if(!modbus_read_value()) {
+    while (ros::ok())
+    {
+        if (!modbus_read_value())
+        {
             node.param("/plc/read_value", false);
-        } else {
+        }
+        else
+        {
             node.param("/plc/read_value", true);
         }
         /*Coil No.4 Check if shutdown switch is pushed*/
-        if(modbus_map["shutdown_sw"] == 1) perform_shutdown();
+        if (modbus_map["shutdown_sw"] == 1)
+            perform_shutdown();
 
         /*Coil No. 5 Shutdown from Android triggered from service callback*/
         //Handle at shutdown_callback()
 
         /*Coil No. 6 Heartbeat*/
-        if(modbus_map["heartbeat"] == 0) {
-            if(modbus_write_bit(plc, get_plc_address(6, 1), 1) == -1) {
+        if (modbus_map["heartbeat"] == 0)
+        {
+            if (modbus_write_bit(plc, get_plc_address(6, 1), 1) == -1)
+            {
                 ROS_WARN_STREAM("Unable to Write Heartbeat");
-            } else {
+            }
+            else
+            {
                 node.setParam("/plc/heartbeat", "NORMAL");
             }
             heartbeat_count = 0;
-        } else {
+        }
+        else
+        {
             heartbeat_count++;
-            if(heartbeat_count % 5 == 0) {
+            if (heartbeat_count % 5 == 0)
+            {
                 ROS_ERROR_STREAM("PLC_UNPINGABLE");
                 node.setParam("/plc/heartbeat", "ERROR");
             }
@@ -306,7 +384,7 @@ plc_modbus_manager::plc_modbus_manager() {
 
         /*Holding Register No. 9 PLC Status*/
         node.setParam("/plc/status", modbus_map["plc_status"]);
-        
+
         /*Input Register No. 20 - 23 Battery*/
         battery_message.voltage = 0.001 * modbus_map["voltage"];
         battery_message.current = 0.001 * static_cast<int16_t>(modbus_map["current"]);
@@ -326,12 +404,17 @@ plc_modbus_manager::plc_modbus_manager() {
     return;
 }
 
-void plc_modbus_manager::perform_shutdown() {
+void plc_modbus_manager::perform_shutdown()
+{
     /*Write back to PLC on Shutdown Acknowledge*/
-    for(int i = 5; i > 0; i--) {
-        if(modbus_write_bit(plc, get_plc_address(4, 1), 0) != -1) {
+    for (int i = 5; i > 0; i--)
+    {
+        if (modbus_write_bit(plc, get_plc_address(4, 1), 0) != -1)
+        {
             break;
-        } else {
+        }
+        else
+        {
             ROS_ERROR_STREAM("Unable to call write shutdown back..." << i);
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
@@ -340,11 +423,15 @@ void plc_modbus_manager::perform_shutdown() {
     /*Tell android to turnoff codex*/
     ros::ServiceClient client = node.serviceClient<std_srvs::Trigger>("android/codex_off");
     std_srvs::Trigger codex_off_srv;
-    
-    for(int i = 5; i > 0; i--) {
-        if(client.call(codex_off_srv)) {
+
+    for (int i = 5; i > 0; i--)
+    {
+        if (client.call(codex_off_srv))
+        {
             break;
-        } else {
+        }
+        else
+        {
             ROS_ERROR_STREAM("Unable to call turnoff codex service..." << i);
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
@@ -355,24 +442,30 @@ void plc_modbus_manager::perform_shutdown() {
     node.param<std::string>("/android/ip", android_ip, "192.168.16.19");
     ss << "adb connect " << android_ip << "; sleep 3; adb shell reboot -p";
 
-    for(int i = 3; i > 0; i--) {
+    for (int i = 3; i > 0; i--)
+    {
         ROS_INFO_STREAM("Turning off android in..." << i << " using " << ss.str().c_str());
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
     system(ss.str().c_str());
 
     /*Write confirm shutdown to PLC*/
-    for(int i = 5; i > 0; i--) {
-        if(modbus_write_bit(plc, get_plc_address(5, 1), 1) != -1) {
+    for (int i = 5; i > 0; i--)
+    {
+        if (modbus_write_bit(plc, get_plc_address(5, 1), 1) != -1)
+        {
             break;
-        } else {
+        }
+        else
+        {
             ROS_ERROR_STREAM("Unable to call write confirm shutdown..." << i);
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
     }
 
     /*Shutdown self*/
-    for(int i = 5; i > 0; i--) {
+    for (int i = 5; i > 0; i--)
+    {
         ROS_INFO_STREAM("Shutting down(plc) in..." << i);
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
@@ -380,113 +473,150 @@ void plc_modbus_manager::perform_shutdown() {
     system("systemctl --force --force poweroff");
 }
 
-void plc_modbus_manager::led_head_callback(const std_msgs::ColorRGBA::ConstPtr &led_head_data) {
+void plc_modbus_manager::led_head_callback(const std_msgs::ColorRGBA::ConstPtr &led_head_data)
+{
 
     int color_code = get_color_code(led_head_data);
-    
-    if (modbus_write_register(plc, get_plc_address(0, 8), color_code) == -1) {
+
+    if (modbus_write_register(plc, get_plc_address(0, 8), color_code) == -1)
+    {
         ROS_ERROR("Modbus holding reg write failed at addr:%d with value:%u", 0, color_code);
         ROS_ERROR("%s", modbus_strerror(errno));
-    } else {
+    }
+    else
+    {
         ROS_INFO("Modbus holding reg write at addr:%d with value:%u", 0, color_code);
     }
 
-    if (modbus_write_register(plc, get_plc_address(1, 8), led_head_data->a) == -1) {
+    if (modbus_write_register(plc, get_plc_address(1, 8), led_head_data->a) == -1)
+    {
         ROS_ERROR("Modbus holding reg write failed at addr:%d with value:%u", 0, color_code);
         ROS_ERROR("%s", modbus_strerror(errno));
-    } else {
+    }
+    else
+    {
         ROS_INFO("Modbus holding reg write at addr:%d with value:%u", 0, color_code);
     }
-
 }
 
-void plc_modbus_manager::led_tray1_callback(const std_msgs::ColorRGBA::ConstPtr &led_tray1_data) {
+void plc_modbus_manager::led_tray1_callback(const std_msgs::ColorRGBA::ConstPtr &led_tray1_data)
+{
 
     int color_code = get_color_code(led_tray1_data);
-    
-    if (modbus_write_register(plc, get_plc_address(2, 8), color_code) == -1) {
+
+    if (modbus_write_register(plc, get_plc_address(2, 8), color_code) == -1)
+    {
         ROS_ERROR("Modbus holding reg write failed at addr:%d with value:%u", 0, color_code);
         ROS_ERROR("%s", modbus_strerror(errno));
-    } else {
+    }
+    else
+    {
         ROS_INFO("Modbus holding reg write at addr:%d with value:%u", 0, color_code);
     }
 
-    if (modbus_write_register(plc, get_plc_address(3, 8), led_tray1_data->a) == -1) {
+    if (modbus_write_register(plc, get_plc_address(3, 8), led_tray1_data->a) == -1)
+    {
         ROS_ERROR("Modbus holding reg write failed at addr:%d with value:%u", 0, color_code);
         ROS_ERROR("%s", modbus_strerror(errno));
-    } else {
+    }
+    else
+    {
         ROS_INFO("Modbus holding reg write at addr:%d with value:%u", 0, color_code);
     }
-
 }
 
-bool plc_modbus_manager::display_lift_callback(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res){
+bool plc_modbus_manager::display_lift_callback(std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &res)
+{
     uint8_t plc_tray[2] = {false, false};
-    if (req.data){
-        plc_tray[0] = true;         
+    if (req.data)
+    {
+        plc_tray[0] = true;
         res.message = "Lifted";
         ROS_INFO("Display Lifted");
-    } else
+    }
+    else
     {
         plc_tray[1] = true;
         res.message = "Unlifted";
         ROS_INFO("Display Unlifted");
     }
-    if(modbus_write_bits(plc, get_plc_address(31, 1), 2, plc_tray) == -1) {
+    if (modbus_write_bits(plc, get_plc_address(31, 1), 2, plc_tray) == -1)
+    {
         ROS_ERROR("Modbus holding reg write failed at lifting tray");
         ROS_ERROR("%s", modbus_strerror(errno));
         res.success = false;
         res.message = "Failed";
-    } else {
+    }
+    else
+    {
         res.success = true;
     }
 
     return true;
 }
 
-bool plc_modbus_manager::camera_callback(std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& res){
-    if(modbus_write_bit(plc, get_plc_address(7, 1), req.data) == -1) {
+bool plc_modbus_manager::camera_callback(std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &res)
+{
+    if (modbus_write_bit(plc, get_plc_address(7, 1), req.data) == -1)
+    {
         ROS_ERROR("Modbus holding reg write failed at enable/disable camera");
         ROS_ERROR("%s", modbus_strerror(errno));
         res.success = false;
         res.message = "Failed";
-    } else {
+    }
+    else
+    {
         res.success = true;
         res.message = "Successfully Turn On/Off Camera";
     }
     return true;
 }
 
-int plc_modbus_manager::get_color_code(const std_msgs::ColorRGBA::ConstPtr &color_data) {
+int plc_modbus_manager::get_color_code(const std_msgs::ColorRGBA::ConstPtr &color_data)
+{
     int color_code = 0;
-    if(color_data->r > 0) {
-        if(color_data->g > 0) {
-            if(color_data->b > 0) {
+    if (color_data->r > 0)
+    {
+        if (color_data->g > 0)
+        {
+            if (color_data->b > 0)
+            {
                 color_code = 7;
             }
-            else {
+            else
+            {
                 color_code = 4;
             }
         }
-        else if(color_data->b > 0){
+        else if (color_data->b > 0)
+        {
             color_code = 5;
-        } else {
+        }
+        else
+        {
             color_code = 1;
         }
-    } else if(color_data->g > 0) {
-        if(color_data->b > 0) {
+    }
+    else if (color_data->g > 0)
+    {
+        if (color_data->b > 0)
+        {
             color_code = 6;
-        } else {
+        }
+        else
+        {
             color_code = 2;
         }
-    } else if(color_data->b > 0) {
+    }
+    else if (color_data->b > 0)
+    {
         color_code = 3;
     }
     return color_code;
 }
 
-
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
     ros::init(argc, argv, "ros_plc_modbus");
     plc_modbus_manager mm;
     return 0;
