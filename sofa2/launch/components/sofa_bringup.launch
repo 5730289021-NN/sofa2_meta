@@ -93,5 +93,5 @@
     <node pkg="tf" type="static_transform_publisher" name="base_link_to_lidar_fusion" args="0.0 0.0 0.220 0.0 0.0 0.0 /base_link /lidar_fusion 20" output="screen" />
 
     <!--base_link -> camera_link-->
-    <node pkg="tf" type="static_transform_publisher" name="base_link_to_camera_link" args="0.27238 -0.0345 1.3115 0.0 0.21 0.0 /base_link /camera_link 20" output="screen" />
+    <node pkg="tf" type="static_transform_publisher" name="base_link_to_camera_link" args="0.27238 -0.0345 1.3115 0.0 0.0 0.0 /base_link /camera_link 50" output="screen" />
 </launch>
