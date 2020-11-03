@@ -74,12 +74,12 @@
         <param name="range_max" value="25.0"/>
     </node>
 
-    <!-- <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+    <include file="$(find realsense2_camera)/launch/rs_camera.launch">
         <arg name="enable_gyro" value="true"/>
         <arg name="enable_accel" value="true"/>
         <arg name="filters" value="pointcloud"/>
         <arg name="unite_imu_method" value="copy"/>
-    </include> -->
+    </include>
 
 
     <!--odom -> base_footprint published in driver-->
