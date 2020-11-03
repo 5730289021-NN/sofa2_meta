@@ -143,7 +143,7 @@ bool plc_modbus_manager::modbus_read_value() {
     }
 
     if(modbus_read_input_registers(plc, get_plc_address(20, 8), 4, input_reg_buffer) == -1) {
-        ROS_ERROR("Error while reading input register");
+        ROS_ERROR("Error while reading input register: %d + %d", get_plc_address(20, 8), 4);
         ROS_ERROR("%s", modbus_strerror(errno));
         success = false;
     } else {
@@ -169,7 +169,7 @@ uint16_t plc_modbus_manager::get_plc_address(uint16_t rockwell_address, uint8_t 
             case 1:
                 return 8192 + rockwell_address;
             case 8:
-                return 20480 + rockwell_address;
+                return 50 + rockwell_address;
             default:
                 ROS_ERROR("Incorrect no_bit value, the no_bit value can be only 1 or 8");
                 return rockwell_address;
