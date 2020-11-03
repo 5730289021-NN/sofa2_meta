@@ -179,7 +179,6 @@ bool plc_modbus_manager::modbus_read_value()
                 modbus_map[input_reg_name[i]] = input_reg_buffer[i];
             }
         }
-        break;
     }
     else if(plc_type.compare("MITSUBISHI") == 0)
     {
@@ -196,7 +195,6 @@ bool plc_modbus_manager::modbus_read_value()
                 modbus_map[input_reg_name[i]] = input_reg_buffer[i];
             }
         }
-        break;
     }
     return success;
 }
