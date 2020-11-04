@@ -17,7 +17,7 @@ local_costmap:
 
   obstacles_layer_lidar:
     observation_sources: laser_scan_sensor 
-    laser_scan_sensor: {sensor_frame: lidar_fusion, data_type: LaserScan, topic: scan_fusion, marking: true, clearing: true}
+    laser_scan_sensor: {sensor_frame: cloud_f, data_type: LaserScan, topic: front_lidar, marking: true, clearing: true}
    
   # voxel_layer_camera:
   #   observation_sources: cloud_marking_sensor cloud_clearing_sensor
