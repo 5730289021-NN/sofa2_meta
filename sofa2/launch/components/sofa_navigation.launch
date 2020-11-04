@@ -24,7 +24,7 @@
         <node pkg="map_server" type="map_server" name="map_amcl" args="$(arg map_address)" />
 
         <node pkg="amcl" type="amcl" name="sofa2_amcl">
-            <remap from="scan" to="/scan_fusion"/>
+            <remap from="scan" to="/front_lidar/scan"/>
             <param name="use_map_topic" type="bool" value="true"/>
             <param name="update_min_d" type="double" value="0.05" />
             <param name="update_min_a" type="double" value="0.05" />
