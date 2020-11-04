@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="ip_addr" default="192.168.16.23" />
+    <arg name="ip_addr" default="192.168.19.23" />
     <arg name="port" default="9002" /> 
     <node pkg="dynamixel_tcp" type="dynamixel_adapter" name="dynamixel_adapter" output="screen">
         <param name="ip_addr" type="str" value="$(arg ip_addr)"/>

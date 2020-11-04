@@ -1,15 +1,22 @@
 <launch>
-    <arg name="map_address" default="$(find sofa2)/map/fibo-6.yaml" />
-    <arg name="costmap_address" default="$(find sofa2)/map/fibo-6.yaml"/>
+    <!-- <arg name="map_address" default="$(find sofa2)/map/fibo-6.yaml" />
+    <arg name="costmap_address" default="$(find sofa2)/map/fibo-6.yaml"/> -->
   
     <!-- <arg name="map_address" default="$(find sofa2)/map/lx_landscape.yaml" />
     <arg name="costmap_address" default="$(find sofa2)/map/lx_landscape_cost.yaml"/> -->
+
+    <!-- <arg name="map_address" default="$(find sofa2)/map/depa_7fl_2.yaml" />
+    <arg name="costmap_address" default="$(find sofa2)/map/depa_7fl_2_costmap.yaml"/> -->
   
     <!-- <arg name="map_address" default="$(find sofa2)/map/depa_2fl.yaml" />
-    <arg name="costmap_address" default="$(find sofa2)/map/depa_2fl.yaml"/> -->
+    <arg name="costmap_address" default="$(find sofa2)/map/depa_2fl_costmap.yaml"/> -->
 
     <!-- <arg name="map_address" default="$(find sofa2)/map/depa_7fl.yaml" />
     <arg name="costmap_address" default="$(find sofa2)/map/depa_7fl_costmap.yaml"/> -->
+
+    <arg name="map_address" default="$(find sofa2)/map/cbh_3fl.yaml" />
+    <arg name="costmap_address" default="$(find sofa2)/map/cbh_3fl_cost.yaml"/>
+
 
     <group>
         <remap from="map" to="map_amcl" />
@@ -17,7 +24,7 @@
         <node pkg="map_server" type="map_server" name="map_amcl" args="$(arg map_address)" />
 
         <node pkg="amcl" type="amcl" name="sofa2_amcl">
-            <remap from="scan" to="scan_fusion"/>
+            <remap from="scan" to="/scan_fusion"/>
             <param name="use_map_topic" type="bool" value="true"/>
             <param name="update_min_d" type="double" value="0.05" />
             <param name="update_min_a" type="double" value="0.05" />
