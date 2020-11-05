@@ -189,7 +189,7 @@ class SystemCheckerImplementation(object):
 
         if isMaintainance:
             rospy.set_param('/system/status', "MAINTENANCE")
-        else
+        else:
             rospy.set_param('/system/status', FaultLevel.toString(self.fault_level))
 
         rospy.set_param('/system/fault_list', list(self.fault_map.values()))
