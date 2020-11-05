@@ -115,6 +115,7 @@ void plc_modbus_manager::initialize_plc()
     {
         node.setParam("/plc/recovery_status", "NORMAL");
     }
+
 }
 
 bool plc_modbus_manager::modbus_read_value()
@@ -555,7 +556,14 @@ bool plc_modbus_manager::display_lift_callback(std_srvs::SetBool::Request &req, 
 
 bool plc_modbus_manager::camera_callback(std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &res)
 {
-    if (modbus_write_bit(plc, get_plc_address(7, 1), req.data) == -1)
+    bool toWrite = false;
+    if (plc_type == plc_type.compare("ROCKWELL")) {
+        toWrite = req.data;
+    } else if (plc_type == plc_type.compare("MITSUBISHI")) {
+        toWrite = !req.data;
+    }
+
+    if (modbus_write_bit(plc, get_plc_address(7, 1), toWrite) == -1)
     {
         ROS_ERROR("Modbus holding reg write failed at enable/disable camera");
         ROS_ERROR("%s", modbus_strerror(errno));
