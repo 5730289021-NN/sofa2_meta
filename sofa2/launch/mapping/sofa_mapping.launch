@@ -1,0 +1,44 @@
+<launch>
+    <!--
+        Bringup Components:
+            - Front Lidar, Rear Lidar, Merge Lidar
+            - Driver
+            - tf
+            - Realsense Camera
+    -->
+    <include file="$(find sofa2)/launch/components/sofa_bringup.launch"/>
+    
+    <!--
+        Teleop Components:
+            - Joy
+            - Twist Joy
+            - Twist Mux
+            - Mode Controller
+            - Topic Tools for Nav2d **Probably change to navigation_experimental/assist_teleop
+    -->
+    <include file="$(find sofa2)/launch/components/sofa_teleop.launch"/>
+
+    <!--
+        PLC Components:
+            - plc_modbus_node
+            - system_checker *Set /maintainance flag to change /system/status to MAINTENANCE
+    -->
+    <param name="maintentance" type="bool" value="true" />
+    <include file="$(find sofa2)/launch/components/sofa_plc.launch"/>
+
+    <!--GMapping-->
+    <node pkg="gmapping" type="slam_gmapping" name="gmapping">
+        <param name="throttle_scans" type="int" value="1" />
+        <param name="lstep" type="double" value="0.025" />
+        <param name="astep" type="double" value="0.025" />
+        <param name="delta" type="double" value="0.03" />
+        <param name="srr" type="double" value="0.05" />
+        <param name="srt" type="double" value="0.1" />
+        <param name="str" type="double" value="0.05" />
+        <param name="stt" type="double" value="0.1" />
+        <param name="xmin" type="double" value="-40.0" />
+        <param name="ymin" type="double" value="-40.0" />
+        <param name="xmax" type="double" value="40.0" />
+        <param name="ymax" type="double" value="40.0" />
+    </node>
+</launch>

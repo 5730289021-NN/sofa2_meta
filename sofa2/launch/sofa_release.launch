@@ -1,15 +1,50 @@
 <launch>
+    <!--
+        Bringup Components:
+            - Front Lidar, Rear Lidar, Merge Lidar
+            - Driver
+            - tf
+            - Realsense Camera
+    -->
     <include file="$(find sofa2)/launch/components/sofa_bringup.launch"/>
-    <include file="$(find sofa2)/launch/components/sofa_teleop.launch"/>
-    <include file="$(find sofa2)/launch/components/sofa_navigation.launch"/>
-    <include file="$(find sofa2)/launch/components/sofa_plc.launch"/>
-    <include file="$(find sofa2)/launch/components/sofa_dynamixel_tcp.launch"/>
-
-    <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/>
     
-    <node pkg="web_video_server" type="web_video_server" name="web_video_server" output="screen" respawn="false">
-        <param name="width" type="int" value="1280"/>
-        <param name="height" type="int" value="960"/>
-        <param name="quality" type="int" value="50"/>
-    </node>
+    <!--
+        Teleop Components:
+            - Joy
+            - Twist Joy
+            - Twist Mux
+            - Mode Controller
+            - Topic Tools for Nav2d **Probably change to navigation_experimental/assist_teleop
+    -->
+    <include file="$(find sofa2)/launch/components/sofa_teleop.launch"/>
+    
+    <!--
+        Navigation Components:
+            - AMCL
+            - Map Server(Costmap + AMCL Map)
+            - move_base
+    -->
+    <include file="$(find sofa2)/launch/components/sofa_navigation.launch"/>
+    
+    <!--
+        PLC Components:
+            - plc_modbus_node
+            - system_checker
+    -->
+    <include file="$(find sofa2)/launch/components/sofa_plc.launch"/>
+    
+    <!--
+        Dynamixel TCP Components:
+            - Dynamixel Adapter
+            - Dynamixel Operator
+            - Dynamxiel Twist Joy
+    -->
+    <include file="$(find sofa2)/launch/components/sofa_dynamixel_tcp.launch"/>
+    
+    <!--
+        High Level Components:
+            - Rosbridge Websocket
+            - Web Video Server
+    -->
+    <include file="$(find sofa2)/launch/components/sofa_high_level.launch"/>
 </launch>

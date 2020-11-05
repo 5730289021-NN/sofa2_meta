@@ -1,4 +1,9 @@
 <?xml version="1.0"?>
+<!--
+    PLC Components:
+        - plc_modbus_node
+        - system_checker
+-->
 <launch>
     <!--Available plc_type: ROCKWELL, MITSUBISHI-->
     <arg name="_prefix" value="$(env COMPONENT_IP_PREFIX)"/>

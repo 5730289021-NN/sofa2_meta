@@ -184,7 +184,14 @@ class SystemCheckerImplementation(object):
             self.fault_map["PLC_CONN"] = "PLC_NO_CONN"
             self.assign_fault(FaultLevel.ERROR)
         
-        rospy.set_param('/system/status', FaultLevel.toString(self.fault_level))
+        #MAINTAINANCE
+        isMaintainance = rospy.get_param('/maintenance', false)
+
+        if isMaintainance:
+            rospy.set_param('/system/status', "MAINTENANCE")
+        else
+            rospy.set_param('/system/status', FaultLevel.toString(self.fault_level))
+
         rospy.set_param('/system/fault_list', list(self.fault_map.values()))
         # protected region user update end #
 
