@@ -184,7 +184,7 @@ bool plc_modbus_manager::modbus_read_value()
     {
         if (modbus_read_registers(plc, get_plc_address(20, 8), 4, input_reg_buffer) == -1)
         {
-            ROS_ERROR("Error while reading input register: %d + %d", get_plc_address(20, 8), 4);
+            ROS_ERROR("Error while reading holding register: %d + %d", get_plc_address(20, 8), 4);
             ROS_ERROR("%s", modbus_strerror(errno));
             success = false;
         }
