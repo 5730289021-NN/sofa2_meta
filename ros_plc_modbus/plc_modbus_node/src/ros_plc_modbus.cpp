@@ -557,9 +557,9 @@ bool plc_modbus_manager::display_lift_callback(std_srvs::SetBool::Request &req, 
 bool plc_modbus_manager::camera_callback(std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &res)
 {
     bool toWrite = false;
-    if (plc_type == plc_type.compare("ROCKWELL")) {
+    if (plc_type.compare("ROCKWELL") == 0) {
         toWrite = req.data;
-    } else if (plc_type == plc_type.compare("MITSUBISHI")) {
+    } else if (plc_type.compare("MITSUBISHI") == 0) {
         toWrite = !req.data;
     }
 
