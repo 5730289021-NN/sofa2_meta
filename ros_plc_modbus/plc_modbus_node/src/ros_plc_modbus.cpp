@@ -367,8 +367,11 @@ plc_modbus_manager::plc_modbus_manager()
         }
 
         /*Coil No. 7 Camera Status*/
-        node.setParam("/camera/status", modbus_map["camera_onoff"] == 1);
-
+        if (plc_type.compare("ROCKWELL") == 0){
+            node.setParam("/camera/status", modbus_map["camera_onoff"] == 1);
+        } else if (plc_type.compare("MITSUBISHI") == 0) {
+            node.setParam("/camera/status", modbus_map["camera_onoff"] != 1);
+        }
         /*Coil No. 8 Auto Charge*/
         //For future
 
