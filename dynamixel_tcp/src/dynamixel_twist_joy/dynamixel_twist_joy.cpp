@@ -115,7 +115,7 @@ namespace dynamixel_tcp
                             target_state.velocity[2] = abs(joy_msg.axes[4]) * 30;
                             if (joy_msg.axes[4] > 0)
                             {
-                                target_state.position[2] = pos_2_cw;
+                                target_state.position[2] = pos_2_ccw;
                             }
                             else
                             {
