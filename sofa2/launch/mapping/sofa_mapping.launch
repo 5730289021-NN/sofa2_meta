@@ -28,6 +28,7 @@
 
     <!--GMapping-->
     <node pkg="gmapping" type="slam_gmapping" name="gmapping">
+        <remap from="scan" to="/front_lidar/scan" />
         <param name="throttle_scans" type="int" value="1" />
         <param name="lstep" type="double" value="0.025" />
         <param name="astep" type="double" value="0.025" />

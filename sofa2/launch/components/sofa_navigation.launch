@@ -17,8 +17,13 @@
     <!-- <arg name="map_address" default="$(find sofa2)/map/pgh_8fl.yaml" />
     <arg name="costmap_address" default="$(find sofa2)/map/pgh_8fl.yaml"/> -->
 
-    <arg name="map_address" default="$(find sofa2)/map/fibo-6.yaml" />
-    <arg name="costmap_address" default="$(find sofa2)/map/fibo-6.yaml"/>
+    <!-- <arg name="map_address" default="$(find sofa2)/map/fibo-6.yaml" />
+    <arg name="costmap_address" default="$(find sofa2)/map/fibo-6.yaml"/> -->
+
+    <arg name="_map_name" value="$(env MAP_NAME)"/>
+
+    <arg name="map_address" value="$(eval $(find sofa2)/map/ + arg('_map_name') + '.yaml')"/>
+    <arg name="costmap_address" value="$(eval $(find sofa2)/map/ + arg('_map_name') + '_costmap.yaml')"/>
 
     <group>
         <remap from="map" to="map_amcl" />
