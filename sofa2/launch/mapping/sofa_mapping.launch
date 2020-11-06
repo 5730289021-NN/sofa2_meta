@@ -23,7 +23,7 @@
             - plc_modbus_node
             - system_checker *Set /maintainance flag to change /system/status to MAINTENANCE
     -->
-    <param name="maintentance" type="bool" value="true" />
+    <param name="maintenance" type="bool" value="true" />
     <include file="$(find sofa2)/launch/components/sofa_plc.launch"/>
 
     <!--GMapping-->
