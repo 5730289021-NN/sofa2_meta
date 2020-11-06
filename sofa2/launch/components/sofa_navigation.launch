@@ -21,9 +21,10 @@
     <arg name="costmap_address" default="$(find sofa2)/map/fibo-6.yaml"/> -->
 
     <arg name="_map_name" value="$(env MAP_NAME)"/>
+    <arg name="_map_path" value="$(find sofa2)/map/"/>
 
-    <arg name="map_address" value="$(eval $(find sofa2)/map/ + arg('_map_name') + '.yaml')"/>
-    <arg name="costmap_address" value="$(eval $(find sofa2)/map/ + arg('_map_name') + '_costmap.yaml')"/>
+    <arg name="map_address" value="$(eval arg('_map_path') + arg('_map_name') + '.yaml')"/>
+    <arg name="costmap_address" value="$(eval arg('_map_path') + arg('_map_name') + '_costmap.yaml')"/>
 
     <group>
         <remap from="map" to="map_amcl" />
