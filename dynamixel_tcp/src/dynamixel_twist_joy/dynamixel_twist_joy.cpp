@@ -74,7 +74,7 @@ namespace dynamixel_tcp
                 if (joy_updated)
                 {
                     joy_updated = false;
-                    if (joy_msg.axes.size() == 8 && joy_msg.buttons.size() == 11)
+                    if (joy_msg.axes.size() == 8 && (joy_msg.buttons.size() == 11 || joy_msg.buttons.size() == 15))
                     {
                         /*
                         Joy Buttons 6 : Enable Head/Camera Control
