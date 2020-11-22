@@ -64,17 +64,18 @@ namespace dynamixel_tcp
                 ROS_ERROR("No Position 2 Limit given");
                 success = false;
             }
-            if(!success) {
+            if (!success)
+            {
                 ROS_ERROR("There's uninitialized variable, dynamixel twist joy won't start");
                 return;
             }
-            
+
             while (ros::ok())
             {
                 if (joy_updated)
                 {
                     joy_updated = false;
-                    if (joy_msg.axes.size() == 8 && (joy_msg.buttons.size() == 11 || joy_msg.buttons.size() == 15))
+                    if (joy_msg.axes.size() == 8 && joy_msg.buttons.size() == 11)
                     {
                         /*
                         Joy Buttons 6 : Enable Head/Camera Control
@@ -124,7 +125,65 @@ namespace dynamixel_tcp
                             zero_vel_sent = false;
                             target_publisher.publish(target_state);
                         }
-                        else if(!zero_vel_sent)
+                        else if (!zero_vel_sent)
+                        {
+                            sensor_msgs::JointState zero_vel_msg;
+                            zero_vel_msg = getZeroVelocityMessage();
+                            target_publisher.publish(zero_vel_msg);
+                            zero_vel_sent = true;
+                        }
+                    }
+                    else if (joy_msg.axes.size() == 8 && joy_msg.buttons.size() == 15)
+                    {
+                        /*
+                        Joy Buttons 11 : Enable Head/Camera Control
+                        */
+                        if (joy_msg.buttons[11])
+                        {
+                            /*
+                            Calculate Value for Joint 0
+                            Joy Axes 2: Camera Up
+                            Joy Axes 5: Camera Down
+                            */
+                            target_state.velocity[0] = abs(joy_msg.axes[4] - joy_msg.axes[5]) * 100;
+                            if (joy_msg.axes[4] - joy_msg.axes[5] > 0)
+                            {
+                                target_state.position[0] = pos_0_cw;
+                            }
+                            else
+                            {
+                                target_state.position[0] = pos_0_ccw;
+                            }
+                            /*
+                            Calculate Value for Joint 1   
+                            Joy Axes 3: Robot Head-No Axis
+                            */
+                            target_state.velocity[1] = abs(joy_msg.axes[2]) * 100;
+                            if (joy_msg.axes[2] > 0)
+                            {
+                                target_state.position[1] = pos_1_ccw;
+                            }
+                            else
+                            {
+                                target_state.position[1] = pos_1_cw;
+                            }
+                            /*
+                            Calculate Value for Joint 2
+                            Joy Axes 4: Robot Head-Yes Axis
+                            */
+                            target_state.velocity[2] = abs(joy_msg.axes[3]) * 30;
+                            if (joy_msg.axes[3] > 0)
+                            {
+                                target_state.position[2] = pos_2_ccw;
+                            }
+                            else
+                            {
+                                target_state.position[2] = pos_2_cw;
+                            }
+                            zero_vel_sent = false;
+                            target_publisher.publish(target_state);
+                        }
+                        else if (!zero_vel_sent)
                         {
                             sensor_msgs::JointState zero_vel_msg;
                             zero_vel_msg = getZeroVelocityMessage();
