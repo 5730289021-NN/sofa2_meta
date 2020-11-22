@@ -78,9 +78,10 @@ namespace dynamixel_tcp
                     if (joy_msg.axes.size() == 8 && joy_msg.buttons.size() == 11)
                     {
                         /*
-                        Joy Buttons 6 : Enable Head/Camera Control
+                        Wired Xbox Joy
+                        Joy Buttons 7 : Enable Head/Camera Control
                         */
-                        if (joy_msg.buttons[6])
+                        if (joy_msg.buttons[7])
                         {
                             /*
                             Calculate Value for Joint 0
@@ -136,6 +137,7 @@ namespace dynamixel_tcp
                     else if (joy_msg.axes.size() == 8 && joy_msg.buttons.size() == 15)
                     {
                         /*
+                        Wireless Xbox Joy
                         Joy Buttons 11 : Enable Head/Camera Control
                         */
                         if (joy_msg.buttons[11])
