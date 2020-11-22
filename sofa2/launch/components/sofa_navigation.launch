@@ -83,8 +83,8 @@
 
         <rosparam file="$(find sofa2)/config/move_base_config/costmap_common_params.yaml" command="load" ns="global_costmap" />
         <rosparam file="$(find sofa2)/config/move_base_config/costmap_common_params.yaml" command="load" ns="local_costmap" />
-        <rosparam file="$(find sofa2)/config/move_base_config/teb_local_planner_params.yaml" command="load" />
-        <!-- <rosparam file="$(find sofa2)/config/move_base_config/eband_local_planner_params.yaml" command="load" /> -->
+        <!-- <rosparam file="$(find sofa2)/config/move_base_config/teb_local_planner_params.yaml" command="load" /> -->
+        <rosparam file="$(find sofa2)/config/move_base_config/eband_local_planner_params.yaml" command="load" />
         <rosparam file="$(find sofa2)/config/move_base_config/local_costmap_params.yaml" command="load" />
         <rosparam file="$(find sofa2)/config/move_base_config/global_costmap_params.yaml" command="load" /> 
     </node>
