@@ -1,4 +1,4 @@
-image: cbh_3fl_cost.pgm
+image: cbh_3fl_costmap.pgm
 resolution: 0.030000
 origin: [0.000000, 0.000000, 0.000000]
 negate: 0
