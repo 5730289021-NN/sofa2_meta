@@ -1,7 +1,6 @@
 [submodule "ira_laser_tools"]
 	path = ira_laser_tools
 	url = https://github.com/iralabdisco/ira_laser_tools
-<<<<<<< HEAD
 [submodule "sick_scan"]
 	path = sick_scan
 	url = https://github.com/SICKAG/sick_scan
@@ -9,5 +8,3 @@
 	path = navigation_2d
 	url = https://github.com/skasperski/navigation_2d
 	branch = master
-=======
->>>>>>> cbh
