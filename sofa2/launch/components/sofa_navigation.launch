@@ -26,6 +26,10 @@
     <arg name="map_address" value="$(eval arg('_map_path') + arg('_map_name') + '.yaml')"/>
     <arg name="costmap_address" value="$(eval arg('_map_path') + arg('_map_name') + '_costmap.yaml')"/>
 
+    <arg name="_init_x" value="$(env INITIAL_X)"/>
+    <arg name="_init_y" value="$(env INITIAL_Y)"/>
+    <arg name="_init_a" value="$(env INITIAL_A)"/>
+
     <group>
         <remap from="map" to="map_amcl" />
         <remap from="map_metadata" to="map_metadata_amcl" />
@@ -39,14 +43,10 @@
             <param name="resample_interval" type="int" value="2" />
             <param name="laser_max_beams" type="int" value="200" />
             <param name="min_particles" type="int" value="500" />
-
-            <!-- <param name="initial_pose_x" type="double" value="3.6" />
-            <param name="initial_pose_y" type="double" value="1.7" />
-            <param name="initial_pose_a" type="double" value="1.19" /> -->
             
-            <param name="initial_pose_x" type="double" value="6.6" />
-            <param name="initial_pose_y" type="double" value="12.4" />
-            <param name="initial_pose_a" type="double" value="1.57" />
+            <param name="initial_pose_x" type="double" value="$(arg _init_x)" />
+            <param name="initial_pose_y" type="double" value="$(arg _init_y)" />
+            <param name="initial_pose_a" type="double" value="$(arg _init_a)" />
             <param name="odom_model_type" type="string" value="diff-corrected"/>
             
             <param name="laser_z_hit" type="double" value="0.9"/>
