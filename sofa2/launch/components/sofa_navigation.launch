@@ -55,8 +55,8 @@
             <param name="laser_likelihood_max_dist" type="double" value="10.0"/>
 
             <param name="odom_alpha1" type="double" value="0.1"/>
-            <param name="odom_alpha2" type="double" value="0.1"/>
-            <param name="odom_alpha3" type="double" value="0.1"/>
+            <param name="odom_alpha2" type="double" value="0.2"/>
+            <param name="odom_alpha3" type="double" value="0.2"/>
             <param name="odom_alpha4" type="double" value="0.1"/>
         </node>
     </group>
