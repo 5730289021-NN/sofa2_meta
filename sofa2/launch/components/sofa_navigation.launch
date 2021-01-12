@@ -56,7 +56,8 @@
 
             <param name="odom_alpha1" type="double" value="0.05"/>
             <param name="odom_alpha2" type="double" value="0.1"/>
-            <param name="odom_alpha3" type="double" value="0.1"/>
+            <param name="odom_alpha3" type="double" value="0.1
+            "/>
             <param name="odom_alpha4" type="double" value="0.05"/>
         </node>
     </group>
